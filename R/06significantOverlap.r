@@ -6,7 +6,6 @@
 #' GWAS & DEGs data,
 #' Drug Perturbed Genes & DEGs & GWAS data
 
-
 library(EnsDb.Hsapiens.v86)
 
 library(data.table)
