@@ -1,6 +1,8 @@
-#' 1st script
+#' 3rd script
 #' summary:
-#' cleaning up STOPGAP data
+#' Mapping of MeSH terms to EFO IDs 
+
+#' 
 
 library(data.table) #v 1.11.4
 #source("https://bioconductor.org/biocLite.R")

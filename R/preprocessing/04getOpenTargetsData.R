@@ -1,6 +1,7 @@
-#' 1st script
+#' 4th script
 #' summary:
-#' cleaning up STOPGAP data
+#' Retrieve the Open Targets Gene expression data for every diseases by using the EFO IDs from STOPGAP data
+#' Retrieve Therapeutic area mapping for all diseases as well
 
 library(data.table)
 library(httr)
