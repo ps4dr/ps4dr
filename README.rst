@@ -19,7 +19,7 @@ available data sources.
 
 
 1. GRASP: Genome-Wide Repository of Associations Between SNPs and Phenotypes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Associations between SNPs and phenotypes in different disease conditions, curated by the NIH
 
 - Web Page: https://grasp.nhlbi.nih.gov/Overview.aspx
@@ -30,7 +30,7 @@ Associations between SNPs and phenotypes in different disease conditions, curate
   Build 2.0.0.0
 
 2. GWAS Catalog: The NHGRI-EBI Catalog of published genome-wide association studies
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Web Page: https://www.ebi.ac.uk/gwas/home
 - Download: https://www.ebi.ac.uk/gwas/api/search/downloads/full
 - License: The NHGRI-EBI GWAS Catalog and all its contents are available under the general Terms of Use for
@@ -42,7 +42,7 @@ Associations between SNPs and phenotypes in different disease conditions, curate
   Nucleic Acids Research, 2019, Vol. 47 (Database issue): D1005-D1012.
 
 3. GWAS DB: an update database for human genetic variants identified by genome-wide association studies
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 GWASdb is a one stop shop which combines collections of traits/diseases associated SNP (TASs) from current GWAS and
 their comprehensive functional annotations, as well as disease classifications.
 
@@ -54,7 +54,7 @@ their comprehensive functional annotations, as well as disease classifications.
   association studies." Nucleic acids research 44.D1 (2015): D869-D876.
 
 4. PHEWAS Catalog: The NHGRI-EBI Catalog of published genome-wide association studies
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Web Page: https://phewascatalog.org/phewas
 - Download: https://phewascatalog.org/files/phewas-catalog.csv.zip
 - License:
