@@ -31,4 +31,5 @@ downloadData <- function(url, folder) {
 
 download_without_overwrite(
   url = "https://raw.githubusercontent.com/nutterb/redcapAPI/master/README.md",
-  folder = "[path_to_folder]")
+  folder = "[path_to_folder]"
+)
