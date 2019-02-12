@@ -5,11 +5,10 @@ library(doSNOW)
 library(doMC)
 no_cores <- detectCores() - 4
 
-library(SPIA)
-
 library(data.table) # (V 1.11.6)
 library(dplyr) # (V 0.7.6)
 library(tidyr) # (V 0.8.1)
+library(SPIA)
 
 setwd("/home/memon/projects/msdrp/")
 
