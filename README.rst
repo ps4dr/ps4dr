@@ -65,11 +65,6 @@ their comprehensive functional annotations, as well as disease classifications.
 Data Preprocessing
 ------------------
 
-Data sets:
-
-1.
-2.
-3.
 
 The scripts to process the data sets used in the case scenario of the manuscript are located in the
 /data folder.
