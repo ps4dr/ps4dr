@@ -21,9 +21,9 @@ Associations between SNPs and phenotypes in different disease conditions, curate
 - Web Page: https://grasp.nhlbi.nih.gov/Overview.aspx
 - Download: https://s3.amazonaws.com/NHLBI_Public/GRASP/GraspFullDataset2.zip
 - License: ???
-- Citation: Leslie R, *et al.* (2014) GRASP: analysis of genotype-phenotype results from 1,390
-  genome-wide association studies and corresponding open access database. Bioinformatics 30(12), i185-94. GRASP
-  Build 2.0.0.0
+
+.. [1] Leslie R, *et al.* (2014) GRASP: analysis of genotype-phenotype results from 1,390
+       genome-wide association studies and corresponding open access database. Bioinformatics 30(12), i185-94.
 
 2. GWAS Catalog: The NHGRI-EBI Catalog of published genome-wide association studies
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,8 +31,10 @@ Associations between SNPs and phenotypes in different disease conditions, curate
 - Download: https://www.ebi.ac.uk/gwas/api/search/downloads/full
 - License: The NHGRI-EBI GWAS Catalog and all its contents are available under the general Terms of Use for
   EMBL-EBI Services.
-- Citation: Buniello A, *et al.* The NHGRI-EBI GWAS Catalog of published genome-wide association studies, targeted
-  arrays and summary statistics 2019. Nucleic Acids Research, 2019, Vol. 47 (Database issue): D1005-D1012.
+
+.. [2] Buniello A, *et al.* The NHGRI-EBI GWAS Catalog of published genome-wide association studies,
+       targeted arrays and summary statistics 2019. Nucleic Acids Research, 2019, Vol. 47 (Database issue):
+       D1005-D1012.
 
 3. GWAS DB: an update database for human genetic variants identified by genome-wide association studies
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,16 +45,18 @@ their comprehensive functional annotations, as well as disease classifications.
 - Download: ftp://147.8.193.36/GWASdb/gwasdb_20150819_snp_trait.gz
 - License: Data of GWASdb is ONLY provided for research purposes and MUST NOT be used as other purpose, such as
   commercial usage and resources abuse, before contacting us.
-- Citation: Li, Mulin Jun, *et al.* (2015) GWASdb v2: an update database for human genetic variants identified by
-  genome-wide association studies." Nucleic acids research 44.D1: D869-D876.
+
+.. [3] Li, Mulin Jun, *et al.* (2015) GWASdb v2: an update database for human genetic variants identified by
+       genome-wide association studies." Nucleic acids research 44.D1: D869-D876.
 
 4. PHEWAS Catalog: The NHGRI-EBI Catalog of published genome-wide association studies
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Web Page: https://phewascatalog.org/phewas
 - Download: https://phewascatalog.org/files/phewas-catalog.csv.zip
 - License:
-- Citation: Denny JC, *et al.* (2013) Systematic comparison of phenome-wide association study of
-  electronic medical record data and genome-wide association study data. Nat Biotechnol. Dec;31(12):1102-10.
+
+.. [4] Denny JC, *et al.* (2013) Systematic comparison of phenome-wide association study of
+       electronic medical record data and genome-wide association study data. Nat Biotechnol. Dec;31(12):1102-10.
 
 Data Preprocessing
 ------------------
