@@ -9,16 +9,15 @@
 #biocLite("graphite")
 
 library(data.table)
-library(SPIA)
 library(tidyverse)
-library(EnrichmentBrowser)
+library(SPIA)
 library(graphite)
 
 setwd("/home/memon/projects/msdrp/")
 
 
 #####__Prepare DEG data set for SPIA__#####
-degs <- unique(fread("./data/opentargets.degs.tsv"))
+degs <- unique(fread("./dat/opentargets.degs.tsv"))
 degs <- degs[,c(1,3,6,7)]
 
 # process positive lfc 
@@ -53,10 +52,10 @@ lfc.com$pval <- NULL
 # gene.id <- getBM(attributes=c('entrezgene','hgnc_symbol','ensembl_gene_id','chromosome_name','start_position','end_position'),
 #                    filters ='chromosome_name', values =val, mart = ensembl)
 # 
-# save(gene.id,file = "./data/geneID.RData")
+# save(gene.id,file = "./dat/geneID.RData")
 # rm(ensembl,val)
 
-# load("./data/geneID.RData")
+# load("./dat/geneID.RData")
 # gene.id$entrezgene <- gsub("^$", NA, gene.id$entrezgene)
 # gene.id <- gene.id[which(!is.na(gene.id$entrezgene)),]
 # gene.id <- data.table(gene.id)
@@ -64,9 +63,9 @@ lfc.com$pval <- NULL
 # names(gene.id) <- c("ENTREZ","ensembl.id")
 # gene.id <- gene.id[!duplicated(gene.id$ensembl.id),]
 # gene.id.entrez <- gene.id[!duplicated(gene.id$ensembl.id),]
-# save(gene.id.entrez,file = "./data/gene.id.entrez.RData")
+# save(gene.id.entrez,file = "./dat/gene.id.entrez.RData")
 
-load("./data/gene.id.entrez.RData")
+load("./dat/gene.id.entrez.RData")
 lfc.com <- merge(lfc.com,gene.id.entrez,by="ensembl.id")
 lfc.com = lfc.com[!duplicated(lfc.com[,c('efo.id','ENTREZ')]),]
 
@@ -75,11 +74,11 @@ rm(degs,lfc.neg,lfc.pos,lfc.com)
 
 #degs.ad <- lfc.com[efo.id == "EFO_0000249"]
 
-#save(lfc.com,file="./data/lfc.com.RData")
-save(lfc.efo,file="./data/lfc.efo.RData")
+#save(lfc.com,file="./dat/lfc.com.RData")
+save(lfc.efo,file="./dat/lfc.efo.RData")
 
 ##_____read log fold changes for a particular disease_______###
-load("./data/lfc.efo.RData") ###--get log fold change for all genes for each diseases-##
+load("./dat/lfc.efo.RData") ###--get log fold change for all genes for each diseases-##
 
 ##_____Create Named Vector for log fold changes in each disease_____________###
 
@@ -104,7 +103,7 @@ ensembl_all = unique(gene.id.entrez$ensembl.id)
 entrez_all = unique(gene.id.entrez$ENTREZ)
 entrezID_all = unique(gsub("^","ENTREZID:",gene.id.entrez$ENTREZ)) ## with ENTREZID: in front of each id
 
-save(lfc_ensembl,lfc_entrez,lfc_entrezID,ensembl_all,entrez_all,entrezID_all,file="./data/lfc.all.RData")
+save(lfc_ensembl,lfc_entrez,lfc_entrezID,ensembl_all,entrez_all,entrezID_all,file="./dat/lfc.all.RData")
 rm(lfc.efo,gene.id.entrez)
 
 #################################3
@@ -113,20 +112,20 @@ rm(lfc.efo,gene.id.entrez)
 
 ##_____KEGG SPIA____###
 ##----------Prepare SPIA from KEGG pathway kgml files---------##
-# makeSPIAdata(kgml.path="./data/kgml/",organism="hsa",out.path="./data/real_kegg/")
+# makeSPIAdata(kgml.path="./dat/kgml/",organism="hsa",out.path="./dat/real_kegg/")
 
 ##_____REACT SPIA____###
 
 # reactome <- pathways("hsapiens", "reactome")
 # reactome <- convertIdentifiers(reactome, "ENTREZID")
-# save(reactome,file = "./data/reactomedb.RData")
-# load("./data/reactomedb.RData") # better load it here, sicne it takes long to map reactome default uniprot id to ENTREZ ID
-# prepareSPIA(reactome, "./data/real_react/hsa")
+# save(reactome,file = "./dat/reactomedb.RData")
+# load("./dat/reactomedb.RData") # better load it here, sicne it takes long to map reactome default uniprot id to ENTREZ ID
+# prepareSPIA(reactome, "./dat/real_react/hsa")
 
 #####______BioCarta____________#####
 # biocarta <- pathways("hsapiens", "biocarta")
 # biocarta <- convertIdentifiers(biocarta, "ENTREZID")
-# prepareSPIA(biocarta, "./data/real_biocarta/hsa")
+# prepareSPIA(biocarta, "./dat/real_biocarta/hsa")
 
 ##_______________________________###
 
@@ -134,13 +133,13 @@ rm(lfc.efo,gene.id.entrez)
 ###___Create Random (Pseudo) Pathways____####
 
 # #___create universe with ENTREZID:____#
-# load("./data/geneID.RData")
+# load("./dat/geneID.RData")
 # universe = unique(na.omit(gene.id.entrez$entrezgene)) # for kegg
 # universe = unique(na.omit(gsub("^","ENTREZID:",gene.id.entrez$entrezgene))) # for reactome, biocarta
 # 
-# load("./data/real_kegg/hsaSPIA.RData")
-# load("./data/real_react/hsaSPIA.RData")
-# load("./data/real_biocarta/hsaSPIA.RData")
+# load("./dat/real_kegg/hsaSPIA.RData")
+# load("./dat/real_react/hsaSPIA.RData")
+# load("./dat/real_biocarta/hsaSPIA.RData")
 # 
 # pseudo_path = path.info
 # rm(path.info)
@@ -169,9 +168,9 @@ rm(lfc.efo,gene.id.entrez)
 # 
 # path.info <- pseudo_path
 # 
-# save(path.info,file = "./data/pseudo_kegg/hsaSPIA.RData")
-# save(path.info,file = "./data/pseudo_react/hsaSPIA.RData")
-# save(path.info,file = "./data/pseudo_biocarta/hsaSPIA.RData")
+# save(path.info,file = "./dat/pseudo_kegg/hsaSPIA.RData")
+# save(path.info,file = "./dat/pseudo_react/hsaSPIA.RData")
+# save(path.info,file = "./dat/pseudo_biocarta/hsaSPIA.RData")
 # rm(path.info,pseudo_path)
 # #_______________________________________________________##
 
@@ -182,12 +181,12 @@ rm(lfc.efo,gene.id.entrez)
 # #__________________________#
 #####___Drug Data Preperation___#####
 
-load("./data/gene.id.entrez.RData")
-fisher.drugs = fread("./data/fisher.drugs.commongenes.tsv")
+load("./dat/gene.id.entrez.RData")
+fisher.drugs = fread("./dat/fisher.drugs.commongenes.tsv")
 fisher.drugs = as.data.frame(unique(fisher.drugs$chembl.id))
 names(fisher.drugs) = "chembl.id"
 
-harmonizome = unique(fread("./data/harmonizome.tsv"))
+harmonizome = unique(fread("./dat/harmonizome.tsv"))
 harmonizome = harmonizome[,c(5,1,7)]
 harmonizome = harmonizome[order(ensembl.id,decreasing = TRUE), ]
 harmonizome = harmonizome[!duplicated(harmonizome[,c('ensembl.id', 'chembl.id')]),]
@@ -196,7 +195,7 @@ harmonizome = merge(fisher.drugs,harmonizome,by="chembl.id")
 harmonizome = harmonizome[,c(1,2,4,3)]
 #harmonizome.chembl = split(harmonizome, harmonizome$chembl.id)
 
-load("./data/super.drugs.RData")
+load("./dat/super.drugs.RData")
 super.drugs = super.drugs[,c(1,2,9)]
 super.drugs.chembl = split(super.drugs, super.drugs$chembl.id)
 
@@ -211,14 +210,14 @@ drug.genes = merge(drug.genes,harmonizome,by=c('chembl.id','ensembl.id')) # merg
 
 drug.genes.list <- split(drug.genes, list(drug.genes$chembl.id,drug.genes$efo.id)) #
 drug.genes.list= Filter(function(x) dim(x)[1] > 0, drug.genes.list) # remove empty lists
-save(drug.genes.list,file = "./data/drug.genes.list.RData")
+save(drug.genes.list,file = "./dat/drug.genes.list.RData")
 
 # length(intersect(harmonizome.chembl[["CHEMBL98"]][["ensembl.id"]],drug.genes.list[["CHEMBL98.EFO_0000249"]][["ensembl.id"]]))
 # length(harmonizome.chembl[["CHEMBL98"]][["ensembl.id"]])
 # length(drug.genes.list[["CHEMBL98.EFO_0000249"]][["ensembl.id"]])
 
 ####____Create named entity list for each drug_disease pairs___####
-load("./data/drug.genes.list.RData")
+load("./dat/drug.genes.list.RData")
 lfc_drug_ensembl <- list()
 for (i in 1:length(drug.genes.list)) {
   lfc_drug_ensembl[[i]] = setNames(as.numeric(drug.genes.list[[i]][[5]]),as.character(drug.genes.list[[i]][[2]]))
@@ -242,17 +241,8 @@ ensembl_all = unique(gene.id.entrez$ensembl.id)
 entrez_all = unique(gene.id.entrez$ENTREZ)
 entrezID_all = unique(gsub("^","ENTREZID:",gene.id.entrez$ENTREZ)) ## with ENTREZID: in front of each id
 
-save(lfc_drug_ensembl,lfc_drug_entrez,lfc_drug_entrezID,ensembl_all,entrez_all,entrezID_all,file="./data/lfc.drug.all.RData")
+save(lfc_drug_ensembl,lfc_drug_entrez,lfc_drug_entrezID,ensembl_all,entrez_all,entrezID_all,file="./dat/lfc.drug.all.RData")
 
 ##____________________________________________________##
 
 
-library(foreach)
-library(doParallel)
-no_cores <- detectCores() - 1
-cl <- makeCluster(no_cores)
-registerDoParallel(cl)
-
-
-
-stopImplicitCluster()

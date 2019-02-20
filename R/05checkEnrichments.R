@@ -60,52 +60,56 @@ efo.ids <- unique(c(stopgap[, efo.id], opentargets.degs[, efo.id], opentargets.d
 chembl.ids <- unique(opentargets.drugs[, chembl.id])
 
 #### Get Gene Symbol for Ensembl IDs 
-library(biomaRt)
-ensembl = useEnsembl(biomart="ensembl", version=93, dataset="hsapiens_gene_ensembl")
-val <- c(1:22,'X','Y','MT')
-chr_genes <- getBM(attributes=c('ensembl_gene_id','hgnc_symbol','chromosome_name'), 
-                   filters ='chromosome_name', values =val, mart = ensembl)
-chr_genes$hgnc_symbol <- gsub("^$", NA, chr_genes$hgnc_symbol)
-chr_genes <- chr_genes[which(!is.na(chr_genes$hgnc_symbol)),]
-chr_genes <- unique(chr_genes)
-hgnc.list = chr_genes[[1]]
+# library(biomaRt)
+# ensembl = useEnsembl(biomart="ensembl", version=93, dataset="hsapiens_gene_ensembl")
+# val <- c(1:22,'X','Y','MT')
+# chr_genes <- getBM(attributes=c('ensembl_gene_id','hgnc_symbol','chromosome_name'), 
+#                    filters ='chromosome_name', values =val, mart = ensembl)
+# chr_genes$hgnc_symbol <- gsub("^$", NA, chr_genes$hgnc_symbol)
+# chr_genes <- chr_genes[which(!is.na(chr_genes$hgnc_symbol)),]
+# chr_genes <- unique(chr_genes)
+# hgnc.list = chr_genes[[1]]
+# 
+# setdiff(ensembl.ids,hgnc.list)
 
-setdiff(ensembl.ids,hgnc.list)
 ### question 1: are genes differentially expressed in disease X enriched in genes genetically associated with disease X, compared to other diseases?
 ## perform Fisher's test
 # loop through diseases
-fisher.genes <- foreach (i = seq(opentargets.degs.list), .combine = rbind, .errorhandling = "remove") %do% {
-    efo.id.opentargets.degs <- names(opentargets.degs.list)[i]
-    foreach (j = seq(stopgap.list), .combine = rbind, .errorhandling = "remove") %dopar% {
-        efo.id.stopgap <- names(stopgap.list)[j]
-        # test significance
-        tmp <- checkOverlapSignificance(opentargets.degs.list[[efo.id.opentargets.degs]]$ensembl.id, stopgap.list[[efo.id.stopgap]]$ensembl.id, ensembl.ids)
-        # annotate
-        tmp <- cbind(efo.id.opentargets.degs, efo.id.stopgap, tmp)
-        tmp <- merge(tmp, unique(stopgap[, .(efo.id, efo.term)]), by.x = "efo.id.stopgap", by.y = "efo.id", all.x = TRUE, all.y = FALSE)
-        tmp <- merge(tmp, unique(opentargets.degs[, .(efo.id, efo.term)]), by.x = "efo.id.opentargets.degs", by.y = "efo.id", all.x = TRUE, all.y = FALSE, suffixes = c(".stopgap", ".opentargets.degs"))
-        setcolorder(tmp, c("efo.id.opentargets.degs", "efo.term.opentargets.degs", "efo.id.stopgap", "efo.term.stopgap", "DEGs", "GWAGs", "overlap", "universe","commonGenes", "odds.ratio", "p.value"))
-    }
+
+disease.genes <- foreach (i = seq(opentargets.degs.list), .combine = rbind, .errorhandling = "remove") %do% {
+  efo.id.opentargets.degs <- names(opentargets.degs.list)[i]
+  foreach (j = seq(stopgap.list), .combine = rbind, .errorhandling = "remove") %dopar% {
+    efo.id.stopgap <- names(stopgap.list)[j]
+    # test significance
+    tmp <- SignificantOverlap(opentargets.degs.list[[efo.id.opentargets.degs]]$ensembl.id, stopgap.list[[efo.id.stopgap]]$ensembl.id, ensembl.ids)
+    # annotate
+    tmp <- cbind(efo.id.opentargets.degs, efo.id.stopgap, tmp)
+    tmp <- merge(tmp, unique(stopgap[, .(efo.id, efo.term)]), by.x = "efo.id.stopgap", by.y = "efo.id", all.x = TRUE, all.y = FALSE)
+    tmp <- merge(tmp, unique(opentargets.degs[, .(efo.id, efo.term)]), by.x = "efo.id.opentargets.degs", by.y = "efo.id", all.x = TRUE, all.y = FALSE, suffixes = c(".stopgap", ".opentargets.degs"))
+    setcolorder(tmp, c("efo.id.opentargets.degs", "efo.term.opentargets.degs", "efo.id.stopgap", "efo.term.stopgap", "DEGs", "GWAGs", "overlap", "universe","commonGenes", "odds.ratio", "p.value"))
+  }
 }
-fisher.genes <- unique(fisher.genes)
+
+disease.genes <- unique(disease.genes)
 
 # correct p-values
-fisher.genes[p.value == 0, p.value := 3e-324]
-fisher.genes <- fisher.genes[order(p.value), ]
-fisher.genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
-
+disease.genes[p.value == 0, p.value := 3e-324]
+disease.genes <- disease.genes[order(p.value), ]
+disease.genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
+fish = disease.genes
+disease.genes <- fread("/home/memon/projects/drug_target_prioritization/GCMap/dat/disease.genes.commongenes.tsv")
 # add dummy variable
-fisher.genes[, same.disease := ifelse(efo.id.opentargets.degs == efo.id.stopgap, TRUE, FALSE)]
+disease.genes[, same.disease := ifelse(efo.id.opentargets.degs == efo.id.stopgap, TRUE, FALSE)]
 
 ## test if distributions significantly different with Mann-Whitney test (Wilcoxon rank sum test)
 # adjusted p-values
-mw.res <- wilcox.test(x = fisher.genes[same.disease == FALSE, -log10(p.adjusted)], y = fisher.genes[same.disease == TRUE, -log10(p.adjusted)])
+mw.res <- wilcox.test(x = disease.genes[same.disease == FALSE, -log10(p.adjusted)], y = disease.genes[same.disease == TRUE, -log10(p.adjusted)])
 print(mw.res)
 print(mw.res$p.value)
-png("./data/fisher.genes.pvalues.boxplots.png", width = 6 * 150, height = 6 * 150, res = 150)
-print(ggplot(fisher.genes, aes(x = same.disease, y = -log10(p.adjusted))) +
+png("./data/disease.genes.pvalues.boxplots.png", width = 6 * 150, height = 6 * 150, res = 150)
+print(ggplot(disease.genes, aes(x = same.disease, y = -log10(p.adjusted))) +
     geom_boxplot(fill = "#0066ff", outlier.shape = NA) +
-    coord_cartesian(ylim = quantile(fisher.genes[, -log10(p.adjusted)], c(0.03, 0.97))) +
+    coord_cartesian(ylim = quantile(disease.genes[, -log10(p.adjusted)], c(0.03, 0.97))) +
     xlab("Same disease") +
     ylab("-log10(adjusted p-value)") +
     theme_bw(18) +
@@ -113,13 +117,13 @@ print(ggplot(fisher.genes, aes(x = same.disease, y = -log10(p.adjusted))) +
     ggtitle(paste("p-value =", sprintf("%.2e", mw.res$p.value))))
 dev.off()
 # odds ratios
-mw.res <- wilcox.test(x = fisher.genes[same.disease == FALSE, odds.ratio], y = fisher.genes[same.disease == TRUE, odds.ratio]) 
+mw.res <- wilcox.test(x = disease.genes[same.disease == FALSE, odds.ratio], y = disease.genes[same.disease == TRUE, odds.ratio]) 
 print(mw.res)
 print(mw.res$p.value)
-png("./data/fisher.genes.oddsratios.boxplots.png", width = 6 * 150, height = 6 * 150, res = 150)
-print(ggplot(fisher.genes, aes(x = same.disease, y = odds.ratio)) +
+png("./data/disease.genes.oddsratios.boxplots.png", width = 6 * 150, height = 6 * 150, res = 150)
+print(ggplot(disease.genes, aes(x = same.disease, y = odds.ratio)) +
     geom_boxplot(fill = "#0066ff", outlier.shape = NA) +
-    coord_cartesian(ylim = quantile(fisher.genes[, odds.ratio], c(0.06, 0.94))) +
+    coord_cartesian(ylim = quantile(disease.genes[, odds.ratio], c(0.06, 0.94))) +
     xlab("Same disease") +
     ylab("Odds ratio") +
     theme_bw(18) +
@@ -128,8 +132,8 @@ print(ggplot(fisher.genes, aes(x = same.disease, y = odds.ratio)) +
 dev.off()
 
 # perform ROC analysis
-preds <- as.numeric(fisher.genes[, -log10(p.adjusted)])
-labls <- as.numeric(fisher.genes[, same.disease])
+preds <- as.numeric(disease.genes[, -log10(p.adjusted)])
+labls <- as.numeric(disease.genes[, same.disease])
 #save(labls,preds,file="roc.RData")
 
 #produce errors, need to do it in laptop
@@ -138,7 +142,7 @@ load("/home/memon/projects/drug_target_prioritization/GCMap/roc.RData")
 print(roc.res)
 sp.ci <- ci.sp(roc.res, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
 se.ci <- ci.se(roc.res, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
-png("./data/fisher.genes.roc.png", width = 6 * 150, height = 6 * 150, res = 150)
+png("./data/disease.genes.roc.png", width = 6 * 150, height = 6 * 150, res = 150)
 par(pty = "s")
 plot(roc.res, main = paste("AUC =", round(roc.res$auc, 2)), xlab = "False positive rate", ylab = "True positive rate", identity.lty = 2, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.5)
 plot(se.ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
@@ -148,17 +152,17 @@ dev.off()
 
 ## export
 # master file
-#fwrite(fisher.genes, "./data/fisher.genes.tsv", sep = "\t")
-fwrite(fisher.genes, "./data/fisher.genes.commongenes.tsv", sep = "\t")
+#fwrite(disease.genes, "./data/disease.genes.tsv", sep = "\t")
+fwrite(disease.genes, "./data/disease.genes.commongenes.tsv", sep = "\t")
 # table
-fwrite(fisher.genes[same.disease == TRUE & p.adjusted < 0.05, ], "./doc/TableS1.csv", sep = ",")
+fwrite(disease.genes[same.disease == TRUE & p.adjusted < 0.05, ], "./doc/TableS1.csv", sep = ",")
 
 
 ### question 2: are genes differentially expressed after treatment with drug for disease X enriched for genes genetically associated with disease X, compared to other diseases?
 
 ## perform Fisher's test
 # loop through diseases
-fisher.drugs <- foreach (i = seq(efo.ids), .combine = rbind, .errorhandling = "remove") %dopar% {
+drugGWAS.genes <- foreach (i = seq(efo.ids), .combine = rbind, .errorhandling = "remove") %dopar% {
     this.efo.id <- efo.ids[i]
     # loop through drugs
     foreach (j = seq(chembl.ids), .combine = rbind, .errorhandling = "remove") %do% {
@@ -178,22 +182,23 @@ fisher.drugs <- foreach (i = seq(efo.ids), .combine = rbind, .errorhandling = "r
              }
     }
 }
-fisher.drugs <- unique(fisher.drugs)
+
+drugGWAS.genes <- unique(drugGWAS.genes)
 
 # correct p-values
-fisher.drugs[p.value == 0, p.value := 3e-324]
-fisher.drugs <- fisher.drugs[order(p.value), ]
-fisher.drugs[, p.adjusted := p.adjust(p.value, method = "fdr")]
+drugGWAS.genes[p.value == 0, p.value := 3e-324]
+drugGWAS.genes <- drugGWAS.genes[order(p.value), ]
+drugGWAS.genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
 
 ## test if distributions significantly different with Mann-Whitney test (Wilcoxon rank sum test)
 # adjusted p-values
-mw.res <- wilcox.test(x = fisher.drugs[existing.indication == FALSE, -log10(p.adjusted)], y = fisher.drugs[existing.indication == TRUE, -log10(p.adjusted)])
+mw.res <- wilcox.test(x = drugGWAS.genes[existing.indication == FALSE, -log10(p.adjusted)], y = drugGWAS.genes[existing.indication == TRUE, -log10(p.adjusted)])
 print(mw.res)
 print(mw.res$p.value)
-png("./data/fisher.drugs.pvalues.boxplots.png", width = 6 * 150, height = 6 * 150, res = 150)
-print(ggplot(fisher.drugs, aes(x = existing.indication, y = -log10(p.adjusted))) +
+png("./data/drugGWAS.genes.pvalues.boxplots.png", width = 6 * 150, height = 6 * 150, res = 150)
+print(ggplot(drugGWAS.genes, aes(x = existing.indication, y = -log10(p.adjusted))) +
     geom_boxplot(fill = "#ff6600", outlier.shape = NA) +
-    coord_cartesian(ylim = quantile(fisher.drugs[, -log10(p.adjusted)], c(0.06, 0.94))) +
+    coord_cartesian(ylim = quantile(drugGWAS.genes[, -log10(p.adjusted)], c(0.06, 0.94))) +
     xlab("Existing indication") +
     ylab("-log10(adjusted p-value)") +
     theme_bw(18) +
@@ -201,13 +206,13 @@ print(ggplot(fisher.drugs, aes(x = existing.indication, y = -log10(p.adjusted)))
     ggtitle(paste("p-value =", sprintf("%.2e", mw.res$p.value))))
 dev.off()
 # odds ratios
-mw.res <- wilcox.test(x = fisher.drugs[existing.indication == FALSE, odds.ratio], y = fisher.drugs[existing.indication == TRUE, odds.ratio]) 
+mw.res <- wilcox.test(x = drugGWAS.genes[existing.indication == FALSE, odds.ratio], y = drugGWAS.genes[existing.indication == TRUE, odds.ratio]) 
 print(mw.res)
 print(mw.res$p.value)
-png("./data/fisher.drugs.oddsratios.boxplots.png", width = 6 * 150, height = 6 * 150, res = 150)
-print(ggplot(fisher.drugs, aes(x = existing.indication, y = odds.ratio)) +
+png("./data/drugGWAS.genes.oddsratios.boxplots.png", width = 6 * 150, height = 6 * 150, res = 150)
+print(ggplot(drugGWAS.genes, aes(x = existing.indication, y = odds.ratio)) +
     geom_boxplot(fill = "#ff6600", outlier.shape = NA) +
-    coord_cartesian(ylim = quantile(fisher.drugs[, odds.ratio], c(0.04, 0.96))) +
+    coord_cartesian(ylim = quantile(drugGWAS.genes[, odds.ratio], c(0.04, 0.96))) +
     xlab("Existing indication") +
     ylab("Odds ratio") +
     theme_bw(18) +
@@ -216,13 +221,13 @@ print(ggplot(fisher.drugs, aes(x = existing.indication, y = odds.ratio)) +
 dev.off()
 
 # perform ROC analysis
-preds <- fisher.drugs[, -log10(p.adjusted)]
-labls <- as.numeric(fisher.drugs[, existing.indication])
+preds <- drugGWAS.genes[, -log10(p.adjusted)]
+labls <- as.numeric(drugGWAS.genes[, existing.indication])
 roc.res <- roc(response = labls, predictor = preds, algorithm = 2, ci = TRUE, ci.method = "bootstrap", boot.n = 1000, parallel = TRUE, progress = "none")
 print(roc.res)
 sp.ci <- ci.sp(roc.res, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
 se.ci <- ci.se(roc.res, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
-png("./data/fisher.drugs.roc.png", width = 6 * 150, height = 6 * 150, res = 150)
+png("./data/drugGWAS.genes.roc.png", width = 6 * 150, height = 6 * 150, res = 150)
 par(pty = "s")
 plot(roc.res, main = paste("AUC =", round(roc.res$auc, 2)), xlab = "False positive rate", ylab = "True positive rate", identity.lty = 2, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.5)
 plot(se.ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
@@ -232,35 +237,12 @@ dev.off()
 
 ## export
 # master file
-#fwrite(fisher.drugs, "./data/fisher.drugs.tsv", sep = "\t")
-fwrite(fisher.drugs, "./data/fisher.drugs.commongenes.tsv", sep = "\t")
+#fwrite(drugGWAS.genes, "./data/drugGWAS.genes.tsv", sep = "\t")
+fwrite(drugGWAS.genes, "./data/drugGWAS.genes.tsv", sep = "\t")
 
 # tables
-fwrite(fisher.drugs[existing.indication == TRUE & p.adjusted < 0.05, ], "./doc/TableS2.csv", sep = ",")
-fwrite(fisher.drugs[existing.indication == FALSE & p.adjusted < 1e-10, ], "./doc/TableS3.csv", sep = ",")
-
-
-x = unique(harmonizome$chembl.id)
-length(intersect(x,chembl.ids))
-save(ensembl.ids,file = "./data/ensembl.ids.RData")
-
-library(data.table)
-library(pdist)
-load("~/projects/drugrep/drug2path/data/spia/spia_drug_kegg_ad_results.RData")
-load("~/projects/drugrep/drug2path/data/spia/spia_kegg_results.RData")
-x = data.table(spia_kegg[["EFO_0000249"]][,c(1,11)])
-y = data.table(spia_drug_kegg_ad[["CHEMBL1016.EFO_0000249"]][,c(1,11)])
-z =  merge(y,x,by="Name")
-colnames(z) = c("Pathways","Drug.Influence","Disease.Influence")
-#z$Score = ifelse(z$Drug.Influence == z$Disease.Influence,0,1)
-z$Drug.Influence = ifelse(z$Drug.Influence == "Activated",1,-1)
-z$Disease.Influence = ifelse(z$Disease.Influence == "Activated",1,-1)
-pdist(z$Drug.Influence,z$Disease.Influence)
-
-m = data.frame(x=c(1,-1,1),y=c(1,1,1))
-n = pdist(m$x,m$y)
-
-n[1,1]
+fwrite(drugGWAS.genes[existing.indication == TRUE & p.adjusted < 0.05, ], "./doc/TableS2.csv", sep = ",")
+fwrite(drugGWAS.genes[existing.indication == FALSE & p.adjusted < 1e-10, ], "./doc/TableS3.csv", sep = ",")
 
 
 
