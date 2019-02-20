@@ -218,3 +218,4 @@ save(drugGWAS.genes,file="./data/drugGWAS.genes.48D.padj1e-10.RData")
 
 length(unique(drugGWAS.genes$chembl.id))
 length(unique(drugGWAS.genes$efo.id))
+
