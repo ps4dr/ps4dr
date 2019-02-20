@@ -263,3 +263,4 @@ dmap[dmap == "None"] <- NA
 save(dmap,file = "./data/drug2715details.RData")
 load("./data/drug2715details.RData")
 
+
