@@ -5,7 +5,7 @@ TODO: Add description
 Installation
 ------------
 The required R libraries and dependencies to run the workflow are detailed in the
-requirements.txt file.
+`requirements.txt file <https://github.com/asifemon/msdrp/blob/master/requirements.txt>`_.
 
 Pipeline
 --------
@@ -16,4 +16,3 @@ Case Scenario
 -------------
 
 The case scenario uses different datasets that are described `in the preprocessing folder <https://github.com/asifemon/msdrp/tree/master/R/preprocessing>`_.
-
