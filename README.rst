@@ -1,6 +1,6 @@
 MSDRP (Multi-scale Drug Repositioning Pipeline)
 ===============================================
-TODO: Add description
+This package comprises a modular workflow designed to identify drug repositioning candidates using multi omics data sets.
 
 Installation
 ------------
