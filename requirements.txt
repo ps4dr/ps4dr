@@ -1,0 +1,23 @@
+# Data Libraries
+EnsDb.Hsapiens.v86
+
+# R modules
+data.table
+foreach
+doParallel
+BiocParallel
+ggplot2
+pROC
+dplyr
+stringr
+SPIA
+ggplot2
+riverplot
+RColorBrewer
+httr
+jsonlite
+tidyr
+library
+pROC
+tidyverse
+graphite
