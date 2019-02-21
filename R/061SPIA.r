@@ -1,5 +1,8 @@
+#' 6th script
+#' summary:
 
-
+library(stringr)
+library(SPIA)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #####_____Drug Data Preperation for SPIA______#####
@@ -205,7 +208,6 @@ rm(lfc.efo,gene.id)
 
 #####________SPIA____________#####
 
-library(SPIA)
 #___________KEGG SPIA______________#
 
 load("./data/lfc.namedVec.dis52.RData")
@@ -253,7 +255,6 @@ dmap$V1 = gsub(" ","",dmap$V1)
 dmap$V1 = gsub("\\{","",dmap$V1)
 dmap$V1 = gsub("\\}","",dmap$V1)
 
-library(stringr)
 dmap = as.data.frame(str_split_fixed(dmap$V1, ",", 26))
 dmap = dmap[,c(2,26,1,3,9)]
 names(dmap) = c("chembl.id","chembl.name","phase","indication","ruleof5")
