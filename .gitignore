@@ -41,5 +41,6 @@ __pycache__/
 
 .pytest_cache
 
-
-data
+data/*.tsv
+data/*.zip
+data/*.gz
