@@ -1,7 +1,6 @@
 Preprocessing
 =============
-
-How to run the preprocessing scripts.
+How to run the pre-processing scripts:
 
 1. **01STOPGAP2_functions.R**. Contains all the functions needed to run the next script
 2. **02STOPGAP2_run.R**. Run STOPGAP2 pipeline to generate processed-GWAS data.
