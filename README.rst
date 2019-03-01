@@ -14,3 +14,8 @@ The R scripts necessary to run the MSDRP pipeline are located `in the R director
 Case Scenario
 -------------
 The case scenario uses different datasets that are described `in the preprocessing folder <https://github.com/asifemon/msdrp/tree/master/R/preprocessing>`_.
+
+How to Modify the Workflow
+--------------------------
+
+Notes how to change parts of the workflow. E.g., GSEA instead of SPIA
