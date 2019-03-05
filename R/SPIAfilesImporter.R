@@ -32,8 +32,6 @@ names(path.info) = filenames
 
 for (pathway in 1:length(path.info)) {
   for (matrix in 1:length(path.info[pathway])) {
-    names(path.info[[pathway]])[3] <- "binding/association"
-    names(path.info[[pathway]])[22] <- "activation_binding/association"
     path.info[[pathway]][['nodes']] <- rownames(path.info[[pathway]][[matrix]])
     path.info[[pathway]][['title']] <- filenames[pathway]
     path.info[[pathway]][['NumberOfReactions']] <- as.integer(0)
