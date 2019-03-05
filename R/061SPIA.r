@@ -5,7 +5,7 @@ library(stringr)
 library(SPIA)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#####_____Drug Data Preperation for SPIA______#####
+#####_____DEGs Data Preperation for SPIA______#####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 load("./data/gene.id.entrez.RData")

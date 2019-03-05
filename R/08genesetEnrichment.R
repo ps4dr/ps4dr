@@ -17,7 +17,7 @@ setwd("/home/memon/projects/msdrp/")
 
 
 #####__Prepare DEG data set for SPIA__#####
-degs <- unique(fread("./dat/opentargets.degs.tsv"))
+degs <- unique(fread("./data/opentargets.degs.tsv"))
 degs <- degs[,c(1,3,6,7)]
 
 # process positive lfc 

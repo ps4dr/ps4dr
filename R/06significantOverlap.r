@@ -15,6 +15,8 @@ registerDoParallel(parallel::detectCores() - 1)
 library(data.table)
 library(dplyr)
 library(tidyr)
+library(ggplot2)
+library(cowplot)
 
 setwd("/home/memon/projects/msdrp/")
 
@@ -22,8 +24,8 @@ setwd("/home/memon/projects/msdrp/")
 SignificantOverlap <- function(set1, set2, universe) {
   set1 <- unique(set1)
   set2 <- unique(set2)
-  a <- sum(set1 %in% set2)
   x <- list(intersect(set1,set2))
+  a <- sum(set1 %in% set2)
   b <- length(set1) - a
   c <- length(set2) - a
   d <- length(universe) - a - b - c
@@ -32,9 +34,15 @@ SignificantOverlap <- function(set1, set2, universe) {
 }
 
 #####_____Datasets________#####
-stopgap <- unique(fread("./data/stopgap.tsv"))
-opentargets.degs <- unique(fread("./data/opentargets.degs.tsv"))
+GWAGs <- unique(fread("./data/stopgap.tsv"))
+tmp <- dplyr::count(GWAGs, efo.id)
+tmp2 <- subset(tmp, n > 50)
+GWAGs = merge(GWAGs,tmp2,by="efo.id")
 
+DEGs <- unique(fread("./data/opentargets.degs.tsv"))
+tmp <- dplyr::count(DEGs, efo.id)
+tmp2 <- subset(tmp, n > 50)
+DEGs = merge(DEGs,tmp2,by="efo.id")
 
 #################################################
 
@@ -51,19 +59,19 @@ opentargets.degs <- unique(fread("./data/opentargets.degs.tsv"))
 ensembl.ids <- unique(keys(EnsDb.Hsapiens.v86))
 
 # split data table by disease
-stopgap.list <- split(stopgap, stopgap$efo.id)
-opentargets.degs.list <- split(opentargets.degs, opentargets.degs$efo.id)
+GWAGs.list <- split(GWAGs, GWAGs$efo.id)
+DEGs.list <- split(DEGs, DEGs$efo.id)
 
 ## Signifcant overlap calculation
-disease.genes <- foreach (i = seq(opentargets.degs.list), .combine = rbind, .errorhandling = "remove") %do% {
-  efo.id.opentargets.degs <- names(opentargets.degs.list)[i]
-  foreach (j = seq(stopgap.list), .combine = rbind, .errorhandling = "remove") %dopar% {
-    efo.id.stopgap <- names(stopgap.list)[j]
-    tmp <- SignificantOverlap(opentargets.degs.list[[efo.id.opentargets.degs]]$ensembl.id, stopgap.list[[efo.id.stopgap]]$ensembl.id, ensembl.ids)
-    tmp <- cbind(efo.id.opentargets.degs, efo.id.stopgap, tmp)
-    tmp <- merge(tmp, unique(stopgap[, .(efo.id, efo.term)]), by.x = "efo.id.stopgap", by.y = "efo.id", all.x = TRUE, all.y = FALSE)
-    tmp <- merge(tmp, unique(opentargets.degs[, .(efo.id, efo.term)]), by.x = "efo.id.opentargets.degs", by.y = "efo.id", all.x = TRUE, all.y = FALSE, suffixes = c(".stopgap", ".opentargets.degs"))
-    setcolorder(tmp, c("efo.id.opentargets.degs", "efo.term.opentargets.degs", "efo.id.stopgap", "efo.term.stopgap", "DEGs", "GWAGs", "overlap", "universe","commonGenes", "odds.ratio", "p.value"))
+disease.genes <- foreach (i = seq(DEGs.list), .combine = rbind, .errorhandling = "remove") %do% {
+  efo.id.DEGs <- names(DEGs.list)[i]
+  foreach (j = seq(GWAGs.list), .combine = rbind, .errorhandling = "remove") %dopar% {
+    efo.id.GWAGs <- names(GWAGs.list)[j]
+    tmp <- SignificantOverlap(DEGs.list[[efo.id.DEGs]]$ensembl.id, GWAGs.list[[efo.id.GWAGs]]$ensembl.id, ensembl.ids)
+    tmp <- cbind(efo.id.DEGs, efo.id.GWAGs, tmp)
+    tmp <- merge(tmp, unique(GWAGs[, .(efo.id, efo.term)]), by.x = "efo.id.GWAGs", by.y = "efo.id", all.x = TRUE, all.y = FALSE)
+    tmp <- merge(tmp, unique(DEGs[, .(efo.id, efo.term)]), by.x = "efo.id.DEGs", by.y = "efo.id", all.x = TRUE, all.y = FALSE, suffixes = c(".GWAGs", ".DEGs"))
+    setcolorder(tmp, c("efo.id.DEGs", "efo.term.DEGs", "efo.id.GWAGs", "efo.term.GWAGs", "DEGs", "GWAGs", "overlap", "universe","commonGenes", "odds.ratio", "p.value"))
   }
 }
 
@@ -73,16 +81,18 @@ disease.genes[p.value == 0, p.value := 3e-324]
 disease.genes <- disease.genes[order(p.value), ]
 disease.genes = disease.genes[overlap > 0]
 disease.genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
+disease.genes <- fread("./data/disease.genes50.tsv")
+disease.genes = disease.genes[p.adjusted <= 0.05]
 # add dummy variable
-disease.genes[, same.disease := ifelse(efo.id.opentargets.degs == efo.id.stopgap, TRUE, FALSE)]
-fwrite(disease.genes, "./data/disease.genes.tsv", sep = "\t")
+disease.genes[, same.disease := ifelse(efo.id.DEGs == efo.id.GWAGs, TRUE, FALSE)]
+fwrite(disease.genes, "./data/disease.genes50.tsv", sep = "\t")
 
-
+names(disease.genes)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##___________Drugs to DISEASE Genes___________#####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-#' Calculating significant overlap between Drug perturbed Genes (LINCS data) adn Disease Genes 
+#' Calculating significant overlap between Drug perturbed Genes (LINCS data) and Disease Genes 
 #' from the above step (DEGs and GWAS genes overlap)
 #' Output would be the disease specific genes which are also perturbed by the drugs.
 
@@ -98,6 +108,9 @@ harmonizome = harmonizome[order(ensembl.id,decreasing = TRUE), ]
 harmonizome = harmonizome[!duplicated(harmonizome[,c('ensembl.id', 'chembl.id')]),] # remove suplicate entries
 harmonizome = merge(harmonizome,gene.id.entrez,by="ensembl.id") # merging with ENTREZ ID, since we need only ones with ENTREZ IDs for SPIA calculation
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+##__________________Optional__________________#####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #' In our case we want to investigate all drugs which went until at least any clinical trial phases
 #' if users want to investigate all drugs they can comment out next 4 lines
 load("./data/drug2715details.RData")
@@ -106,18 +119,18 @@ dmap = dmap[phase==4|phase==3|phase==2|phase==1]
 harmonizome = merge(dmap[,c(1,2)],harmonizome,by="chembl.id")
 
 ##### create Disease-Genes list #####
-disease.genes <- fread("./data/disease.genes.tsv")
+disease.genes <- fread("./data/disease.genes50.tsv")
 # considering all those gene sets where DEGs and GWAS came from same diseases.
 DisGen = disease.genes[same.disease == TRUE & overlap > 0] 
 # remove duplicated rows, since sometimes a disease id is paired with same disease because of slight different names
-DisGen = DisGen[!duplicated(DisGen$efo.id.opentargets.degs),] #remove duplicated rows based on one column
+DisGen = DisGen[!duplicated(DisGen$efo.id.DEGs),] #remove duplicated rows based on one column
 DisGenX <- unique(DisGen %>% 
                          mutate(commonGenes = strsplit(as.character(commonGenes), "\\|")) %>% 
                          unnest(commonGenes))
-DisGen.list <- split(DisGenX, DisGenX$efo.id.opentargets.degs)
+DisGen.list <- split(DisGenX, DisGenX$efo.id.DEGs)
 
 # create vector with all disease, ensembl and chemical IDs
-efo.ids <- unique(DisGen$efo.id.opentargets.degs)
+efo.ids <- unique(DisGen$efo.id.DEGs)
 ensembl.ids <- unique(keys(EnsDb.Hsapiens.v86))
 chembl.ids <- unique(harmonizome[, chembl.id])
 opentargets.drugs <- unique(fread("./data/opentargets.drugs.tsv"))
@@ -148,24 +161,19 @@ drugPdisease.genes <- unique(drugPdisease.genes)
 drugPdisease.genes = drugPdisease.genes[overlap > 0]
 length(unique(drugPdisease.genes$chembl.id))
 length(unique(drugPdisease.genes$efo.id))
-#save(drugPdisease.genes,file="./data/drugPdisease.genes.48D.RData")
+save(drugPdisease.genes,file="./data/drugPdisease.genes50.RData")
 
-load("./data/drugPdisease.genes.48D.RData")
+#load("./data/drugPdisease.genes50.RData")
 # correct p-values
 drugPdisease.genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
 drugPdisease.genes <- drugPdisease.genes[p.adjusted < 0.05]
 #save(drugPdisease.genes,file="./data/drugPdisease.genes.48D.padj.RData")
 drugPdisease.genes <- drugPdisease.genes[p.adjusted < 1e-05]
-save(drugPdisease.genes,file="./data/drugPdisease.genes.48D.padj1e-5.RData")
+save(drugPdisease.genes,file="./data/drugPdisease.genes50.padj1e-5.RData")
 #md2 <- unique(min.drugs[,c(1,3,12)]) #filtering columns for merging indication area to our super drugs
 #drugPdisease.genes <- merge(drugPdisease.genes,md2,by=c("chembl.id","efo.id"))
 drugPdisease.genes <- drugPdisease.genes[order(p.adjusted), ]
-load("./data/drug2715details.RData")
-dmap = data.table(dmap[,c(1,2,3)])
-dmap = dmap[phase == 4]
-dmap = data.table(dmap[,c(1,2)])
 
-drugPdisease.genes <- merge(dmap,drugPdisease.genes,by="chembl.id")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##____Drug perturbed Genes to GWAS Genes_______####
@@ -174,10 +182,41 @@ drugPdisease.genes <- merge(dmap,drugPdisease.genes,by="chembl.id")
 #' Calculating significant overlap between Differentially expressed Genes (DEGs) and GWAS genes
 #' Output would be the disease specific genes which are diffrentially expressed in the diseases 
 #' and also recorded from GWAS.
+#' 
+opentargets.drugs <- unique(fread("./data/opentargets.drugs.tsv"))
+GWAGs <- unique(fread("./data/stopgap.tsv"))
+GWAGs = data.table(GWAGs[,c(3,4,1,2)])
+tmp <- dplyr::count(GWAGs, efo.id)
 
+# disgen_plot1 <- ggplot(tmp, aes(x=n)) + geom_freqpoly(color="darkred",bins = 30)+ ggtitle("Genes per Disease frequency plot")
+# 
+tmp2 <- subset(tmp, n >= 50)
+# disgen_plot2 <- ggplot(tmp2, aes(x=n)) + geom_freqpoly(color="darkred", bins = 30)+ ggtitle("Genes (>= 50) per Disease frequency plot")
+# 
+tmp3 <- subset(tmp, n >= 100)
+# disgen_plot3 <- ggplot(tmp3, aes(x=n)) + geom_freqpoly(color="darkred", bins = 30)+ ggtitle("Genes (>= 100) per Disease frequency plot")
+# 
+tmp4 <- subset(tmp, n >= 500)
+# disgen_plot4 <- ggplot(tmp4, aes(x=n)) + geom_freqpoly(color="darkred", bins = 30)+ ggtitle("Genes (>= 500) per Disease frequency plot")
+# 
+# jpeg(file="./data/frequency_plots_GWAGs_diseaseGenes.jpeg", width=1800, height=1980, res=200)
+# plot_grid(disgen_plot1,disgen_plot2, disgen_plot3,disgen_plot4,align = "h", ncol = 2,nrow =2, rel_heights = c(1/4, 1/4))
+# dev.off()
+
+
+GWAGs = merge(tmp2,GWAGs, by="efo.id")
+GWAGs = data.table(GWAGs[,c(1,3,4,5)])
+
+tmp <- dplyr::count(harmonizome, chembl.id)
+tmp2 <- subset(tmp, n > 50)
+harmonizome = merge(harmonizome,tmp2,by="chembl.id")
+harmonizome = harmonizome[,c(1,2,3,4,5)]
 #update chembl & efo.ids again
 chembl.ids <- unique(harmonizome[, chembl.id])
-efo.ids <- unique(stopgap$efo.id)
+efo.ids <- unique(GWAGs$efo.id)
+GWAGs.list <- split(GWAGs, GWAGs$efo.id)
+# create gene universes for Fisher's test
+ensembl.ids <- unique(keys(EnsDb.Hsapiens.v86))
 
 ## Signifcant overlap calculation
 drugGWAS.genes <- foreach (i = seq(efo.ids), .combine = rbind, .errorhandling = "remove") %dopar% {
@@ -186,13 +225,13 @@ drugGWAS.genes <- foreach (i = seq(efo.ids), .combine = rbind, .errorhandling = 
   foreach (j = seq(chembl.ids), .combine = rbind, .errorhandling = "remove") %do% {
     this.chembl.id <- chembl.ids[j]
     degs <- unique(harmonizome[chembl.id == this.chembl.id, ensembl.id])
-    gags <- stopgap.list[[this.efo.id]]$ensembl.id
+    gags <- GWAGs.list[[this.efo.id]]$ensembl.id
     if (length(degs) > 0 && length(gags) > 0) {
       # test significance
       tmp <- SignificantOverlap(degs, gags, ensembl.ids)
       # annotate
       tmp <- cbind(chembl.id = this.chembl.id, efo.id = this.efo.id, tmp)
-      tmp <- merge(unique(stopgap[, .(efo.id, efo.term)]), tmp, by = "efo.id")
+      tmp <- merge(unique(GWAGs[, .(efo.id, efo.term)]), tmp, by = "efo.id")
       tmp <- merge(unique(harmonizome[, .(chembl.id, chembl.name)]), tmp, by = "chembl.id")
       # add dummy variable
       tmp[, existing.indication := ifelse(nrow(opentargets.drugs[efo.id == this.efo.id & chembl.id == this.chembl.id]) > 0, TRUE, FALSE)]
@@ -208,13 +247,16 @@ drugGWAS.genes[p.value == 0, p.value := 3e-324]
 drugGWAS.genes = drugGWAS.genes[overlap > 0]
 drugGWAS.genes <- drugGWAS.genes[order(p.value), ]
 drugGWAS.genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
-fwrite(drugGWAS.genes, "./data/drugGWAS.genes.tsv", sep = "\t")
+save(drugGWAS.genes,file="./data/drugGWAS.genes50.RData")
 
 drugGWAS.genes <- drugGWAS.genes[p.adjusted < 1e-05]
-save(drugGWAS.genes,file="./data/drugGWAS.genes.48D.padj1e-5.RData")
+save(drugGWAS.genes,file="./data/drugGWAS.genes50.padj1e-5.RData")
 
 drugGWAS.genes <- drugGWAS.genes[p.adjusted < 1e-10]
-save(drugGWAS.genes,file="./data/drugGWAS.genes.48D.padj1e-10.RData")
+save(drugGWAS.genes,file="./data/drugGWAS.genes50.padj1e-10.RData")
 
 length(unique(drugGWAS.genes$chembl.id))
 length(unique(drugGWAS.genes$efo.id))
+load("./data/drugGWAS.genes.padj1e-10.RData")
+load("./data/drugPdisease.genes.48D.padj1e-5.RData")
+length(unique(drugPdisease.genes$efo.id))

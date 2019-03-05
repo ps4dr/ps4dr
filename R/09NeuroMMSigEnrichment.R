@@ -9,7 +9,7 @@ library(pROC)
 library(dplyr)
 library(EnsDb.Hsapiens.v86)
 
-setwd("/home/memon/projects/msdrp/")
+setwd("/home/memon/projects/drug_target_prioritization/GCMap/")
 
 # function to calculate enrichment
 checkOverlapSignificance <- function(Pathway.Genes, DEG.GWA.Genes, universe) {
