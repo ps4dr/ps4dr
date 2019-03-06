@@ -79,5 +79,3 @@ x$anticor = as.numeric(x$anticor)
 x= na.omit(x)
 mean(x$anticor)
 median(x$anticor)
-
-
