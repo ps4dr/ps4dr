@@ -6,8 +6,6 @@ library(cowplot)
 
 setwd("/home/memon/projects/msdrp/")
 
-load("./data/gene.id.entrez.RData")
-
 ##-----------------------------##
 #####_____Pathway SPIA______#####
 ##-----------------------------##
@@ -55,13 +53,13 @@ rm(lfc.neg,lfc.pos,degs)
 
 load("./data/geneID.RData")
 gene.id$entrezgene <- gsub("^$", NA, gene.id$entrezgene)
-# gene.id <- gene.id[which(!is.na(gene.id$entrezgene)),]
-# gene.id <- data.table(gene.id)
-# gene.id<- unique(gene.id[,c('entrezgene','ensembl_gene_id')])
+
+gene.id <- gene.id[which(!is.na(gene.id$entrezgene)),]
 gene.id <- data.table(gene.id)
-gene.id<- unique(gene.id[,c('hgnc_symbol','ensembl_gene_id')])
-names(gene.id) <- c("ENTREZ","ensembl.id")
+gene.id<- unique(gene.id[,c('entrezgene','ensembl_gene_id','hgnc_symbol')])
+names(gene.id) <- c("ENTREZ","ensembl.id","HGNC")
 gene.id <- gene.id[!duplicated(gene.id$ensembl.id),]
+
 
 lfc.com <- merge(lfc.com,gene.id,by="ensembl.id")
 lfc.com = lfc.com[!duplicated(lfc.com[,c('efo.id','ENTREZ')]),]
@@ -69,7 +67,7 @@ lfc.com = lfc.com[!duplicated(lfc.com[,c('efo.id','ENTREZ')]),]
 # lfc.efo = split(lfc.com, lfc.com$efo.id)
 
 disease.genes <- fread("./data/disease.genes50.tsv")
-DisGen = disease.genes[same.disease == TRUE & overlap > 0]
+DisGen = disease.genes[same.disease == TRUE & overlap > 0 & p.adjusted < 0.05]
 # remove duplicated rows, since sometimes a disease id is paired with same disease because of slight different names
 DisGen = DisGen[!duplicated(DisGen$efo.id.DEGs),] #remove duplicated rows based on one column
 DisGen = DisGen[,c(1,2,9)]
@@ -86,14 +84,14 @@ DisGen$commonGenes = NULL
 names(DisGen) = c("efo.id","efo.term","ensembl.id")
 DisGen = merge(DisGen,lfc.com,by=c('ensembl.id','efo.id')) # merge with harmonizome
 
-lfc.efo = split(DisGen, DisGen$efo.id)
+lfc.efo = split(DisGen, DisGen$efo.term)
 rm(degs,lfc.neg,lfc.pos,lfc.com)
 
-save(lfc.efo,file="./data/disease.genes50.lfc.RData")
+save(lfc.efo,file="./data/disease.genes42.lfc.RData")
 
 ##_____read log fold changes for a particular disease_______###
 # load("./data/lfc.dis52.RData") 
-load("./data/disease.genes50.lfc.RData")###--get log fold change for all genes for each diseases-##
+load("./data/disease.genes42.lfc.RData")###--get log fold change for all genes for each diseases-##
 
 ##_____Create Named Vector for log fold changes in each disease_____________###
 
@@ -115,13 +113,19 @@ for (i in 1:length(lfc.efo)) {
   names(lfc_entrezID)[[i]] = names(lfc.efo)[[i]]
 }
 
+lfc_hgnc <- list()
+for (i in 1:length(lfc.efo)) {
+  lfc_hgnc[[i]] = setNames(as.numeric(lfc.efo[[i]][[4]]),as.character(lfc.efo[[i]][[6]]))
+  names(lfc_hgnc)[[i]] = names(lfc.efo)[[i]]
+}
 
 ##_____Create a vector with all Gene universe to proxy Array Genes_________###
+hgnc_all = unique(gene.id$HGNC)
 ensembl_all = unique(gene.id$ensembl.id)
 entrez_all = unique(gene.id$ENTREZ)
 entrezID_all = unique(gsub("^","ENTREZID:",gene.id$ENTREZ)) ## with ENTREZID: in front of each id
 
-save(lfc_ensembl,lfc_entrez,lfc_entrezID,ensembl_all,entrez_all,entrezID_all,file="./data/disease.genes50.lfc.namedVec.RData")
+save(lfc_hgnc,lfc_ensembl,lfc_entrez,lfc_entrezID,hgnc_all,ensembl_all,entrez_all,entrezID_all,file="./data/disease.genes42.lfc.namedVec.RData")
 # save(lfc_hgnc,hgnc_all,file="./data/disease.genes50.lfc.namedVec.HGNC.RData")
 rm(lfc.efo,gene.id)
 
@@ -130,17 +134,18 @@ rm(lfc.efo,gene.id)
 #####________SPIA____________#####
 
 library(SPIA)
+setwd("/home/memon/projects/msdrp/")
 #___________KEGG SPIA______________#
 
 # load("./data/lfc.namedVec.dis52.RData")
-load("./data/disease.genes50.lfc.namedVec.RData")
+load("./data/disease.genes42.lfc.namedVec.RData")
 
 spia_kegg = list()
 for (i in 1:length(lfc_entrez)) {
   spia_kegg[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir="./data/real_kegg/",organism="hsa")
 }
 names(spia_kegg) = names(lfc_entrez)
-save(spia_kegg,file = "./data/spia/spia_kegg_disease.genes50_results.RData")
+save(spia_kegg,file = "./data/spia/spia_kegg_disease42.genes50_results.RData")
 
 # rm(list=ls())
 # gc()
