@@ -1,7 +1,7 @@
 library(data.table)
 #library(pdist)
 
-setwd("~/projects/drugrep/drug2path/")
+setwd("/home/memon/projects/msdrp/")
 
 #####_____load KEGG disease SPIA results_____#####
 # load("~/projects/drugrep/drug2path/data/spia/spia_kegg_results.RData")
@@ -17,7 +17,7 @@ dis.path = data.table(spia_kegg[["Crohn's disease"]][,c(1,11)])
 # spia_drug_kegg = spia_test$EFO_0000249
 # spia_drug_kegg = spia_test[["EFO_0002508"]]
 # spia_drug_kegg = spia_test[["EFO_0000400"]]
-load("~/projects/drugrep/drug2path/data/spia/spia_kegg_30Diseases_nopar.RData")
+load("./data/spia/spia_kegg_30Diseases_nopar.RData")
 spia_drug_kegg = spia_kegg_30D[["Crohn's disease"]]
 
 spia_drug_kegg = Filter(function(x) !is.null(x), spia_drug_kegg) #delete empty df from list
@@ -47,13 +47,13 @@ cor_score= cor_score %>% drop_na()
 plot(cor_score$V1)
 
 d = density(cor_score$V1)
-pdf(file = "~/projects/drugrep/drug2path/data/spia/anticor_dm.pdf")
-plot(d,main = "Drug anti-correlation Scores for Diabetes Mellitus")
+pdf(file = "./data/spia/anticor_CD.pdf")
+plot(d,main = "Drug anti-correlation Scores for Crohn's Disease")
 abline(v=median(cor_score$V1),col="blue")
 text(median(cor_score$V1), 1, cex=1.1, round(median(cor_score$V1), digits=4))
 dev.off()
 
-write.csv(cor_score,file = "~/projects/drugrep/drug2path/data/spia/drug.cor10.ad.txt",quote = F)
+write.csv(cor_score,file = "./data/spia/drug.cor10.cd.txt",quote = F)
 
 
 
@@ -65,7 +65,7 @@ write.csv(cor_score,file = "~/projects/drugrep/drug2path/data/spia/drug.cor10.ad
 # #w = pdist(drug.dis.path,indices.A = 1:nrow(drug.dis.path), indices.B = 1:nrow(drug.dis.path))
 # drug.cor = cor(drug.dis.path$Drug.Influence, drug.dis.path$Disease.Influence)
 
-load("~/projects/drugrep/drug2path/data/spia/drug.cor100.ad.RData")
+load("./data/spia/drug.cor100.ad.RData")
 names(drug.cor100)[i]
 colnames(drug.cor100)[i]
 
