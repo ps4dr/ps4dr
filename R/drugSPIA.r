@@ -97,3 +97,4 @@ for (diseases in 1:length(lfc_test)){
 save(spia_kegg_2,file = "./dat/spia/spia_kegg_38_nopar_test1.RData")
 
 
+

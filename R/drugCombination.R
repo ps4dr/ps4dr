@@ -59,6 +59,3 @@ for (i in seq_along(drug.path)) {
 
 
 
-
-
-
