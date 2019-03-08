@@ -1,52 +1,100 @@
 library(data.table)
-#library(pdist)
+library(tidyr)
+library(RecordLinkage)
 
 setwd("/home/memon/projects/msdrp/")
 
-#####_____load KEGG disease SPIA results_____#####
-# load("~/projects/drugrep/drug2path/data/spia/spia_kegg_results.RData")
-load("./data/spia/spia_kegg_disease42.genes50_results.RData")
-# dis.path = data.table(spia_kegg[["EFO_0000400"]][,c(1,11)])
-#dis.path = data.table(spia_kegg[["EFO_0000249"]][,c(1,11)])
-# dis.path = data.table(spia_kegg[["EFO_0002508"]][,c(1,11)])
-dis.path = data.table(spia_kegg[["Crohn's disease"]][,c(1,11)])
-
-
-#####_____load KEGG Drug SPIA results_____#####
-# load("~/projects/drugrep/drug2path/data/spia/spia_test_nopar_lfcdis1_try1.RData")
-# spia_drug_kegg = spia_test$EFO_0000249
-# spia_drug_kegg = spia_test[["EFO_0002508"]]
-# spia_drug_kegg = spia_test[["EFO_0000400"]]
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~load KEGG Drug SPIA results~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 load("./data/spia/spia_kegg_30Diseases_nopar.RData")
-spia_drug_kegg = spia_kegg_30D[["Crohn's disease"]]
-
+spia_drug_kegg = spia_kegg_30D
 spia_drug_kegg = Filter(function(x) !is.null(x), spia_drug_kegg) #delete empty df from list
 
-drug.path <- list()
-for (i in 1:length(spia_drug_kegg)) {
-  drug.path[[i]] = spia_drug_kegg[[i]][,c(1,11)]
-  names(drug.path)[i] = names(spia_drug_kegg)[i]
+drug.path <- vector('list', length(spia_drug_kegg)) # create list of lists
+names(drug.path) <- names(spia_drug_kegg)
+for(i in seq_along(spia_drug_kegg)){
+  for(j in seq_along(spia_drug_kegg[[i]])){
+    drug.path[[i]][[j]] <- spia_drug_kegg[[i]][[j]][,c(1,11)]
+    names(drug.path[[i]])[[j]] <- names(spia_drug_kegg[[i]])[[j]]
+  }
 }
 
-drug.dis.path = list()
-drug.cor = list()
-for (i in 1:length(drug.path)) {
-  drug.dis.path[[i]] = merge(drug.path[[i]],dis.path,by="Name")
-  names(drug.dis.path)[i] = names(spia_drug_kegg)[i]
-  names(drug.dis.path[[i]]) = c("Pathways","Drug.Influence","Disease.Influence")
-  drug.dis.path[[i]]$Drug.Influence = ifelse(drug.dis.path[[i]]$Drug.Influence == "Activated",1,-1)
-  drug.dis.path[[i]]$Disease.Influence = ifelse(drug.dis.path[[i]]$Disease.Influence == "Activated",1,-1)
-  drug.cor[[i]] = cor(drug.dis.path[[i]]$Drug.Influence, drug.dis.path[[i]]$Disease.Influence)
-  names(drug.cor)[i] = gsub("\\..*","",names(drug.dis.path)[i])
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~load KEGG Disease SPIA results~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+load("./data/spia/spia_kegg_disease42.genes50_results.RData")
+# dis.path = lapply(spia_kegg, function(x) x[,c(1,11)])
+
+#~~~~Remove any other diseases which are not in drug.path~~~#
+#~~~~so, both drug.path & dis.path are equivalent~~~~~~~~~~~#
+
+dis.path = vector('list', length(spia_drug_kegg)) # create list of lists
+names(dis.path) <- names(spia_drug_kegg)
+
+for (i in seq_along(spia_drug_kegg)) {
+  for (j in seq_along(spia_kegg)){
+    if (names(spia_drug_kegg)[[i]] == names(spia_kegg)[j]) {
+      dis.path[[i]] = spia_kegg[[j]][,c(1,11)]
+    }
+  }
 }
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~Calculate Correlation-Score~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+drug.dis.path = vector('list', length(spia_drug_kegg)) # create list of lists
+names(drug.dis.path) <- names(spia_drug_kegg)
+drug.cor = vector('list', length(spia_drug_kegg)) # create list of lists
+names(drug.cor) <- names(spia_drug_kegg)
+
+for (i in seq_along(drug.path)) {
+  for (j in seq_along(drug.path[[i]])) {
+    drug.dis.path[[i]][[j]] = merge(dis.path[[i]],drug.path[[i]][[j]],by="Name")
+    names(drug.dis.path[[i]])[[j]] <- names(spia_drug_kegg[[i]])[[j]]
+    names(drug.dis.path[[i]][[j]]) = c("Pathways","Disease.Influence","Drug.Influence")
+    drug.dis.path[[i]][[j]]$Disease.Influence = ifelse(drug.dis.path[[i]][[j]]$Disease.Influence == "Activated",1,-1)
+    drug.dis.path[[i]][[j]]$Drug.Influence = ifelse(drug.dis.path[[i]][[j]]$Drug.Influence == "Activated",1,-1)
+
+    
+    drug.cor[[i]][[j]] = cor(drug.dis.path[[i]][[j]]$Drug.Influence, drug.dis.path[[i]][[j]]$Disease.Influence)
+    names(drug.cor[[i]])[[j]] = names(drug.dis.path[[i]])[[j]]
+    drug.cor[[i]][[j]] = as.data.frame(drug.cor[[i]][[j]])
+    names(drug.cor[[i]][[j]]) = "Correlation.Score"
+    drug.cor[[i]][[j]]$"Dissimilarity.Score" = (sum(levenshteinDist(as.character(drug.dis.path[[i]][[j]]$Drug.Influence),as.character(drug.dis.path[[i]][[j]]$Disease.Influence))) * 100) / length(drug.dis.path[[i]][[j]]$Drug.Influence)
+    drug.cor[[i]][[j]]$"DrugPathway" = length(drug.dis.path[[i]][[j]]$Drug.Influence)
+    drug.cor[[i]][[j]]$"DiseasePathway" = length(dis.path[[i]]$Name)
+  }
+}
+
+
+##~~~~~create a single data.frame from all drugs in a disease~~~##
+
+#x=do.call(rbind,drug.cor[["Alzheimer's disease"]])
+for (i in seq_along(drug.cor)) {
+  drug.cor[[i]] = do.call(rbind,drug.cor[[i]])
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+# Drop NA values from each lists
+drug.cor = lapply(drug.cor, function(x) x[!is.na(x)])
+drug.cor = lapply(drug.cor, function(x) as.data.frame(x))
+x= drug.cor[["Crohn's disease"]]
+
+d = density(drug.cor[["Crohn's disease"]])
+
+cor_score= x %>% drop_na()
 
 cor_score=as.data.frame(do.call(rbind, drug.cor))
 library(tidyr)
-cor_score= cor_score %>% drop_na()
+cor_score= x %>% drop_na()
 #cor_score$drug = rownames(cor_score)
 plot(cor_score$V1)
 
-d = density(cor_score$V1)
+d = density(cor_score$Correlation.Score)
 pdf(file = "./data/spia/anticor_CD.pdf")
 plot(d,main = "Drug anti-correlation Scores for Crohn's Disease")
 abline(v=median(cor_score$V1),col="blue")
@@ -79,3 +127,6 @@ x$anticor = as.numeric(x$anticor)
 x= na.omit(x)
 mean(x$anticor)
 median(x$anticor)
+
+
+

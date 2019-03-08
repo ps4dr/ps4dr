@@ -22,9 +22,9 @@ setwd("/home/memon/projects/msdrp/wikipath/")
 
 filenames <-list.files(path = ".")
 path.info = lapply(paste0(getwd(),"/", filenames), read_allsheets) 
-# filenames = gsub('_unflatten.xlsx','',filenames)
-# filenames = gsub('hsa','',filenames)
-# filenames = gsub('R-HSA-','',filenames)
+filenames = gsub('_unflatten.xlsx','',filenames)
+filenames = gsub('hsa','',filenames)
+filenames = gsub('R-HSA-','',filenames)
 filenames = gsub('xlsx','',filenames)
 names(path.info) = filenames
 
@@ -39,8 +39,8 @@ for (pathway in 1:length(path.info)) {
 }
 
 ##############################################
-#save(path.info,file="/home/memon/projects/msdrp/forspia/test/hsaSPIA.RData")
-#save(path.info,file="/home/memon/projects/msdrp/react/hsaSPIA.RData")
+# save(path.info,file="/home/memon/projects/msdrp/kegg/hsaSPIA.RData")
+# save(path.info,file="/home/memon/projects/msdrp/react/hsaSPIA.RData")
 save(path.info,file="/home/memon/projects/msdrp/wikipath/hsaSPIA.RData")
 #####################
 
