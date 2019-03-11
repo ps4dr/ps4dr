@@ -1,8 +1,10 @@
 #' 5th script
 #' summary:
-#' Download LINCS L1000 dataset 
-#' Map from LINCS IDs to Chembl IDs using to PubChem IDs as intermediate 
+#' 01: Download Drug Perturbed Gens Expression Profiles, LINCS L1000 dataset 
+#' 02: Map from LINCS IDs to Chembl IDs using to PubChem IDs as intermediate 
 
+# source("http://bioconductor.org/biocLite.R")
+# biocLite("EnsDb.Hsapiens.v86")
 
 library(EnsDb.Hsapiens.v86)
 library(data.table)
@@ -16,9 +18,6 @@ setwd("/home/memon/projects/msdrp/")
 
 #####  get LINCS L1000 data from Harmonizome  #####
 
-# harmonizome <- fread("gunzip -c ./data/gene_attribute_edges.txt.gz", header = TRUE, skip = 1, select = c(1, 3, 4, 7))
-# http://amp.pharm.mssm.edu/Harmonizome/dataset/LINCS+L1000+CMAP+Signatures+of+Differentially+Expressed+Genes+for+Small+Molecules
-# use harmonizome_downloader.ipynb for down load harmonizome dataset, OR
 url ="http://amp.pharm.mssm.edu/static/hdfs/harmonizome/data/lincscmapchemical/gene_attribute_edges.txt.gz"
 
 if(!http_error(url) == TRUE){
@@ -44,7 +43,7 @@ if(!http_error(url) == TRUE){
 } else {
   print("The url is outdated, please updatde!")
 }
-lincs.mappings <- data.table(lincs.mappings)
+lincs.mappings <- data.table(unique(lincs.mappings))
 
 #####  map Entrez IDs to Ensembl  #####
 

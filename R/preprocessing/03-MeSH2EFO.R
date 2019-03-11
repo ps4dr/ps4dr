@@ -5,7 +5,7 @@
 #' EFO ontology (version 2.105) file has been used for these mapping purpose
 
 
-#source("https://bioconductor.org/biocLite.R")
+#source("http://bioconductor.org/biocLite.R")
 #biocLite("EnsDb.Hsapiens.v86")
 library(EnsDb.Hsapiens.v86)
 
