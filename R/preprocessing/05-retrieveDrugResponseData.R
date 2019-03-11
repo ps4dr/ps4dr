@@ -16,7 +16,9 @@ registerDoParallel(parallel::detectCores() - 1)
 
 setwd("/home/memon/projects/msdrp/")
 
-#####  get LINCS L1000 data from Harmonizome  #####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~get LINCS L1000 data from Harmonizome~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 url ="http://amp.pharm.mssm.edu/static/hdfs/harmonizome/data/lincscmapchemical/gene_attribute_edges.txt.gz"
 
@@ -28,13 +30,12 @@ if(!http_error(url) == TRUE){
 } else {
   print("The url is outdated, please update!")
 }
-L1000 <- data.table(L1000)
+L1000 <- data.table(unique(L1000))
 
-#####  get LINCS to PubChem mappings  #####
 
-# lincs.mappings <- fread("../data/LINCS_LSM_Pubchem_ID_mappings.tsv") # NOT FOUND, no source mentioned
-# contains "pert_id","pert_iname","pubchem_cid","SMILES" 
-# lincs.mappings <- fread("./data/meta_SMILES.csv",select = c(1,3))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~get LINCS to PubChem mappings~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 url = "http://maayanlab.net/SEP-L1000/downloads/meta_SMILES.csv"
 if(!http_error(url) == TRUE){
@@ -45,13 +46,19 @@ if(!http_error(url) == TRUE){
 }
 lincs.mappings <- data.table(unique(lincs.mappings))
 
-#####  map Entrez IDs to Ensembl  #####
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~map Entrez IDs to Ensembl~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 L1000.genes <- L1000[, as.character(unique(GeneID))]
 anno <- as.data.table(select(EnsDb.Hsapiens.v86, keys = L1000.genes, keytype = "ENTREZID", columns = c("GENEID", "ENTREZID")))
 L1000 <- merge(anno[, ENTREZID := as.numeric(ENTREZID)], L1000, by.x = "ENTREZID", by.y = "GeneID", allow.cartesian = TRUE)
 
-#####  map LINCS IDs to ChEMBL IDs  #####
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~map LINCS IDs to ChEMBL IDs~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 unichem.url <- "https://www.ebi.ac.uk/unichem/rest/src_compound_id/"
 unichem.res <- foreach(i = seq(lincs.mappings[, pubchem_cid]), .combine = rbind) %dopar% {
@@ -63,8 +70,7 @@ unichem.res <- foreach(i = seq(lincs.mappings[, pubchem_cid]), .combine = rbind)
     }
 }
 
-# annotate and tidy
 L1000[, lincs.id := substr(`Perturbation ID_Perturbagen_Cell Line_Time_Time Unit_Dose_Dose Unit`, 1, 13)]
 L1000 <- merge(L1000, unichem.res, by = "lincs.id")
 L1000 <- L1000[, .(ensembl.id = GENEID, gene.symbol = GeneSym, lincs.id, pubchem.id, chembl.id, perturbation = `Perturbation ID_Perturbagen_Cell Line_Time_Time Unit_Dose_Dose Unit`, direction = weight)]
-fwrite(L1000, "./data/L1000.tsv")
+save(L1000, file="./data/L1000.RData")
