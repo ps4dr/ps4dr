@@ -1,0 +1,78 @@
+#' 3rd script
+#' summary:
+#' Mapping of MeSH terms to EFO IDs from GWASs Data processed by STOPGAP Pipeline
+#' for downloading Differential Gene Expression Data from Open Targtets by EFO IDs
+#' EFO ontology (version 2.105) file has been used for these mapping purpose
+
+
+#source("https://bioconductor.org/biocLite.R")
+#biocLite("EnsDb.Hsapiens.v86")
+library(EnsDb.Hsapiens.v86)
+
+library(foreach)
+library(doParallel)
+registerDoParallel(parallel::detectCores() - 1)
+
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(httr)
+library(jsonlite)
+
+setwd("/home/memon/projects/msdrp/")
+
+# get GWASs Data from STOPGAP pipeline output 
+load("./data/stopgap.gene.mesh.RData")
+gwas.data <- stopgap.gene.mesh
+rm(stopgap.gene.mesh)
+
+length(unique(gwas.data$msh))
+length(unique(gwas.data$gene.v19))
+length(unique(gwas.data$snp.ld))
+
+# keep relevant columns
+gwas.data = data.table(gwas.data)
+gwas.data <- unique(gwas.data[, .(snp.ld,gene.v19, msh, pvalue, gene.score, gene.rank.min, source)])
+# replace p-values of zero with arbitrarily low p-value
+gwas.data[pvalue == 0, pvalue := 3e-324]
+
+# map gene symbols to Ensembl
+gwas.data.genes <- unique(gwas.data[, gene.v19])
+anno <- as.data.table(select(EnsDb.Hsapiens.v86, keys = gwas.data.genes, keytype = "SYMBOL", columns = c("GENEID", "SYMBOL")))
+gwas.data <- merge(gwas.data, anno, by.x = "gene.v19", by.y = "SYMBOL", all = FALSE)
+
+#' read EFO ontolgy (version 2.105) files in csv format downloaded from bioportal on 11th March, 2019
+#' "http://data.bioontology.org/ontologies/EFO/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb&download_format=csv"
+
+efo = fread("/home/memon/projects/msdrp/EFO.csv")
+efo = efo[,c(1,2,3)] # filter out unnecessary columns
+efo$`Class ID` = gsub(".*efo/","",efo$`Class ID`) # replace urls to get only EFO IDs
+efo = efo[efo$`Class ID` %like% "EFO",] # filter out other disease IDs other than EFO
+efo = unite(efo, Disease, c('Preferred Label', Synonyms), sep = "|",remove=FALSE)
+efo = efo[,c(1,2)]
+
+# create new rows for each synonyms of EFO IDs 
+efo <- unique(efo %>% 
+                mutate(Disease = strsplit(as.character(Disease), "\\|")) %>% 
+                unnest(Disease))
+efo$Disease <- gsub("^$", NA, efo$Disease)
+efo <- efo[which(!is.na(efo$Disease)),]
+efo$upper = toupper(efo$Disease)
+efo$upper = trimws(efo$upper, which = "both")
+
+mesh.terms = unique(gwas.data[,3])
+mesh.terms$upper = toupper(mesh.terms$msh)
+mesh.terms$upper = trimws(mesh.terms$upper, which = "both")
+
+# merge MeSH terms from gwas.data to efo IDs
+mesh2efo = merge(mesh.terms,efo, by="upper")
+mesh2efo = mesh2efo[,c(2,3,4)]
+names(mesh2efo) = c("mesh","efo.id","efo.term")
+
+# merge gwas.data with mesh2efo table
+gwas.data <- merge(gwas.data, mesh2efo, by.x = "msh", by.y = "mesh", all = FALSE)
+gwas.data <- gwas.data[, .(snp.ld,ensembl.id = GENEID, gene.symbol = gene.v19, efo.id, efo.term, gwas.data.pvalue = pvalue, gwas.data.gene.score = gene.score, gwas.data.gene.rank = gene.rank.min,source)]
+unique(gwas.data$efo.id)
+
+save(gwas.data, file="./data/gwas.data.RData")
+
