@@ -1,6 +1,7 @@
 library(data.table)
 library(tidyr)
 library(RecordLinkage)
+library(ggplot2)
 
 setwd("/home/memon/projects/msdrp/")
 
@@ -75,59 +76,55 @@ for (i in seq_along(drug.path)) {
 #x=do.call(rbind,drug.cor[["Alzheimer's disease"]])
 for (i in seq_along(drug.cor)) {
   drug.cor[[i]] = do.call(rbind,drug.cor[[i]])
+  drug.cor[[i]]$Drug = rownames(drug.cor[[i]])
+  drug.cor[[i]] = drug.cor[[i]][,c(5,1,2,3,4)]
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+##~~~~~~~~~~~~~~~~~~~~~Density Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-# Drop NA values from each lists
-drug.cor = lapply(drug.cor, function(x) x[!is.na(x)])
-drug.cor = lapply(drug.cor, function(x) as.data.frame(x))
-x= drug.cor[["Crohn's disease"]]
+drug.cor1 = drug.cor
 
-d = density(drug.cor[["Crohn's disease"]])
+for (i in seq_along(drug.cor)) {
+  for (j in seq_along(drug.cor[[i]])) {
+    drug.cor[[i]]$Dissimilarity.Score = NULL
+    drug.cor[[i]]$DrugPathway = NULL
+    drug.cor[[i]]$DiseasePathway = NULL
+    
+  }
+  names(drug.cor[[i]])[[2]] = names(drug.cor)[[i]]
+}
 
-cor_score= x %>% drop_na()
+drug.cor$`HIV infection` = NULL
+density.score = lapply(drug.cor, melt)
+density.score = do.call(rbind,density.score)
+names(density.score) <- c("Drug","Diseases","Correlation_Score")
 
-cor_score=as.data.frame(do.call(rbind, drug.cor))
-library(tidyr)
-cor_score= x %>% drop_na()
-#cor_score$drug = rownames(cor_score)
-plot(cor_score$V1)
+jpeg(file="./data/densityPlots_allDiseases.jpeg", width=2800, height=1980, res=200)
+ggplot(density.score,aes(x=Correlation_Score, fill=Diseases)) + geom_density(alpha=0.25) + 
+  labs(title="Distribution of Correlation Scores of all Drugs for each Diseases")+ theme(legend.position = "bottom",legend.title=element_text(size=10)) + theme(plot.title = element_text(hjust = 0.5)) + ylab("Density") + xlab("Correlation Score")
+dev.off()
 
+
+density.score = data.table(density.score)
+density.score1 = density.score[variable == "hepatocellular carcinoma"]
+density.score1= density.score1 %>% drop_na()
+
+q5 <- quantile(density.score1$value,.05)
+q95 <- quantile(density.score1$value,.95)
+
+
+ggplot(density.score1,aes(x=value, fill=variable)) + geom_density(alpha=.25)
+
+
+
+
+drug.cor = drug.cor1
+cor_score= drug.cor %>% drop_na()
 d = density(cor_score$Correlation.Score)
-pdf(file = "./data/spia/anticor_CD.pdf")
 plot(d,main = "Drug anti-correlation Scores for Crohn's Disease")
 abline(v=median(cor_score$V1),col="blue")
 text(median(cor_score$V1), 1, cex=1.1, round(median(cor_score$V1), digits=4))
-dev.off()
-
-write.csv(cor_score,file = "./data/spia/drug.cor10.cd.txt",quote = F)
-
-
-
-# drug.dis.path =  merge(drug.path,dis.path,by="Name")
-# colnames(drug.dis.path) = c("Pathways","Drug.Influence","Disease.Influence")
-# drug.dis.path$anti.Correlation = ifelse(drug.dis.path$Drug.Influence == drug.dis.path$Disease.Influence,0,1)
-# drug.dis.path$Drug.Influence = ifelse(drug.dis.path$Drug.Influence == "Activated",1,-1)
-# drug.dis.path$Disease.Influence = ifelse(drug.dis.path$Disease.Influence == "Activated",1,-1)
-# #w = pdist(drug.dis.path,indices.A = 1:nrow(drug.dis.path), indices.B = 1:nrow(drug.dis.path))
-# drug.cor = cor(drug.dis.path$Drug.Influence, drug.dis.path$Disease.Influence)
-
-load("./data/spia/drug.cor100.ad.RData")
-names(drug.cor100)[i]
-colnames(drug.cor100)[i]
-
-gsub("\\..*","",names(drug.cor100)[i])
-
-
-
-x=as.data.frame(do.call(rbind, drug.cor))
-names(x) = "anticor"
-x$anticor = as.numeric(x$anticor)
-x= na.omit(x)
-mean(x$anticor)
-median(x$anticor)
-
-
 
 
