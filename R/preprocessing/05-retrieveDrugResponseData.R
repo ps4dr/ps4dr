@@ -2,6 +2,7 @@
 #' summary:
 #' 01: Download Drug Perturbed Gens Expression Profiles, LINCS L1000 dataset 
 #' 02: Map from LINCS IDs to Chembl IDs using to PubChem IDs as intermediate 
+#' unichem RESTful API was last accessed on 11 March, 2019. 
 
 # source("http://bioconductor.org/biocLite.R")
 # biocLite("EnsDb.Hsapiens.v86")
