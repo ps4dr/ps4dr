@@ -1,3 +1,9 @@
+#' 9th script
+#' summary:
+#' This script calculates correation and dissimilarity scores fos all drug-disease pairs 
+#' plot distribution for all drug correlation scores for each disease 
+
+
 library(data.table)
 library(tidyr)
 library(RecordLinkage)
@@ -96,7 +102,7 @@ for (i in seq_along(drug.cor)) {
   names(drug.cor[[i]])[[2]] = names(drug.cor)[[i]]
 }
 
-drug.cor$`HIV infection` = NULL
+drug.cor$`HIV infection` = NULL # This disease creates anomaly in the graph due to smaller density distribution
 density.score = lapply(drug.cor, melt)
 density.score = do.call(rbind,density.score)
 names(density.score) <- c("Drug","Diseases","Correlation_Score")
@@ -107,24 +113,5 @@ ggplot(density.score,aes(x=Correlation_Score, fill=Diseases)) + geom_density(alp
 dev.off()
 
 
-density.score = data.table(density.score)
-density.score1 = density.score[variable == "hepatocellular carcinoma"]
-density.score1= density.score1 %>% drop_na()
-
-q5 <- quantile(density.score1$value,.05)
-q95 <- quantile(density.score1$value,.95)
-
-
-ggplot(density.score1,aes(x=value, fill=variable)) + geom_density(alpha=.25)
-
-
-
-
-drug.cor = drug.cor1
-cor_score= drug.cor %>% drop_na()
-d = density(cor_score$Correlation.Score)
-plot(d,main = "Drug anti-correlation Scores for Crohn's Disease")
-abline(v=median(cor_score$V1),col="blue")
-text(median(cor_score$V1), 1, cex=1.1, round(median(cor_score$V1), digits=4))
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 

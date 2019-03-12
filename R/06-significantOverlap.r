@@ -1,9 +1,9 @@
 #' 6th script
 #' summary:
 #' calculate significant overlap between/among different data sets 
-#' 01: Drug Perturbed Genes & GWAS data,
-#' 02: GWAS & DEGs data,
-#' 03: Drug Perturbed Genes & DEGs & GWAS data
+#' 01: GWAS & DEGs data :> disease.genes,
+#' 02: Drug Perturbed Genes & DEGs & GWAS data :> drugPdisease.genes,
+#' 03: Drug Perturbed Genes & GWAS data :> drugGWAS.genes.
 
 library(EnsDb.Hsapiens.v86)
 
@@ -115,24 +115,19 @@ L1000 = L1000[order(ensembl.id,decreasing = TRUE), ]
 L1000 = L1000[!duplicated(L1000[,c('ensembl.id', 'chembl.id')]),] # remove suplicate entries
 L1000 = merge(L1000,gene.id.entrez,by="ensembl.id") # merging with ENTREZ ID, since we need only ones with ENTREZ IDs for SPIA calculation
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-##__________________Optional__________________#####
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~Optional~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #' In our case we want to investigate all drugs which went until at least any clinical trial phases
 #' if users want to investigate all drugs they can comment out next 4 lines
-# load("./data/drug2disease.RData")
-# dmap = data.table(unique(drug2disease[,c(3,4,6)]))
-# dmap = dmap[phase==4|phase==3|phase==2|phase==1]
-# 
-# L1000 = merge(dmap[,c(1,2)],L1000,by="chembl.id")
-# L1000 = data.table(unique(L1000))
 
 load("./data/drug2715details.RData")
 dmap = data.table(dmap[,c(1,2,3)])
 dmap = dmap[phase==4|phase==3|phase==2|phase==1] #673 Drugs
 L1000 = merge(dmap[,c(1,2)],L1000,by="chembl.id")
-names(L1000)
+length(unique(L1000$chembl.id))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 ##### create Disease-Genes list #####
 load("./data/disease.genes50.RData")
 # disease.genes <- fread("./data/disease.genes50.tsv")
@@ -191,7 +186,7 @@ save(drugPdisease.genes,file="./data/drugPdisease.genes50.RData")
 # correct p-values
 drugPdisease.genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
 drugPdisease.genes <- drugPdisease.genes[p.adjusted < 0.05]
-save(drugPdisease.genes,file="./data/drugPdisease.genes.48D.padj.RData")
+save(drugPdisease.genes,file="./data/drugPdisease.genes50.padj.RData")
 drugPdisease.genes <- drugPdisease.genes[p.adjusted < 1e-05]
 save(drugPdisease.genes,file="./data/drugPdisease.genes50.padj1e-5.RData")
 #md2 <- unique(min.drugs[,c(1,3,12)]) #filtering columns for merging indication area to our super drugs
@@ -282,8 +277,11 @@ save(drugGWAS.genes,file="./data/drugGWAS.genes50.padj1e-5.RData")
 drugGWAS.genes <- drugGWAS.genes[p.adjusted < 1e-10]
 save(drugGWAS.genes,file="./data/drugGWAS.genes50.padj1e-10.RData")
 
+
+load("./data/drugGWAS.genes50.padj1e-5.RData")
+load("./data/drugGWAS.genes50.padj1e-10.RData")
 length(unique(drugGWAS.genes$chembl.id))
 length(unique(drugGWAS.genes$efo.id))
-load("./data/drugGWAS.genes.padj1e-10.RData")
+
 load("./data/drugPdisease.genes.48D.padj1e-5.RData")
 length(unique(drugPdisease.genes$efo.id))

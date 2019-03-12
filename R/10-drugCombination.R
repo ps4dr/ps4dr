@@ -1,5 +1,7 @@
+#' 10th script
+#' summary:
 #' create pathway activities with the combination of two drugs
-#' then use 2drugs combination pathways to calculate anti-correlation score 
+#' then use 2drugs combination pathways to calculate correlation score 
 
 comb1=list()
 comb2=list()

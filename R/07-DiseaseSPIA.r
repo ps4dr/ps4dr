@@ -1,17 +1,26 @@
+#' 7th script
+#' summary:
+#' This script calcualtes Signaling Pathway Impact with Disease Genes 
+#' that are differentially expressed and having SNPs from GWASs.
+#' 01: prepare Gene Expression Data sets
+#' 02: Calcualte SPIA
+
 library(data.table)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(cowplot)
 
+library(SPIA)
+
 setwd("/home/memon/projects/msdrp/")
 
-##-----------------------------##
-#####_____Pathway SPIA______#####
-##-----------------------------##
 
 
-#####__Prepare DEG data set for SPIA__#####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~Prepare DEGs data set for SPIA~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 load("./data/DEGs.RData")
 DEGs <- DEGs[,c(1,3,6,7)]
 
@@ -89,11 +98,10 @@ rm(lfc.com)
 
 save(lfc.efo,file="./data/disease47.genes50.lfc.RData")
 
-##_____read log fold changes for a particular disease_______###
-# load("./data/lfc.dis52.RData") 
-load("./data/disease47.genes50.lfc.RData")###--get log fold change for all genes for each diseases-##
 
-##_____Create Named Vector for log fold changes in each disease_____________###
+#~~~~~~~~~~Create Named Vector for log fold changes in each disease~~~~~~~~~~#
+
+load("./data/disease47.genes50.lfc.RData")###--get log fold change for all genes for each diseases-##
 
 lfc_ensembl <- list()
 for (i in 1:length(lfc.efo)) {
@@ -119,25 +127,30 @@ for (i in 1:length(lfc.efo)) {
   names(lfc_hgnc)[[i]] = names(lfc.efo)[[i]]
 }
 
-##_____Create a vector with all Gene universe to proxy Array Genes_________###
+#~~~~~~Create a vector with all Gene universe to proxy Array Genes~~~~~~~#
 hgnc_all = unique(gene.id$HGNC)
 ensembl_all = unique(gene.id$ensembl.id)
 entrez_all = unique(gene.id$ENTREZ)
 entrezID_all = unique(gsub("^","ENTREZID:",gene.id$ENTREZ)) ## with ENTREZID: in front of each id
 
 save(lfc_hgnc,lfc_ensembl,lfc_entrez,lfc_entrezID,hgnc_all,ensembl_all,entrez_all,entrezID_all,file="./data/disease47.genes50.lfc.namedVec.RData")
-# save(lfc_hgnc,hgnc_all,file="./data/disease.genes50.lfc.namedVec.HGNC.RData")
-rm(lfc.efo,gene.id)
 
-#################################3
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-#####________SPIA____________#####
 
-library(SPIA)
-setwd("/home/memon/projects/msdrp/")
-#___________KEGG SPIA______________#
 
-# load("./data/lfc.namedVec.dis52.RData")
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~ Disease SPIA~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+#' SPIA can be calcualted for KEGG, Reactome and Wiki Pathways
+#' Here we showed only with KEGG Pathways
+#' Necessary data sets for calculating SPIA for Reactome 
+#' and Wiki pathways are uploaded in the git repository
+
+
+#~~~~~~~~~~~~~KEGG SPIA~~~~~~~~~~~~~#
+
 load("./data/disease47.genes50.lfc.namedVec.RData")
 
 spia_kegg = list()
@@ -145,22 +158,28 @@ for (i in 1:length(lfc_entrez)) {
   spia_kegg[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir="./data/real_kegg/",organism="hsa")
 }
 names(spia_kegg) = names(lfc_entrez)
+
 save(spia_kegg,file = "./data/spia/spia_kegg_disease47.genes50_results.RData")
 
-# rm(list=ls())
-# gc()
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-#load("./data/lfc.all.RData")
+#~~~~~~~~~~~Fake KEGG SPIA~~~~~~~~~~~#
+
+#' we have created SPIA data sets for all three pathways 
+#' with random gene sets to see whether our reults are by 
+#' random chance or meaningful indeed.
+#' Here is the SPIA calculation with fake KEGG pathway data
+
 spia_kegg_fake = list()
 for (i in 1:length(lfc_entrez)) {
   spia_kegg_fake[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir="./data/pseudo_kegg/",organism="hsa")
 }
 save(spia_kegg_fake,file = "./data/spia/spia_kegg_disease47.genes50_fake_results.RData")
-plotP(spia_kegg[[13]])
+plotP(spia_kegg[[4]])
 rm(list=ls())
 gc()
 
-load("./data/spia/spia_kegg_disease.genes50_results.RData")
+load("./data/spia/spia_kegg_disease47.genes50_results.RData")
 names(lfc_entrez$EFO_0000249)
 
 spia_kegg_ad = spia(de = lfc_entrez[[3]], all = entrez_all, data.dir="./data/real_kegg/",organism="hsa")
@@ -175,7 +194,8 @@ plotP(spia_kegg_ad)
 # spia_kegg1 <- spia_kegg1[pGFdr <= 0.05]
 # spia_kegg_fake1 <- data.table(spia_kegg_fake)
 # spia_kegg_fake1 <- spia_kegg_fake1[pGFdr <= 0.05] 
-##################################################################
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
 dmap = read.csv("/home/memon/projects/msdrp/2725_drugs_details.csv",header = F)

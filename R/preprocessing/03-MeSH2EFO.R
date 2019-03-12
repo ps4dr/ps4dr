@@ -71,4 +71,8 @@ GWASs <- GWASs[, .(snp.ld,ensembl.id = GENEID, gene.symbol = gene.v19, efo.id, e
 unique(GWASs$efo.id)
 
 save(GWASs, file="./data/GWASs.RData")
-
+length(unique(GWASs$efo.id))
+length(unique(GWASs$ensembl.id))
+stopgap = fread("./data/stopgap.tsv")
+length(unique(stopgap$efo.id))
+length(unique(stopgap$ensembl.id))
