@@ -75,3 +75,18 @@ L1000[, lincs.id := substr(`Perturbation ID_Perturbagen_Cell Line_Time_Time Unit
 L1000 <- merge(L1000, unichem.res, by = "lincs.id")
 L1000 <- L1000[, .(ensembl.id = GENEID, gene.symbol = GeneSym, lincs.id, pubchem.id, chembl.id, perturbation = `Perturbation ID_Perturbagen_Cell Line_Time_Time Unit_Dose_Dose Unit`, direction = weight)]
 save(L1000, file="./data/L1000.RData")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~L1000 Drugs~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+#' write all L1000 Drugs into a CSV file to use it to get their 
+#' CHEMBL names and clinical tril information from CHEMBL via their API
+#' using chemblid2name.ipynb script
+
+L1000Drugs = unique(L1000[,5])
+fwrite(L1000Drugs,"./data/L1000Drugs.csv",col.names = F)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+

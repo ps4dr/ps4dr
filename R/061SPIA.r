@@ -247,7 +247,7 @@ plotP(spia_kegg_ad)
 ##################################################################
 
 
-dmap = read.csv("/home/memon/projects/msdrp/2725_drugs_details.csv",header = F)
+dmap = read.csv("/home/memon/projects/msdrp/data/2725_drugs_details.csv",header = F)
 dmap$V1 = gsub("[A-z]+\\':","",dmap$V1)
 dmap$V1 = gsub("u","",dmap$V1)
 dmap$V1 = gsub("\'","",dmap$V1)
@@ -256,12 +256,13 @@ dmap$V1 = gsub("\\{","",dmap$V1)
 dmap$V1 = gsub("\\}","",dmap$V1)
 
 dmap = as.data.frame(str_split_fixed(dmap$V1, ",", 26))
+
 dmap = dmap[,c(2,26,1,3,9)]
 names(dmap) = c("chembl.id","chembl.name","phase","indication","ruleof5")
 dmap= dmap %>% mutate_all(as.character)
 dmap$chembl.name = gsub("[0-9]+.[0-9]+,","",dmap$chembl.name)
 dmap[dmap == "None"] <- NA
+
 save(dmap,file = "./data/drug2715details.RData")
 load("./data/drug2715details.RData")
-
 
