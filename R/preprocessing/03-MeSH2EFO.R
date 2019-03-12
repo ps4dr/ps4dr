@@ -19,7 +19,7 @@ setwd("/home/memon/projects/msdrp/")
 
 # get GWASs Data from STOPGAP pipeline output 
 load("./data/stopgap.gene.mesh.RData")
-GWASs <- stopgap.gene.mesh
+GWASs = stopgap.gene.mesh
 rm(stopgap.gene.mesh)
 
 length(unique(GWASs$msh))
@@ -28,14 +28,14 @@ length(unique(GWASs$snp.ld))
 
 # keep relevant columns
 GWASs = data.table(GWASs)
-GWASs <- unique(GWASs[, .(snp.ld,gene.v19, msh, pvalue, gene.score, gene.rank.min, source)])
+GWASs = unique(GWASs[, .(snp.ld,gene.v19, msh, pvalue, gene.score, gene.rank.min, source)])
 # replace p-values of zero with arbitrarily low p-value
 GWASs[pvalue == 0, pvalue := 3e-324]
 
 # map gene symbols to Ensembl
-GWASs.genes <- unique(GWASs[, gene.v19])
-anno <- as.data.table(select(EnsDb.Hsapiens.v86, keys = GWASs.genes, keytype = "SYMBOL", columns = c("GENEID", "SYMBOL")))
-GWASs <- merge(GWASs, anno, by.x = "gene.v19", by.y = "SYMBOL", all = FALSE)
+GWASs.genes = unique(GWASs[, gene.v19])
+anno = as.data.table(select(EnsDb.Hsapiens.v86, keys = GWASs.genes, keytype = "SYMBOL", columns = c("GENEID", "SYMBOL")))
+GWASs = merge(GWASs, anno, by.x = "gene.v19", by.y = "SYMBOL", all = FALSE)
 
 #' read EFO ontolgy (version 2.105) files in csv format downloaded from bioportal on 11th March, 2019
 #' "http://data.bioontology.org/ontologies/EFO/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb&download_format=csv"
@@ -48,11 +48,11 @@ efo = unite(efo, Disease, c('Preferred Label', Synonyms), sep = "|",remove=FALSE
 efo = efo[,c(1,2)]
 
 # create new rows for each synonyms of EFO IDs 
-efo <- unique(efo %>% 
+efo = unique(efo %>% 
                 mutate(Disease = strsplit(as.character(Disease), "\\|")) %>% 
                 unnest(Disease))
-efo$Disease <- gsub("^$", NA, efo$Disease)
-efo <- efo[which(!is.na(efo$Disease)),]
+efo$Disease = gsub("^$", NA, efo$Disease)
+efo = efo[which(!is.na(efo$Disease)),]
 efo$upper = toupper(efo$Disease)
 efo$upper = trimws(efo$upper, which = "both")
 
@@ -66,8 +66,8 @@ mesh2efo = mesh2efo[,c(2,3,4)]
 names(mesh2efo) = c("mesh","efo.id","efo.term")
 
 # merge GWASs with mesh2efo table
-GWASs <- merge(GWASs, mesh2efo, by.x = "msh", by.y = "mesh", all = FALSE)
-GWASs <- GWASs[, .(snp.ld,ensembl.id = GENEID, gene.symbol = gene.v19, efo.id, efo.term, GWASs.pvalue = pvalue, GWASs.gene.score = gene.score, GWASs.gene.rank = gene.rank.min,source)]
+GWASs = merge(GWASs, mesh2efo, by.x = "msh", by.y = "mesh", all = FALSE)
+GWASs = GWASs[, .(snp.ld,ensembl.id = GENEID, gene.symbol = gene.v19, efo.id, efo.term, GWASs.pvalue = pvalue, GWASs.gene.score = gene.score, GWASs.gene.rank = gene.rank.min,source)]
 unique(GWASs$efo.id)
 
 save(GWASs, file="./data/GWASs.RData")

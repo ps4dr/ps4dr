@@ -13,7 +13,7 @@ for(i in seq_along(drug.path)){
 
 
 drug.comb.path = vector('list', length(drug.path)) # create list of lists
-names(drug.comb.path) <- names(drug.path)
+names(drug.comb.path) = names(drug.path)
 
 for (i in 1:(length(comb1))){
   for (j in 1:(length(comb1[[i]])/2)) {
@@ -25,8 +25,8 @@ for (i in 1:(length(comb1))){
                                ifelse(is.na(drug.comb.path[[i]][[j]]$Status.x),drug.comb.path[[i]][[j]]$Status.y,
                                       ifelse(is.na(drug.comb.path[[i]][[j]]$Status.y),drug.comb.path[[i]][[j]]$Status.x,
                                             ifelse(drug.comb.path[[i]][[j]]$Status.x!=drug.comb.path[[i]][[j]]$Status.y,"Neutral",drug.comb.path[[i]][[j]]$Status.y)))]
-    drug.comb.path[[i]][[j]]$Status.x <- NULL
-    drug.comb.path[[i]][[j]]$Status.y <- NULL
+    drug.comb.path[[i]][[j]]$Status.x = NULL
+    drug.comb.path[[i]][[j]]$Status.y = NULL
   }
 }
 
@@ -36,14 +36,14 @@ rm(comb1,comb2)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 drug.dis.path = vector('list', length(spia_drug_kegg)) # create list of lists
-names(drug.dis.path) <- names(spia_drug_kegg)
+names(drug.dis.path) = names(spia_drug_kegg)
 drug.cor = vector('list', length(spia_drug_kegg)) # create list of lists
-names(drug.cor) <- names(spia_drug_kegg)
+names(drug.cor) = names(spia_drug_kegg)
 
 for (i in seq_along(drug.comb.path)) {
   for (j in seq_along(drug.comb.path[[i]])) {
     drug.dis.path[[i]][[j]] = merge(dis.path[[i]],drug.comb.path[[i]][[j]],by="Name")
-    names(drug.dis.path[[i]])[[j]] <- names(drug.comb.path[[i]])[[j]]
+    names(drug.dis.path[[i]])[[j]] = names(drug.comb.path[[i]])[[j]]
     names(drug.dis.path[[i]][[j]]) = c("Pathways","Disease.Influence","Drug.Influence")
     drug.dis.path[[i]][[j]]$Disease.Influence = ifelse(drug.dis.path[[i]][[j]]$Disease.Influence == "Activated",1,-1)
     drug.dis.path[[i]][[j]]$Drug.Influence = ifelse(drug.dis.path[[i]][[j]]$Drug.Influence == "Activated",1,-1)
@@ -97,7 +97,7 @@ drug.cor$epilepsy = NULL
 drug.cor$`HIV infection` = NULL
 density.score = lapply(drug.cor, melt)
 density.score = do.call(rbind,density.score)
-names(density.score) <- c("Drug","Diseases","Correlation_Score")
+names(density.score) = c("Drug","Diseases","Correlation_Score")
                           
 density.score = density.score %>% drop_na()
 density.score = data.table(density.score)

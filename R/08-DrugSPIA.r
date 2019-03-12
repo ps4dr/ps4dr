@@ -69,7 +69,7 @@ super.drugs = merge(super.drugs,disease.genes,by.x="efo.id",by.y="efo.id.DEGs")
 length(unique(super.drugs$efo.id))
 
 # split multiple genes in same column to multiple rows
-drug.genes <- unique(super.drugs %>% 
+drug.genes = unique(super.drugs %>% 
                        mutate(ensembl.id = strsplit(as.character(commonGenes), ",")) %>% 
                        unnest(ensembl.id))
 #clean up special symbols
@@ -96,7 +96,7 @@ drug.genes = merge(drug.genes,L1000,by=c('chembl.name','ensembl.id')) # merge wi
 drug.genes = drug.genes[!duplicated(drug.genes[,c('chembl.id','ensembl.id','efo.term')]),]
 
 #' count efo_chembl pair frequency, to remove rows frequencies less than 10
-# tmp <- count(drug.genes, c('efo.term','chembl.id'))
+# tmp = count(drug.genes, c('efo.term','chembl.id'))
 # tmp2 = subset(tmp, freq> 10)
 # drug.genes = merge(tmp2,drug.genes, by="efo.term") # memory problem
 
@@ -125,14 +125,14 @@ save(topDiseases.drug,file = "./data/drug.genes.list.drugPdisease.genes50.padj.R
 # load("./data/drug.genes.list.drugGWAS.disease47.genes50.padj1e-10.RData")
 load("./data/drug.genes.list.drugPdisease.genes50.padj.RData")
 
-lfc_drug_ensembl <- topDiseases.drug
+lfc_drug_ensembl = topDiseases.drug
 for (i in 1:length(topDiseases.drug)) {
   for (j in 1:length(topDiseases.drug[[i]])){
     lfc_drug_ensembl[[i]][[j]] = setNames(as.numeric(topDiseases.drug[[i]][[j]][[2]]),as.character(topDiseases.drug[[i]][[j]][[1]]))
   }
 }
 
-lfc_drug_entrez <- topDiseases.drug
+lfc_drug_entrez = topDiseases.drug
 for (i in 1:length(topDiseases.drug)) {
   for (j in 1:length(topDiseases.drug[[i]])){
     lfc_drug_entrez[[i]][[j]] = setNames(as.numeric(topDiseases.drug[[i]][[j]][[2]]),as.character(topDiseases.drug[[i]][[j]][[3]]))
@@ -141,7 +141,7 @@ for (i in 1:length(topDiseases.drug)) {
   }
 }
 
-lfc_drug_entrezID <- topDiseases.drug
+lfc_drug_entrezID = topDiseases.drug
 for (i in 1:length(topDiseases.drug)) {
   for (j in 1:length(topDiseases.drug[[i]])){
     lfc_drug_entrezID[[i]][[j]] = setNames(as.numeric(topDiseases.drug[[i]][[j]][[2]]),as.character(gsub("^","ENTREZID:",topDiseases.drug[[i]][[j]][[3]])))
@@ -170,7 +170,7 @@ save(lfc_drug_entrezID,entrezID_all,file="./data/lfc.drug.drugPdisease.disease47
 
 
 #~~~~~~~~~SPIA Function~~~~~~~~~~#
-spia_fun <- function(x){
+spia_fun = function(x){
   spia_drug_kegg = list()
   spia_drug_kegg = spia(de = x, all = entrez_all, data.dir="./data/real_kegg/",organism="hsa")
 }
@@ -187,7 +187,7 @@ lfc_test = lfc_drug_entrez
 spia_kegg_47D = list()
 
 for (diseases in 1:length(lfc_test)){
-  spia_kegg_47D[[diseases]] <- mclapply(lfc_test[[diseases]], spia_fun, mc.cores = no_cores)
+  spia_kegg_47D[[diseases]] = mclapply(lfc_test[[diseases]], spia_fun, mc.cores = no_cores)
   names(spia_kegg_47D)[[diseases]] = names(lfc_test)[[diseases]]
 }
 

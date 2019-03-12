@@ -82,13 +82,13 @@ drug2disease.therapeutic = foreach(i = seq(efo.ids), .combine = rbind) %dopar% {
 drug2disease.therapeutic = unique(as.data.frame(drug2disease.therapeutic))
 
 # create new rows for each synonyms of EFO IDs 
-drug2disease.therapeutic <- unique(drug2disease.therapeutic%>% 
+drug2disease.therapeutic = unique(drug2disease.therapeutic%>% 
                                      mutate(therapeutic.area = strsplit(as.character(therapeutic.area), ",")) %>% 
                                      unnest(therapeutic.area))
 # cleaning up symbols
-drug2disease.therapeutic$therapeutic.area <- gsub("^c\\(", "", drug2disease.therapeutic$therapeutic.area)
-drug2disease.therapeutic$therapeutic.area <- gsub("\\)", "", drug2disease.therapeutic$therapeutic.area)
-drug2disease.therapeutic$therapeutic.area <- gsub("\"", "", drug2disease.therapeutic$therapeutic.area)
+drug2disease.therapeutic$therapeutic.area = gsub("^c\\(", "", drug2disease.therapeutic$therapeutic.area)
+drug2disease.therapeutic$therapeutic.area = gsub("\\)", "", drug2disease.therapeutic$therapeutic.area)
+drug2disease.therapeutic$therapeutic.area = gsub("\"", "", drug2disease.therapeutic$therapeutic.area)
 
 length(unique(drug2disease.therapeutic$efo.term))
 length(unique(drug2disease.therapeutic$therapeutic.area))

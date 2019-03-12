@@ -18,12 +18,12 @@ load("./data/spia/spia_kegg_30Diseases_nopar.RData")
 spia_drug_kegg = spia_kegg_30D
 spia_drug_kegg = Filter(function(x) !is.null(x), spia_drug_kegg) #delete empty df from list
 
-drug.path <- vector('list', length(spia_drug_kegg)) # create list of lists
-names(drug.path) <- names(spia_drug_kegg)
+drug.path = vector('list', length(spia_drug_kegg)) # create list of lists
+names(drug.path) = names(spia_drug_kegg)
 for(i in seq_along(spia_drug_kegg)){
   for(j in seq_along(spia_drug_kegg[[i]])){
-    drug.path[[i]][[j]] <- spia_drug_kegg[[i]][[j]][,c(1,11)]
-    names(drug.path[[i]])[[j]] <- names(spia_drug_kegg[[i]])[[j]]
+    drug.path[[i]][[j]] = spia_drug_kegg[[i]][[j]][,c(1,11)]
+    names(drug.path[[i]])[[j]] = names(spia_drug_kegg[[i]])[[j]]
   }
 }
 
@@ -38,7 +38,7 @@ load("./data/spia/spia_kegg_disease42.genes50_results.RData")
 #~~~~so, both drug.path & dis.path are equivalent~~~~~~~~~~~#
 
 dis.path = vector('list', length(spia_drug_kegg)) # create list of lists
-names(dis.path) <- names(spia_drug_kegg)
+names(dis.path) = names(spia_drug_kegg)
 
 for (i in seq_along(spia_drug_kegg)) {
   for (j in seq_along(spia_kegg)){
@@ -53,14 +53,14 @@ for (i in seq_along(spia_drug_kegg)) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 drug.dis.path = vector('list', length(spia_drug_kegg)) # create list of lists
-names(drug.dis.path) <- names(spia_drug_kegg)
+names(drug.dis.path) = names(spia_drug_kegg)
 drug.cor = vector('list', length(spia_drug_kegg)) # create list of lists
-names(drug.cor) <- names(spia_drug_kegg)
+names(drug.cor) = names(spia_drug_kegg)
 
 for (i in seq_along(drug.path)) {
   for (j in seq_along(drug.path[[i]])) {
     drug.dis.path[[i]][[j]] = merge(dis.path[[i]],drug.path[[i]][[j]],by="Name")
-    names(drug.dis.path[[i]])[[j]] <- names(spia_drug_kegg[[i]])[[j]]
+    names(drug.dis.path[[i]])[[j]] = names(spia_drug_kegg[[i]])[[j]]
     names(drug.dis.path[[i]][[j]]) = c("Pathways","Disease.Influence","Drug.Influence")
     drug.dis.path[[i]][[j]]$Disease.Influence = ifelse(drug.dis.path[[i]][[j]]$Disease.Influence == "Activated",1,-1)
     drug.dis.path[[i]][[j]]$Drug.Influence = ifelse(drug.dis.path[[i]][[j]]$Drug.Influence == "Activated",1,-1)
@@ -105,7 +105,7 @@ for (i in seq_along(drug.cor)) {
 drug.cor$`HIV infection` = NULL # This disease creates anomaly in the graph due to smaller density distribution
 density.score = lapply(drug.cor, melt)
 density.score = do.call(rbind,density.score)
-names(density.score) <- c("Drug","Diseases","Correlation_Score")
+names(density.score) = c("Drug","Diseases","Correlation_Score")
 
 jpeg(file="./data/densityPlots_allDiseases.jpeg", width=2800, height=1980, res=200)
 ggplot(density.score,aes(x=Correlation_Score, fill=Diseases)) + geom_density(alpha=0.25) + 
