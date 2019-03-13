@@ -1,4 +1,4 @@
-#' 7th script
+#' 2nd script
 #' summary:
 #' This script calculates pathway enrichment analysis using Signaling Pathway Impact (SPIA) for each of the Disease Genes 
 #' that are differentially expressed and having SNPs from GWASs.
@@ -13,8 +13,10 @@ library(cowplot)
 
 library(SPIA)
 
+#####################################################################
+#TODO: Change to the directory where you cloned this repository
 setwd("/home/memon/projects/msdrp/")
-
+#####################################################################
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

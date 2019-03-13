@@ -1,6 +1,6 @@
-#' 6th script
+#' 1st script
 #' summary:
-#' calculate significant overlap between/among different data sets using Fisher's exact tests.
+#' This script calculates significant overlap between/among different data sets using Fisher's exact tests.
 #' Three different overlaps are calculated in this script (Figure 1. "Gene set intersection")
 #' 01: GWAS & DEGs data :> disease.genes,
 #' 02: Drug Perturbed Genes & DEGs & GWAS data :> drugPdisease.genes,
@@ -18,7 +18,11 @@ library(tidyr)
 library(ggplot2)
 library(cowplot)
 
+
+#####################################################################
+#TODO: Change to the directory where you cloned this repository
 setwd("/home/memon/projects/msdrp/")
+#####################################################################
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~Enrichment Calculation Function for Two Gene Sets using Fisher's Exact Test~~#

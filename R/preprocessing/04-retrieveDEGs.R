@@ -13,7 +13,10 @@ library(foreach)
 library(doParallel)
 registerDoParallel(parallel::detectCores() - 1)
 
+#####################################################################
+#TODO: Change to the directory where you cloned this repository
 setwd("/home/memon/projects/msdrp/")
+#####################################################################
 
 # load gwas.data data to get EFO IDs for diseases
 load("./data/gwas.data.RData")

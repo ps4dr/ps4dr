@@ -15,7 +15,11 @@ library(foreach)
 library(doParallel)
 registerDoParallel(parallel::detectCores() - 1)
 
+
+#####################################################################
+#TODO: Change to the directory where you cloned this repository
 setwd("/home/memon/projects/msdrp/")
+#####################################################################
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~get LINCS L1000 data from Harmonizome~~~~~~#

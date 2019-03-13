@@ -15,7 +15,10 @@ library(tidyr)
 library(httr)
 library(jsonlite)
 
+#####################################################################
+#TODO: Change to the directory where you cloned this repository
 setwd("/home/memon/projects/msdrp/")
+#####################################################################
 
 # get GWASs Data from STOPGAP pipeline output 
 load("./data/stopgap.gene.mesh.RData")
