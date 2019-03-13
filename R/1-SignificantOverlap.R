@@ -1,6 +1,6 @@
 #' 1st script
 #' summary:
-#' This script calculates significant overlap between/among different data sets using Fisher's exact tests.
+#' This script calculates significant overlap between/among different data sets using Fisher's exact test
 #' Three different overlaps are calculated in this script (Figure 1. "Gene set intersection")
 #' 01: GWAS & DEGs data :> disease.genes,
 #' 02: Drug Perturbed Genes & DEGs & GWAS data :> drugPdisease.genes,

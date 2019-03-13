@@ -1,6 +1,6 @@
 #' 4th script
 #' summary:
-#' This script calculates correation and dissimilarity scores fos all drug-disease pairs 
+#' This script calculates correation and dissimilarity scores for all drug-disease pathway pairs
 #' plot distribution for all drug correlation scores for each disease 
 
 

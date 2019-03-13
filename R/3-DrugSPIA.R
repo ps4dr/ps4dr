@@ -1,6 +1,6 @@
 #' 3rd script
 #' summary:
-#' This script calculates Signaling Pathway Impact (SPIA) with:
+#' This script calculates pathway enrichment analysis using Signaling Pathway Impact (SPIA) with:
 #' 01: genes that are drug perturbed, differentially expressed and having SNPs from GWASs and/or
 #' 02: genes that are drug perturbed and having SNPs from GWASs
 
