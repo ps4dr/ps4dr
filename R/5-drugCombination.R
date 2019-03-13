@@ -1,7 +1,13 @@
-#' 10th script
+#' 5th script
 #' summary:
 #' create pathway activities with the combination of two drugs
 #' then use 2drugs combination pathways to calculate correlation score 
+
+
+#####################################################################
+#TODO: Change to the directory where you cloned this repository
+setwd("/home/memon/projects/msdrp/")
+#####################################################################
 
 comb1=list()
 comb2=list()
