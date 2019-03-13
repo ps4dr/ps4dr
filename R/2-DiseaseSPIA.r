@@ -1,9 +1,9 @@
 #' 7th script
 #' summary:
-#' This script calcualtes Signaling Pathway Impact with Disease Genes 
+#' This script calculates pathway enrichment analysis using Signaling Pathway Impact (SPIA) for each of the Disease Genes 
 #' that are differentially expressed and having SNPs from GWASs.
 #' 01: prepare Gene Expression Data sets
-#' 02: Calcualte SPIA
+#' 02: calculate SPIA
 
 library(data.table)
 library(dplyr)
@@ -143,10 +143,10 @@ save(lfc_hgnc,lfc_ensembl,lfc_entrez,lfc_entrezID,hgnc_all,ensembl_all,entrez_al
 #~~~~~~~~~~~ Disease SPIA~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-#' SPIA can be calcualted for KEGG, Reactome and Wiki Pathways
-#' Here we showed only with KEGG Pathways
+#' SPIA can be calcualted for KEGG, Reactome and WikiPathways
+#' Here, we showed only with KEGG Pathways
 #' Necessary data sets for calculating SPIA for Reactome 
-#' and Wiki pathways are uploaded in the git repository
+#' and WikiPathways are uploaded in the git repository
 
 
 #~~~~~~~~~~~~~KEGG SPIA~~~~~~~~~~~~~#
@@ -166,7 +166,7 @@ save(spia_kegg,file = "./data/spia/spia_kegg_disease47.genes50_results.RData")
 #~~~~~~~~~~~Fake KEGG SPIA~~~~~~~~~~~#
 
 #' we have created SPIA data sets for all three pathways 
-#' with random gene sets to see whether our reults are by 
+#' with random gene sets to see whether our results are by 
 #' random chance or meaningful indeed.
 #' Here is the SPIA calculation with fake KEGG pathway data
 
