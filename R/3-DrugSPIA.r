@@ -1,6 +1,6 @@
 #' 8th script
 #' summary:
-#' This script calcualtes Signaling Pathway Impact with
+#' This script calculates Signaling Pathway Impact (SPIA) with:
 #' 01: genes that are drug perturbed, differentially expressed and having SNPs from GWASs and/or
 #' 02: genes that are drug perturbed and having SNPs from GWASs
 
@@ -18,7 +18,10 @@ no_cores <- detectCores() - 4
 
 library(SPIA)
 
+#####################################################################
+#TODO: Change to the directory where you cloned this repository
 setwd("/home/memon/projects/msdrp/")
+#####################################################################
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #####___Drug Data Preperation for SPIA___#####
