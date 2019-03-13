@@ -2,11 +2,11 @@ Preprocessing
 =============
 How to run the pre-processing scripts:
 
-1. **01STOPGAP2_functions.R**. Contains all the functions needed to run the next script
-2. **02STOPGAP2_run.R**. Run STOPGAP2 pipeline to generate processed-GWAS data.
-3. **03mesh2efoSTOPGAP.R**. Converts MESH terms to EFO identifiers in the processed-GWAS data for harmonizing purposes.
-4. **04getOpenTargetsData.R**. Downloading all data from Open Targets using its API.
-5. **05processHarmonizome.R**. Download the LINCS L1000 dataset and maps LINCS identifiers to ChEMBL ids for harmonizing purposes.
+1. `01STOPGAP2_functions.R: <https://github.com/asifemon/msdrp/blob/master/R/preprocessing/01STOPGAP2_functions.R>`_ Contains all the functions needed to run the next script
+2. `02STOPGAP2_run.R: <https://github.com/asifemon/msdrp/blob/master/R/preprocessing/02STOPGAP2_run.R>`_ Run STOPGAP2 pipeline to generate processed-GWAS data.
+3. `03-MeSH2EFO.R: <https://github.com/asifemon/msdrp/blob/master/R/preprocessing/03-MeSH2EFO.R>`_ Converts MESH terms to EFO identifiers in the processed-GWAS data for harmonizing purposes.
+4. `*04-RetrieveDEGs.R: <https://github.com/asifemon/msdrp/blob/master/R/preprocessing/04-RetrieveDEGs.R>`_ Downloading all data from Open Targets using its API.
+5. `05-RetrieveDrugResponseData.R: <https://github.com/asifemon/msdrp/blob/master/R/preprocessing/05-RetrieveDrugResponseData.R>`_ Download the LINCS L1000 dataset and maps LINCS identifiers to ChEMBL ids for harmonizing purposes.
 
 How to Download the Data
 ------------------------
