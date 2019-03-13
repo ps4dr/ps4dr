@@ -1,4 +1,4 @@
-#' 8th script
+#' 3rd script
 #' summary:
 #' This script calculates Signaling Pathway Impact (SPIA) with:
 #' 01: genes that are drug perturbed, differentially expressed and having SNPs from GWASs and/or
