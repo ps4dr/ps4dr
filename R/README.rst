@@ -17,8 +17,8 @@ All the R scripts in this directory run the MSDRP pipeline. The scripts expect t
 
 Scripts
 -------
-**1-SignificantOverlap.R:** calculates significant overlap between/among different data sets using Fisher's exact test.  <br />
-**2-DiseaseSPIA.R:** calculates pathway enrichment analysis using Signaling Pathway Impact (SPIA) for each of the Disease Genes.  <br />
-**3-DrugSPIA.R:** calculates pathway enrichment analysis using Signaling Pathway Impact (SPIA) for Drug perturbed genes in each Disease.  <br />
-**4-CheckDistribution.R:** calculates correation and dissimilarity scores for all drug-disease pathway pairs.  <br />
-**5-DrugCombination.R:** create pathway activities with the combination of two drugs.  <br />
+**1-SignificantOverlap.R:** calculates significant overlap between/among different data sets using Fisher's exact test. 
+**2-DiseaseSPIA.R:** calculates pathway enrichment analysis using Signaling Pathway Impact (SPIA) for each of the Disease Genes. 
+**3-DrugSPIA.R:** calculates pathway enrichment analysis using Signaling Pathway Impact (SPIA) for Drug perturbed genes in each Disease. 
+**4-CheckDistribution.R:** calculates correation and dissimilarity scores for all drug-disease pathway pairs.
+**5-DrugCombination.R:** create pathway activities with the combination of two drugs. 
