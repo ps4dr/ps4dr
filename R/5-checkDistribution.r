@@ -14,9 +14,17 @@ setwd("/home/memon/projects/msdrp/")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~load KEGG Drug SPIA results~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-load("./data/spia/spia_kegg_30Diseases_nopar.RData")
-spia_drug_kegg = spia_kegg_30D
+# load("./data/spia/spia_kegg_30Diseases_nopar.RData")
+load("./data/spia/spia_kegg_47Diseases_drugGWAS_nopar.RData")
+spia_drug_kegg = spia_kegg_47D
+rm(spia_kegg_47D)
 spia_drug_kegg = Filter(function(x) !is.null(x), spia_drug_kegg) #delete empty df from list
+
+# remove empty drug frames
+for (i in 1:length(spia_drug_kegg)) {
+  spia_drug_kegg[[i]] = spia_drug_kegg[[i]][lapply(spia_drug_kegg[[i]], length) > 1]
+}
+
 
 drug.path = vector('list', length(spia_drug_kegg)) # create list of lists
 names(drug.path) = names(spia_drug_kegg)
@@ -31,7 +39,8 @@ for(i in seq_along(spia_drug_kegg)){
 #~~~~~~load KEGG Disease SPIA results~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load("./data/spia/spia_kegg_disease42.genes50_results.RData")
+# load("./data/spia/spia_kegg_disease42.genes50_results.RData")
+load("./data/spia/spia_kegg_disease47.genes50_results.RData")
 # dis.path = lapply(spia_kegg, function(x) x[,c(1,11)])
 
 #~~~~Remove any other diseases which are not in drug.path~~~#
@@ -90,7 +99,7 @@ for (i in seq_along(drug.cor)) {
 ##~~~~~~~~~~~~~~~~~~~~~Density Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-drug.cor1 = drug.cor
+drug.cor = drug.cor1
 
 for (i in seq_along(drug.cor)) {
   for (j in seq_along(drug.cor[[i]])) {
@@ -102,12 +111,12 @@ for (i in seq_along(drug.cor)) {
   names(drug.cor[[i]])[[2]] = names(drug.cor)[[i]]
 }
 
-drug.cor$`HIV infection` = NULL # This disease creates anomaly in the graph due to smaller density distribution
+drug.cor$`chronic obstructive pulmonary disease` = NULL # This disease creates anomaly in the graph due to smaller density distribution
 density.score = lapply(drug.cor, melt)
 density.score = do.call(rbind,density.score)
 names(density.score) = c("Drug","Diseases","Correlation_Score")
 
-jpeg(file="./data/densityPlots_allDiseases.jpeg", width=2800, height=1980, res=200)
+#jpeg(file="./data/densityPlots_allDiseases.jpeg", width=2800, height=1980, res=200)
 ggplot(density.score,aes(x=Correlation_Score, fill=Diseases)) + geom_density(alpha=0.25) + 
   labs(title="Distribution of Correlation Scores of all Drugs for each Diseases")+ theme(legend.position = "bottom",legend.title=element_text(size=10)) + theme(plot.title = element_text(hjust = 0.5)) + ylab("Density") + xlab("Correlation Score")
 dev.off()
