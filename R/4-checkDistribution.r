@@ -1,4 +1,4 @@
-#' 9th script
+#' 4th script
 #' summary:
 #' This script calculates correation and dissimilarity scores fos all drug-disease pairs 
 #' plot distribution for all drug correlation scores for each disease 
@@ -9,7 +9,11 @@ library(tidyr)
 library(RecordLinkage)
 library(ggplot2)
 
+#####################################################################
+#TODO: Change to the directory where you cloned this repository
 setwd("/home/memon/projects/msdrp/")
+#####################################################################
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~load KEGG Drug SPIA results~~~~~#
