@@ -4,7 +4,7 @@ How to Use
 Preprocessing
 -------------
 
-This directory contains all the preprocessing scripts to download and harmonize the dataset showcased in the manuscript.
+This `directory <https://github.com/asifemon/msdrp/tree/master/R/preprocessing>`_ contains all the preprocessing scripts to download and harmonize the dataset showcased in the manuscript.
 
 Pipeline
 --------
