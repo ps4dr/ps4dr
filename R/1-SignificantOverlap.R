@@ -17,6 +17,195 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(cowplot)
+library(pROC)
+
+#####################################################################
+#TODO: Change to the directory where you cloned this repository
+setwd("/home/memon/projects/msdrp/")
+#####################################################################
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~Enrichment Calculation Function for Two Gene Sets using Fisher's Exact Test~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+SignificantOverlap <- function(geneSet1, geneSet2, universe) {
+  geneSet1 = unique(geneSet1)
+  geneSet2 = unique(geneSet2)
+  x = list(intersect(geneSet1,geneSet2))
+  a = sum(geneSet1 %in% geneSet2)
+  b = length(geneSet1) - a
+  c = length(geneSet2) - a
+  d = length(universe) - a - b - c
+  fisher = fisher.test(matrix(c(a,b,c,d), nrow=2, ncol=2, byrow=TRUE), alternative="greater")
+  data.table(DEGs = length(geneSet1), GWASs = length(geneSet2), overlap = a, commonGenes = x, universe = length(universe), odds.ratio = fisher$estimate, p.value = fisher$p.value)
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~Datasets~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+load("./data/GWASs.RData")
+tmp = dplyr::count(GWASs, efo.id)
+tmp2 = subset(tmp, n > 50)
+GWASs = merge(GWASs,tmp2,by="efo.id")
+
+load("./data/DEGs.RData")
+tmp = dplyr::count(DEGs, efo.id)
+tmp2 = subset(tmp, n > 50)
+DEGs = merge(DEGs,tmp2,by="efo.id")
+
+#'
+#'
+
+# CommonDis = as.data.frame(intersect(GWASs$efo.id,DEGs$efo.id))
+# names(CommonDis) = "efo.id"
+# 
+# GWASs2 = merge(CommonDis,GWASs, by="efo.id")
+# gwascnt = count(GWASs2,efo.id)
+# DEGs2 = merge(CommonDis,DEGs, by="efo.id")
+# degcnt = count(DEGs2,efo.id)
+# 
+# GWASs2.list = split(GWASs2, GWASs2$efo.id)
+# DEGs2.list = split(DEGs2, DEGs2$efo.id)
+# 
+# allcount = data.table(merge(gwascnt,degcnt, by="efo.id"))
+# names(allcount) = c('efo.id','gwas','degs')
+# allcount$dif = 0
+# allcount$common = 0
+# for (i in 1:nrow(allcount)) {
+#   allcount[i][[4]] = abs((min(allcount[i,2:3]) -max(allcount[i,2:3]))/min(allcount[i,2:3]))*100
+#   allcount[i][[5]] = (length(intersect(DEGs2.list[[i]][["ensembl.id"]],GWASs2.list[[i]][["ensembl.id"]])) / min(allcount[i,2:3])) * 100
+# }
+# allcount = allcount[order(dif), ]
+# allcount = allcount[dif >= 2000 | common < 1]
+# allcount = as.character(allcount$efo.id)
+# 
+# gwas.efo = unique(as.character(GWASs$efo.id))
+# gwas.efo = as.data.frame(setdiff(gwas.efo,allcount))
+# names(gwas.efo) = "efo.id"
+# gwas.efo$efo.id = as.character(gwas.efo$efo.id)
+# 
+# deg.efo = unique(as.character(DEGs$efo.id))
+# deg.efo = as.data.frame(setdiff(deg.efo,allcount))
+# names(deg.efo) = "efo.id"
+# deg.efo$efo.id = as.character(deg.efo$efo.id)
+# 
+# GWASs = merge(GWASs,gwas.efo, by="efo.id")
+# DEGs = merge(DEGs,deg.efo, by="efo.id")
+# 
+# rm(DEGs2,DEGs2.list,GWASs2,GWASs2.list,deg.efo,degcnt,gwas.efo,gwascnt,tmp,tmp2,allcount,i,CommonDis)
+
+#################################################
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+##____DEGs to GWAS Genes >>> DISEASE Genes_____####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+#' Calculating significant overlap between Differentially expressed Genes (DEGs) and GWAS genes
+#' Output would be the disease specific genes which are diffrentially expressed in the diseases 
+#' and also recorded from GWAS.
+
+# create gene universes for Fisher's test
+ensembl.ids = unique(keys(EnsDb.Hsapiens.v86))
+
+# split data table by disease
+GWASs.list = split(GWASs, GWASs$efo.id)
+DEGs.list = split(DEGs, DEGs$efo.id)
+
+## Signifcant overlap calculation
+disease.genes <- foreach (i = seq(DEGs.list), .combine = rbind, .errorhandling = "remove") %do% {
+  efo.id.DEGs = names(DEGs.list)[i]
+  foreach (j = seq(GWASs.list), .combine = rbind, .errorhandling = "remove") %dopar% {
+    efo.id.GWASs = names(GWASs.list)[j]
+    tmp = SignificantOverlap(DEGs.list[[efo.id.DEGs]]$ensembl.id, GWASs.list[[efo.id.GWASs]]$ensembl.id, ensembl.ids)
+    tmp = cbind(efo.id.DEGs, efo.id.GWASs, tmp)
+    tmp = merge(tmp, unique(GWASs[, .(efo.id, efo.term)]), by.x = "efo.id.GWASs", by.y = "efo.id", all.x = TRUE, all.y = FALSE)
+    tmp = merge(tmp, unique(DEGs[, .(efo.id, efo.term)]), by.x = "efo.id.DEGs", by.y = "efo.id", all.x = TRUE, all.y = FALSE, suffixes = c(".GWASs", ".DEGs"))
+    setcolorder(tmp, c("efo.id.DEGs", "efo.term.DEGs", "efo.id.GWASs", "efo.term.GWASs", "DEGs", "GWASs", "overlap", "universe","commonGenes", "odds.ratio", "p.value"))
+  }
+}
+
+# correct p-values
+disease.genes[p.value == 0, p.value := 3e-324]
+disease.genes = disease.genes[order(p.value), ]
+disease.genes = disease.genes[overlap > 0]
+disease.genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
+# add dummy variable
+disease.genes[, same.disease := ifelse(efo.id.DEGs == efo.id.GWASs, TRUE, FALSE)]
+disease.genes = disease.genes[p.adjusted < 1]
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~ROC Curve~~~~~~~~~~~~~~#
+
+preds <- as.numeric(disease.genes[, -log10(p.adjusted)])
+labls <- as.numeric(disease.genes[, same.disease])
+
+#produce errors, need to do it in laptop
+roc.res <- roc(response = as.numeric(labls), predictor = as.numeric(preds), algorithm = 2, ci = TRUE, ci.method = "bootstrap",smooth=TRUE, boot.n = 1000, parallel = TRUE, progress = "none")
+print(roc.res)
+sp.ci <- ci.sp(roc.res, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
+se.ci <- ci.se(roc.res, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
+png("./data/disease.genes.roc.png", width = 6 * 150, height = 6 * 150, res = 150)
+par(pty = "s")
+plot(roc.res, main = paste("AUC =", round(roc.res$auc, 2)), xlab = "False positive rate", ylab = "True positive rate", identity.lty = 2, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.5)
+plot(se.ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
+plot(sp.ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
+plot(roc.res, add = TRUE, col = "#0066ff", lwd = 3)
+dev.off()
+
+
+disease.genes = disease.genes[p.adjusted <= 0.05]
+save(disease.genes,file="./data/disease.genes50.RData")
+# load("./data/disease.genes50.RData")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+##___________Drugs to DISEASE Genes___________#####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+#' Calculating significant overlap between Drug perturbed Genes (LINCS data) and Disease Genes 
+#' from the above step (DEGs and GWAS genes overlap)
+#' Output would be the disease specific genes which are also perturbed by the drugs.
+
+# should make a separate script with all smal code snippets used for creating these small files 
+load("./data/gene.id.entrez.RData")
+
+# get LINCS dataset
+load("./data/L1000.RData")
+# harmonizome = unique(fread("./data/harmonizome.tsv"))
+L1000 = L1000[,c(5,1,7)]
+length(unique(L1000$chembl.id))
+length(unique(L1000$ensembl.id))
+L1000 = L1000[order(ensembl.id,decreasing = TRUE), ]
+L1000 = L1000[!duplicated(L1000[,c('ensembl.id', 'chembl.id')]),] # remove suplicate entries
+L1000 = merge(L1000,gene.id.entrez,by="ensembl.id") # merging with ENTREZ ID, since we need only ones with ENTREZ IDs for SPIA calculation
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~Optional~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#' In our case we want to investigate all drugs which went until at least any clinical trial phases
+#' if users want to investigate all drugs they can comment out next 4 lines
+
+load("./data/drug2715details.RData")
+dmap = data.table(dmap[,c(1,2,3)])
+dmap = dmap[phase==4|phase==3|phase==2|phase==1] #673 Drugs
+L1000 = merge(dmap[,c(1,2)],L1000,by="chembl.id")
+length(unique(L1000$chembl.id))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+##### create Disease-Genes list #####
+load("./data/disease.genes50.RData")
+# disease.genes = fread("./data/disease.genes50.tsv")
+# considering all those gene sets where DEGs and GWAS came from same diseases.
+DisGen = disease.genes[same.disease == TRUE & overlap > 0] 
+# remove duplicated rows, since sometimes a disease id is paired with same disease because of slight different names
+DisGen = DisGen[!duplicated(DisGen$efo.id.DEGs),] #remove duplicated rows based on one column
+DisGenX = unique(DisGen %>% 
+                   mutate(commonGenes = strsplit(as.character(commonGenes), ",")) %>% 
+                   unnest(commonGenes))
+DisGenX = DisGenX[,c(1,2,13)]
+# cleaning up symbols
 
 
 #####################################################################
@@ -117,7 +306,7 @@ L1000 = L1000[,c(5,1,7)]
 length(unique(L1000$chembl.id))
 length(unique(L1000$ensembl.id))
 L1000 = L1000[order(ensembl.id,decreasing = TRUE), ]
-L1000 = L1000[!duplicated(L1000[,c('ensembl.id', 'chembl.id')]),] # remove suplicate entries
+L1000 = L1000[!duplicated(L1000[,c('ensembl.id', 'chembl.id')]),] # remove duplicate entries
 L1000 = merge(L1000,gene.id.entrez,by="ensembl.id") # merging with ENTREZ ID, since we need only ones with ENTREZ IDs for SPIA calculation
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

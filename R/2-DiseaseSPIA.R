@@ -100,6 +100,9 @@ rm(lfc.com)
 
 save(lfc.efo,file="./data/disease47.genes50.lfc.RData")
 
+#~~~test with direct DEGs
+lfc.efo = split(lfc.com, lfc.com$efo.id)
+lfc.efo = Filter(function(x) dim(x)[1] > 10, lfc.efo)
 
 #~~~~~~~~~~Create Named Vector for log fold changes in each disease~~~~~~~~~~#
 
@@ -163,6 +166,45 @@ names(spia_kegg) = names(lfc_entrez)
 
 save(spia_kegg,file = "./data/spia/spia_kegg_disease47.genes50_results.RData")
 
+
+#~~~~Test with direct DEGs~~~~~#
+lfc_new = list()
+for (i in seq_along(CommonDis)) {
+  for (j in seq_along(lfc_entrez)){
+    if (CommonDis[[i]] == names(lfc_entrez)[j]) {
+      lfc_new[[i]] = lfc_entrez[[j]]
+      names(lfc_new)[i] = names(lfc_entrez)[j]
+    }
+  }
+}
+lfc_entrez = lfc_new
+spia_kegg_degs = list()
+for (i in 1:length(lfc_entrez)) {
+  spia_kegg_degs[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir="./data/real_kegg/",organism="hsa")
+}
+
+# CommonDis = as.data.frame(intersect(GWASs$efo.id,DEGs$efo.id))
+# names(CommonDis) = "efo.id"
+# CommonDis = merge(CommonDis,DEGs,by="efo.id")
+# CommonDis = unique(CommonDis[,c(1,2)])
+# names(spia_kegg_degs) = CommonDis$efo.term
+# 
+# names(spia_kegg_degs) = names(lfc_entrez)
+save(spia_kegg_degs,file = "./data/spia/spia_kegg_degs_disease61.genes50_results.RData")
+
+load("./data/spia/spia_kegg_degs_disease61.genes50_results.RData")
+
+
+spia_kegg_degs = lapply(spia_kegg_degs, function(x) x[x$pNDE <= 0.05,])
+plotP(spia_kegg_degs[[4]])
+load("./data/spia/spia_kegg_disease47.genes50_results.RData")
+spia_kegg = lapply(spia_kegg, function(x) x[x$pNDE <= 0.05,])
+
+ad1 = spia_kegg_degs$EFO_0000249[,c(1,11)]
+ad2 = spia_kegg$`Alzheimer's disease`[,c(1,11)]
+
+adcomb = data.table(merge(ad1,ad2, by="Name"))
+adcomb[, sameStatus := ifelse(adcomb$Status.x == adcomb$Status.y, TRUE, FALSE)]
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~Fake KEGG SPIA~~~~~~~~~~~#
