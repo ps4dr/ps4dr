@@ -57,9 +57,9 @@ for (i in seq_along(drug.path)) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 # load("./data/spia/spia_kegg_disease42.genes50_results.RData")
-# load("./data/spia/spia_kegg_disease47.genes50_results.RData")
-load("./data/spia/spia_kegg_degs_disease61.genes50_results.RData")
-spia_kegg = spia_kegg_degs
+load("./data/spia/spia_kegg_disease47.genes50_results.RData")
+# load("./data/spia/spia_kegg_degs_disease61.genes50_results.RData")
+# spia_kegg = spia_kegg_degs
 # dis.path = lapply(spia_kegg, function(x) x[,c(1,11)])
 
 #~~~~Remove any disease pathway with p.value (pNDE) >= 0.05 ~~~#
@@ -142,6 +142,7 @@ for (i in seq_along(drug.shortlist)) {
   drug.shortlist[[i]] = drug.shortlist[[i]][drug.shortlist[[i]]$Correlation.Score <= -0.4 & drug.shortlist[[i]]$'affectedPathway' >= 50]
 }
 
+
 #' filter out diseases which has less than 5 drugs
 drug.shortlist = Filter(function(x) dim(x)[1] >= 1, drug.shortlist)
 drug.shortlist.df = do.call(rbind,drug.shortlist)
@@ -149,7 +150,7 @@ drug.shortlist.df$Drug = tolower(drug.shortlist.df$Drug)
 drug.shortlist.df$Drug = capitalize(drug.shortlist.df$Drug)
 # fwrite(drug.shortlist.df, file = "./data/drug.shortlist.csv")
 # save(drug.path,dis.path,drug.dis.path,drug.Correlation,drug.shortlist,file="./data/drugCorraltion.drugGWAS.RData")
-save(drug.path,dis.path,drug.dis.path,drug.Correlation,drug.shortlist,file="./data/drugCorraltion.drug_onlyDEGS.RData")
+# save(drug.path,dis.path,drug.dis.path,drug.Correlation,drug.shortlist,file="./data/drugCorraltion.drug_onlyDEGS.RData")
 # save(drug.path,dis.path,drug.dis.path,drug.Correlation,drug.shortlist,file="./data/drugCorraltion-1.drugPdisease.RData")
 # load("./data/drugCorraltion.drugGWAS.RData")
 load("./data/drugCorraltion-1.drugPdisease.RData")
