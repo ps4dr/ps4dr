@@ -1,0 +1,30 @@
+Package: msdrp
+Title: Identify drug repositioning candidates using multi-omics data
+Version: 0.0.0.9000
+Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
+Description: What the package does (one paragraph).
+Depends: R (>= 3.5.2)
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Imports:
+    httr (>= 1.3.1),
+    jsonlite (>= 1.5),
+    foreach (>= 1.4.4),
+    doParallel (>= 1.0.11),
+    BiocParallel (>= 1.14.2),
+    data.table (>= 1.11.4),
+    stringr (>= 1.3.1),
+    dplyr (>= 0.7.6),
+    tidyr (>= 0.8.1),
+    tidyverse (>= 1.2.1),
+    RecordLinkage (>= 0.4-10.2),
+    pROC (>= 1.12.1),
+    ggplot2 (>= 3.0.0),
+    riverplot (>= 0.6),
+    cowplot (>= 0.9.4),
+    RColorBrewer (>= 1.1-2)
+biocViews:
+    EnsDb.Hsapiens.v86,
+    SPIA (>= 2.32.0),
+    graphite (>= 1.26.1)

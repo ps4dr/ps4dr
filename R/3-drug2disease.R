@@ -121,6 +121,6 @@ for(i in 1:ncol(kegg)){
   kegg[[i]] <- chr_genes[[2]][match(kegg[[i]], chr_genes[[1]])]
 }
 
-associated genes (GWAS)associated genes (GWAS)
+# associated genes (GWAS)associated genes (GWAS)
 
 
