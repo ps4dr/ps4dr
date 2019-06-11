@@ -5,20 +5,20 @@ sets.
 
 Installation
 ------------
-This library can be installed directly from GitHub using the following instructions adapted
-from `R Package primer <https://kbroman.org/pkg_primer/pages/github.html>`_:
-
-1. If devtools is not installed, do
+If ``devtools`` is not installed, do:
 
 .. code-block:: sh
 
    $ R -e 'install.packages("devtools")'
 
-2. .. code-block:: sh
+This library can be installed directly from GitHub using the following instructions adapted
+from `R Package primer <https://kbroman.org/pkg_primer/pages/github.html>`_:
+
+.. code-block:: sh
 
    $ R -e 'library(devtools); install_github("asifemon/msdrp")'
 
-Install from source with:
+Alternatively, ``msrdp`` can be cloned then installed from the source with:
 
 .. code-block:: sh
 
