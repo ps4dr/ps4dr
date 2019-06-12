@@ -11,15 +11,22 @@ library(tidyr)
 library(httr)
 library(jsonlite)
 
-args = commandArgs(trailingOnly=TRUE)
-resultsFolder = args[1]
-if (! file.exists(resultsFolder)) {
-    dir.create(resultsFolder)
+ensureFolder = function(folder) {
+  if (! file.exists(folder)) {
+    dir.create(folder)
+  }
 }
-print("Using results folder at " + resultsFolder)
+
+args = commandArgs(trailingOnly=TRUE)
+resultsFolder = normalizePath(args[1])
+ensureFolder(resultsFolder)
+sprintf("Using results folder at %s", resultsFolder)
+
+
+dataFolder = = file.path(resultsFolder, "data")
 
 # get GWASs Data from STOPGAP pipeline output 
-load("./data/stopgap.gene.mesh.RData")
+load(dataFolder + "stopgap.gene.mesh.RData")
 GWASs = stopgap.gene.mesh
 rm(stopgap.gene.mesh)
 
@@ -41,7 +48,7 @@ GWASs = merge(GWASs, anno, by.x = "gene.v19", by.y = "SYMBOL", all = FALSE)
 #' read EFO ontolgy (version 2.105) files in csv format downloaded from bioportal on 11th March, 2019
 #' "http://data.bioontology.org/ontologies/EFO/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb&download_format=csv"
 
-efo = fread("/home/memon/projects/msdrp/EFO.csv")
+efo = fread(dataFolder + "EFO.csv")
 efo = efo[,c(1,2,3)] # filter out unnecessary columns
 efo$`Class ID` = gsub(".*efo/","",efo$`Class ID`) # replace urls to get only EFO IDs
 efo = efo[efo$`Class ID` %like% "EFO",] # filter out other disease IDs other than EFO
@@ -71,9 +78,9 @@ GWASs = merge(GWASs, mesh2efo, by.x = "msh", by.y = "mesh", all = FALSE)
 GWASs = GWASs[, .(snp.ld,ensembl.id = GENEID, gene.symbol = gene.v19, efo.id, efo.term, GWASs.pvalue = pvalue, GWASs.gene.score = gene.score, GWASs.gene.rank = gene.rank.min,source)]
 unique(GWASs$efo.id)
 
-save(GWASs, file="./data/GWASs.RData")
+save(GWASs, file=dataFolder + "GWASs.RData")
 length(unique(GWASs$efo.id))
 length(unique(GWASs$ensembl.id))
-stopgap = fread("./data/stopgap.tsv")
+stopgap = fread(dataFolder + "stopgap.tsv")
 length(unique(stopgap$efo.id))
 length(unique(stopgap$ensembl.id))
