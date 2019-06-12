@@ -4,32 +4,32 @@ To run the pre-processing scripts, you have to go into the `R/preprocessing` fol
 
 1. Run the following command to download all of the data and run the STOPGAP2 pipeline to generate processed-GWAS data:
 
-```bash
-$ cd msdrp/R/preprocessing/
-$ Rscript STOPGAP2_run.R ../../data/
-```
+.. code-block:: sh
+
+   $ cd msdrp/R/preprocessing/
+   $ Rscript STOPGAP2_run.R ../../data/
 
 2.  Convert MeSH terms to EFO identifiers in the processed-GWAS data for harmonizing purposes with the following
 command:
 
-```bash
-$ cd R/preprocessing/
-$ Rscript MeSH2EFO.R ../../data/
-```
+.. code-block:: sh
+
+   $ cd R/preprocessing/
+   $ Rscript MeSH2EFO.R ../../data/
 
 3. Downloading all data from Open Targets using its API with the following command:
 
-```bash
-$ cd R/preprocessing/
-$ Rscript RetrieveDEGs.R ../../data/
-```
+.. code-block:: sh
+
+   $ cd R/preprocessing/
+   $ Rscript RetrieveDEGs.R ../../data/
 
 4. Download the LINCS L1000 dataset and maps LINCS identifiers to ChEMBL ids for harmonizing purposes.
 
-```bash
-$ cd R/preprocessing/
-$ Rscript RetrieveDrugResponseData.R ../../data/
-```
+.. code-block:: sh
+
+   $ cd R/preprocessing/
+   $ Rscript RetrieveDrugResponseData.R ../../data/
 
 Data
 ----
