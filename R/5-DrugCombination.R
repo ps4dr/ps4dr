@@ -132,8 +132,8 @@ for (i in 1:length(comb1)){
 # save(drug.comb.path,file="./data/drug.comb.path.drugGWAS.RData")
 save(drug.comb.path,file="./data/drug.comb.path.drugPdisease.RData")
 rm(comb1,comb2)
-
-load("./data/drug.comb.path.drugGWAS.RData")
+load("./data/drug.comb.path.drugPdisease.RData")
+# load("./data/drug.comb.path.drugGWAS.RData")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #' discard diseases from dis.path which are not in drug.comb.path
 a = setdiff(names(dis.path),names(drug.comb.path))
@@ -182,7 +182,16 @@ for (i in seq_along(drug.Correlation)) {
 
 save(drug.dis.path,drug.Correlation, file = "./data/drugCombination.correlationScore.drugPdisease.RData")
 
-
+load("./data/drugCombination.correlationScore.drugPdisease.RData")
+x = drug.Correlation[["lung carcinoma"]][order(drug.Correlation[["lung carcinoma"]]$Correlation.Score,-drug.Correlation[["lung carcinoma"]]$affectedPathway),]
+x = drug.Correlation[[5]][order(-drug.Correlation[[5]]$affectedPathway,drug.Correlation[[5]]$Correlation.Score),]
+x = data.table(x)
+x$Correlation.Score = round(x$Correlation.Score,2)
+x = x[x$Correlation.Score <= -0.5 & x$affectedPathway >= 80]
+x = x[order(-x$affectedPathway,x$Correlation.Score),]
+x = x[,c(1,3,7)]
+fwrite(x, file = "./data/drugComb.breastCancer.csv")
+x$Drug = tolower(x$Drug)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##~~~~~~~~~~~~~~~~~~~~~Scatter Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

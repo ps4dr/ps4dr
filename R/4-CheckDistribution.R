@@ -155,6 +155,8 @@ drug.shortlist.df$Drug = capitalize(drug.shortlist.df$Drug)
 # load("./data/drugCorraltion.drugGWAS.RData")
 load("./data/drugCorraltion-1.drugPdisease.RData")
 
+drug.Correlation.df = do.call(rbind,drug.Correlation)
+x = drug.Correlation.df[drug.Correlation.df$Correlation.Score >= 0.5 & drug.Correlation.df$affectedPathway >= 80]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##~~~~~~~~~~~~~~~~~~~~~Scatter Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
@@ -178,15 +180,16 @@ ggplot(drugCor,aes(x= affectedPathway,y=Correlation.Score, col=Disease)) + geom_
   theme(plot.title = element_text(hjust = 0.5)) + ylab("Correlation Sore") + xlab("affected Pathway (%)")
 dev.off()
 
-jpeg(file="./data/ScatterPlots_highlighted_DrugPDisease_CorrelationScore.jpeg", width=2800, height=1980, res=200)
-ggplot(drugCor,aes(x= affectedPathway,y=Correlation.Score, col=Disease)) + geom_point(size=3, shape=1, colour ="grey") + 
-  geom_point(data = cmap2, aes(x= DrugPathway,y=Correlation.Score, col=Disease), size=3) +
-  labs(title="Scatter Plots of Correlation Scores and affected pathways(%)") + 
-  theme(legend.position = "bottom",legend.title=element_text(size=10)) + 
-  theme(plot.title = element_text(hjust = 0.5)) + ylab("Correlation Sore") + xlab("affected Pathway (%)") +
-  geom_hline(aes(yintercept = 0)) +
-  geom_vline(aes(xintercept = 50))
-dev.off()
+#' additional
+# jpeg(file="./data/ScatterPlots_highlighted_DrugPDisease_CorrelationScore.jpeg", width=2800, height=1980, res=200)
+# ggplot(drugCor,aes(x= affectedPathway,y=Correlation.Score, col=Disease)) + geom_point(size=3, shape=1, colour ="grey") + 
+#   geom_point(data = cmap2, aes(x= DrugPathway,y=Correlation.Score, col=Disease), size=3) +
+#   labs(title="Scatter Plots of Correlation Scores and affected pathways(%)") + 
+#   theme(legend.position = "bottom",legend.title=element_text(size=10)) + 
+#   theme(plot.title = element_text(hjust = 0.5)) + ylab("Correlation Sore") + xlab("affected Pathway (%)") +
+#   geom_hline(aes(yintercept = 0)) +
+#   geom_vline(aes(xintercept = 50))
+# dev.off()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -206,22 +209,53 @@ dev.off()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+##~~~~~~~~~~~~~~~~~~~~~Density Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+load("./data/drugCorraltion-1.drugPdisease.RData")
+
 for (i in seq_along(drug.Correlation)) {
   for (j in seq_along(drug.Correlation[[i]])) {
     drug.Correlation[[i]]$Dissimilarity.Score = NULL
     drug.Correlation[[i]]$DrugPathway = NULL
     drug.Correlation[[i]]$DiseasePathway = NULL
     drug.Correlation[[i]]$Disease = NULL
-    # drug.Correlation[[i]]$affectedPathway = NULL
+    drug.Correlation[[i]]$affectedPathway = NULL
     
   }
   names(drug.Correlation[[i]])[[2]] = names(drug.Correlation)[[i]]
 }
 
+# following drug(s) creates anomaly in the graph due to smaller density distribution in DrugGWAS data
+# drug.Correlation$`chronic obstructive pulmonary disease` = NULL
+# 
+# # following drug(s) creates anomaly in the graph due to smaller density distribution in DrugGWAS data
+# # drug.Correlation$`HIV infection` = NULL
+# # drug.Correlation$`celiac disease` = NULL
+# # drug.Correlation$`mucocutaneous lymph node syndrome` = NULL
+# drug.Correlation$`central nervous system cancer` = NULL
+# drug.Correlation$`Pick disease` = NULL
+# drug.Correlation$`Parkinson's disease` = NULL
+# drug.Correlation$`mucocutaneous lymph node syndrome` = NULL
+# drug.Correlation$`non-small cell lung carcinoma` = NULL
+# drug.Correlation$`celiac disease` = NULL
+density.score = lapply(drug.Correlation, melt)
+density.score = do.call(rbind,density.score)
+names(density.score) = c("Drug","Diseases","Correlation_Score")
+
+# jpeg(file="./data/densityPlots_allDiseases_DrugGWAS.jpeg", width=2800, height=1980, res=200)
+# jpeg(file="./data/densityPlots_allDiseases_DrugPdisease_pval_30D.jpeg", width=2800, height=1980, res=200)
+ggplot(density.score,aes(x=Correlation_Score, fill=Diseases)) + geom_density(alpha=0.25) + 
+  labs(title="Distribution of Correlation Scores of all Drugs for each Diseases")+ theme(legend.position = "bottom",legend.title=element_text(size=10)) + theme(plot.title = element_text(hjust = 0.5)) + ylab("Density") + xlab("Correlation Score")
+dev.off() 
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~Standization~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
+load("./data/drugCorraltion-1.drugPdisease.RData")
 #' Standization with scale function (Z-score normalization)
 #' 
 # drug.Correlation = do.call(rbind,drug.Correlation) # list to df
@@ -231,7 +265,7 @@ drug.Correlation = lapply(drug.Correlation, data.frame) # need to convert back t
 # scaling with z score transformation
 drug.Cor.Scaled = drug.Correlation
 for (i in seq_along(drug.Correlation)) {
-  drug.Cor.Scaled[[i]] = lapply(drug.Correlation[[i]][2],function(x) scale(x, scale=TRUE))
+  drug.Cor.Scaled[[i]] = lapply(drug.Correlation[[i]][3],function(x) scale(x, scale=TRUE))
   drug.Cor.Scaled[[i]]$durg = drug.Correlation[[i]]$Drug
   drug.Cor.Scaled[[i]]$affectedPathway = drug.Correlation[[i]]$affectedPathway
   #drug.Cor.Scaled[[i]]$disease = names(drug.Cor.Scaled)[[i]]
@@ -260,14 +294,15 @@ drug.Cor.Scaled$Drug = capitalize(drug.Cor.Scaled$Drug)
 #drug.Cor.Scaled$Disease = capitalize(drug.Cor.Scaled$Disease)
 
 
-jpeg(file="./data/densityPlots_DrugPdisease_CorrelationScore_scaled.jpeg", width=2800, height=1980, res=200)
+# jpeg(file="./data/densityPlots_DrugPdisease_CorrelationScore_scaled.jpeg", width=2800, height=1980, res=200)
 ggplot(drug.Cor.Scaled,aes(x=Correlation.Score, fill=Disease)) + geom_density(alpha=0.25) + 
-  labs(title="Distribution of Correlation Scores of all Drugs for each Diseases")+ theme(legend.position = "bottom",legend.title=element_text(size=10)) + 
-  theme(plot.title = element_text(hjust = 0.5)) + ylab("Density") + xlab("Correlation.Score")
+  labs(title="Distribution of Correlation Scores of all Drugs for each Diseases")+ theme(plot.title = element_text(hjust = 0.5,size=18)) +
+  theme(legend.position = "bottom",legend.title=element_text(size=12)) + 
+  ylab("Density") + xlab("Correlation.Score")
 dev.off()
 
 
-jpeg(file="./data/ScatterPlots_DrugPDisease_scaled_CorrelationScore.jpeg", width=2800, height=1980, res=200)
+# jpeg(file="./data/ScatterPlots_DrugPDisease_scaled_CorrelationScore.jpeg", width=2800, height=1980, res=200)
 ggplot(drug.Cor.Scaled,aes(x= affectedPathway,y=Correlation.Score, col=Disease)) + geom_point(size=2, shape=1) +
   labs(title="Scatter Plots of Correlation Scores and affected pathways(%)") + 
   theme(legend.position = "bottom",legend.title=element_text(size=10)) + 
@@ -351,37 +386,6 @@ CombinedDrugs$percentage2 = round((CombinedDrugs$FDADrugs/CombinedDrugs$Drugs10t
 CombinedDrugs = CombinedDrugs[order(-CombinedDrugs$percentage2),]
 
 write.csv(CombinedDrugs,"./data/CombinedDrugs.csv",quote=FALSE,row.names=FALSE)
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-##~~~~~~~~~~~~~~~~~~~~~Density Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
-
-
-
-# following drug(s) creates anomaly in the graph due to smaller density distribution in DrugGWAS data
-# drug.Correlation$`chronic obstructive pulmonary disease` = NULL
-# 
-# # following drug(s) creates anomaly in the graph due to smaller density distribution in DrugGWAS data
-# # drug.Correlation$`HIV infection` = NULL
-# # drug.Correlation$`celiac disease` = NULL
-# # drug.Correlation$`mucocutaneous lymph node syndrome` = NULL
-# drug.Correlation$`central nervous system cancer` = NULL
-# drug.Correlation$`Pick disease` = NULL
-# drug.Correlation$`Parkinson's disease` = NULL
-# drug.Correlation$`mucocutaneous lymph node syndrome` = NULL
-# drug.Correlation$`non-small cell lung carcinoma` = NULL
-# drug.Correlation$`non-small cell lung carcinoma` = NULL
-
-density.score = lapply(drug.Correlation, melt)
-density.score = do.call(rbind,density.score)
-names(density.score) = c("Drug","Diseases","Correlation_Score")
-
-# jpeg(file="./data/densityPlots_allDiseases_DrugGWAS.jpeg", width=2800, height=1980, res=200)
-# jpeg(file="./data/densityPlots_allDiseases_DrugPdisease_pval.jpeg", width=2800, height=1980, res=200)
-ggplot(density.score,aes(x=Correlation_Score, fill=Diseases)) + geom_density(alpha=0.25) + 
-  labs(title="Distribution of Correlation Scores of all Drugs for each Diseases")+ theme(legend.position = "bottom",legend.title=element_text(size=10)) + theme(plot.title = element_text(hjust = 0.5)) + ylab("Density") + xlab("Correlation Score")
-dev.off() 
-
 
 
 
