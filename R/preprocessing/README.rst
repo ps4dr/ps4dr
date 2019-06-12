@@ -2,6 +2,9 @@ Preprocessing
 =============
 To run the pre-processing scripts, you have to go into the `R/preprocessing` folder:
 
+**Note** you have to be inside the `preprocessing` folder where the scripts are (right now, until the
+code is properly packaged).
+
 1. Run the following command to download all of the data and run the STOPGAP2 pipeline to generate processed-GWAS data:
 
 .. code-block:: sh
