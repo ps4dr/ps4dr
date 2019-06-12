@@ -1,15 +1,38 @@
 Preprocessing
 =============
-How to run the pre-processing scripts:
+To run the pre-processing scripts, you have to go into the `R/preprocessing` folder:
 
-1. `01STOPGAP2_functions.R: <https://github.com/asifemon/msdrp/blob/master/R/preprocessing/01STOPGAP2_functions.R>`_ Contains all the functions needed to run the next script
-2. `02STOPGAP2_run.R: <https://github.com/asifemon/msdrp/blob/master/R/preprocessing/02STOPGAP2_run.R>`_ Run STOPGAP2 pipeline to generate processed-GWAS data.
-3. `03-MeSH2EFO.R: <https://github.com/asifemon/msdrp/blob/master/R/preprocessing/03-MeSH2EFO.R>`_ Converts MESH terms to EFO identifiers in the processed-GWAS data for harmonizing purposes.
-4. `04-RetrieveDEGs.R: <https://github.com/asifemon/msdrp/blob/master/R/preprocessing/04-RetrieveDEGs.R>`_ Downloading all data from Open Targets using its API.
-5. `05-RetrieveDrugResponseData.R: <https://github.com/asifemon/msdrp/blob/master/R/preprocessing/05-RetrieveDrugResponseData.R>`_ Download the LINCS L1000 dataset and maps LINCS identifiers to ChEMBL ids for harmonizing purposes.
+1. Run the following command to download all of the data and run the STOPGAP2 pipeline to generate processed-GWAS data:
 
-How to Download the Data
-------------------------
+```bash
+$ cd msdrp/R/preprocessing/
+$ Rscript STOPGAP2_run.R ../../data/
+```
+
+2.  Convert MeSH terms to EFO identifiers in the processed-GWAS data for harmonizing purposes with the following
+command:
+
+```bash
+$ cd R/preprocessing/
+$ Rscript MeSH2EFO.R ../../data/
+```
+
+3. Downloading all data from Open Targets using its API with the following command:
+
+```bash
+$ cd R/preprocessing/
+$ Rscript RetrieveDEGs.R ../../data/
+```
+
+4. Download the LINCS L1000 dataset and maps LINCS identifiers to ChEMBL ids for harmonizing purposes.
+
+```bash
+$ cd R/preprocessing/
+$ Rscript RetrieveDrugResponseData.R ../../data/
+```
+
+Data
+----
 GWAS data sets for STOPGAP
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 We deployed STOPGAP pipeline (https://github.com/StatGenPRD/STOPGAP) to merge and harmonize GWAS data sets from publicly

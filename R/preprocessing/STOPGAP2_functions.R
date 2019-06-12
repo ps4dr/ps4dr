@@ -1,6 +1,8 @@
 #--------STOPGAP2 R functions ----------------#
 # Author: Judong Shen and KIjoung Song
 
+print("Sourced STOPGAP utilities")
+
 # Trim white spaces
 trimWhiteSpace <- function (x) {
   sub("[ \t\n\r]*$", "", sub("^[ \t\n\r]*", "", x))
@@ -419,7 +421,7 @@ run.ld <- function(){
   system("./LDcalc.sh 1 ./STOPGAP_LD ./STOPGAP_LD")
   
 }
-run.ld()
+# run.ld()
 
 # Update rsIDs in the gwas data (data) to dbSNP141 version by using the ./STOPGAP2_LDResults/rsID_Coordinates.txt file 
 # Write out the new GWAS data as "stopgap_4sources_dbSNP141.RData" 
@@ -2196,6 +2198,5 @@ var=c("gene","gene.v19","disease","msh","pvalue","pubmedid","source","snp.gwas",
   save(stopgap.bestld, file = "stopgap.bestld.RData", compress = TRUE)   
   
   invisible(stopgap.bestld)
-  
 }
 

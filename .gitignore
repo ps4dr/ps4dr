@@ -44,3 +44,5 @@ __pycache__/
 data/*.tsv
 data/*.zip
 data/*.gz
+data/gwas/*
+.DS_Store

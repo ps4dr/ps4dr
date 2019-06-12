@@ -4,21 +4,19 @@
 #' for downloading Differential Gene Expression Data from Open Targtets by EFO IDs
 #' EFO ontology (version 2.105) file has been used for these mapping purpose
 
-
-#source("http://bioconductor.org/biocLite.R")
-#biocLite("EnsDb.Hsapiens.v86")
 library(EnsDb.Hsapiens.v86)
-
 library(data.table)
 library(dplyr)
 library(tidyr)
 library(httr)
 library(jsonlite)
 
-#####################################################################
-#TODO: Change to the directory where you cloned this repository
-setwd("/home/memon/projects/msdrp/")
-#####################################################################
+args = commandArgs(trailingOnly=TRUE)
+resultsFolder = args[1]
+if (! file.exists(resultsFolder)) {
+    dir.create(resultsFolder)
+}
+print("Using results folder at " + resultsFolder)
 
 # get GWASs Data from STOPGAP pipeline output 
 load("./data/stopgap.gene.mesh.RData")

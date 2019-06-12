@@ -8,22 +8,23 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Imports:
+    BiocParallel (>= 1.14.2),
+    cowplot (>= 0.9.4),
+    data.table (>= 1.11.4),
+    doParallel (>= 1.0.11),
+    dplyr (>= 0.7.6),
+    foreach (>= 1.4.4),
+    gplots,
+    ggplot2 (>= 3.0.0),
     httr (>= 1.3.1),
     jsonlite (>= 1.5),
-    foreach (>= 1.4.4),
-    doParallel (>= 1.0.11),
-    BiocParallel (>= 1.14.2),
-    data.table (>= 1.11.4),
-    stringr (>= 1.3.1),
-    dplyr (>= 0.7.6),
-    tidyr (>= 0.8.1),
-    tidyverse (>= 1.2.1),
-    RecordLinkage (>= 0.4-10.2),
     pROC (>= 1.12.1),
-    ggplot2 (>= 3.0.0),
+    RColorBrewer (>= 1.1-2),
+    RecordLinkage (>= 0.4-10.2),
     riverplot (>= 0.6),
-    cowplot (>= 0.9.4),
-    RColorBrewer (>= 1.1-2)
+    stringr (>= 1.3.1),
+    tidyr (>= 0.8.1),
+    tidyverse (>= 1.2.1)
 biocViews:
     EnsDb.Hsapiens.v86,
     SPIA (>= 2.32.0),

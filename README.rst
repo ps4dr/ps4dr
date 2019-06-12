@@ -27,7 +27,10 @@ Alternatively, ``msrdp`` can be cloned then installed from the source with:
 
 Reproduction
 ------------
-TODO
+1. Run all pre-processing scripts using the instructions at
+   https://github.com/asifemon/msdrp/tree/master/R/preprocessing
+2. Run all analysis scripts using the instructions at
+   https://github.com/asifemon/msdrp/tree/master/R/analysis
 
 Results
 -------
