@@ -9,7 +9,7 @@ To run the pre-processing scripts, you have to go into the `R/preprocessing` fol
    $ cd msdrp/R/preprocessing/
    $ Rscript STOPGAP2_run.R ../../data/
 
-2.  Convert MeSH terms to EFO identifiers in the processed-GWAS data for harmonizing purposes with the following
+2. Convert MeSH terms to EFO identifiers in the processed-GWAS data for harmonizing purposes with the following
 command:
 
 .. code-block:: sh

@@ -22,7 +22,7 @@ drug.shortlist = drug.Correlation
 drug.shortlist = lapply(drug.shortlist, data.table)
 
 for (i in seq_along(drug.shortlist)) {
-  drug.shortlist[[i]] = drug.shortlist[[i]][drug.shortlist[[i]]$Correlation.Score < 0]
+    drug.shortlist[[i]] = drug.shortlist[[i]][drug.shortlist[[i]]$Correlation.Score < 0]
 }
 
 #' filter out diseases which has less than 1 drugs
@@ -30,7 +30,7 @@ drug.shortlist = Filter(function(x) dim(x)[1] >= 1, drug.shortlist)
 
 #' create separate data frame for each drug
 for (i in seq_along(drug.shortlist)) {
-  drug.shortlist[[i]] = split(drug.shortlist[[i]], drug.shortlist[[i]]$Drug)
+    drug.shortlist[[i]] = split(drug.shortlist[[i]], drug.shortlist[[i]]$Drug)
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -41,28 +41,28 @@ load("./data/spia/spia_kegg_47Diseases_drugPdisease_nopar.RData")
 
 spia_drug_kegg = spia_kegg_47D
 rm(spia_kegg_47D)
-spia_drug_kegg = Filter(function(x) !is.null(x), spia_drug_kegg) #delete empty df from list
+spia_drug_kegg = Filter(function(x) ! is.null(x), spia_drug_kegg) #delete empty df from list
 
 # remove empty drug frames
-for (i in 1:length(spia_drug_kegg)) {
-  spia_drug_kegg[[i]] = spia_drug_kegg[[i]][lapply(spia_drug_kegg[[i]], length) > 1]
+for (i in 1 : length(spia_drug_kegg)) {
+    spia_drug_kegg[[i]] = spia_drug_kegg[[i]][lapply(spia_drug_kegg[[i]], length) > 1]
 }
 
 #~~~~Remove any drug pathway with p.value (pNDE) >= 0.05 ~~~#
-for (i in seq_along(spia_drug_kegg)){
-  spia_drug_kegg[[i]] = lapply(spia_drug_kegg[[i]], function(x) x[x$pNDE <= 0.05,])
+for (i in seq_along(spia_drug_kegg)) {
+    spia_drug_kegg[[i]] = lapply(spia_drug_kegg[[i]], function(x) x[x$pNDE <= 0.05,])
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~#
 #test
-a = setdiff(names(spia_drug_kegg),names(drug.shortlist))
+a = setdiff(names(spia_drug_kegg), names(drug.shortlist))
 
 for (i in seq_along(spia_drug_kegg)) {
-  if(names(spia_drug_kegg)[i] %in% a){
-    spia_drug_kegg[[i]] = NULL
-  }
+    if (names(spia_drug_kegg)[i] %in% a) {
+        spia_drug_kegg[[i]] = NULL
+    }
 }
 
 
@@ -75,72 +75,72 @@ for (i in seq_along(spia_drug_kegg)) {
 drugNegCor = vector('list', length(drug.shortlist)) # create list of lists
 names(drugNegCor) = names(drug.shortlist)
 
-for (i in 1:length(spia_drug_kegg)) {
-  for (j in 1:length(spia_drug_kegg[[i]])) {
-    if (names(spia_drug_kegg[[i]])[[j]] %in% names(drug.shortlist[[i]])) {
-      drugNegCor[[i]][[j]] = spia_drug_kegg[[i]][[j]]
+for (i in 1 : length(spia_drug_kegg)) {
+    for (j in 1 : length(spia_drug_kegg[[i]])) {
+        if (names(spia_drug_kegg[[i]])[[j]] %in% names(drug.shortlist[[i]])) {
+            drugNegCor[[i]][[j]] = spia_drug_kegg[[i]][[j]]
+        }
     }
-  }
-  drugNegCor[[i]] = Filter(function(x) !is.null(x), drugNegCor[[i]]) # filter out empty drug table
-  names(drugNegCor[[i]]) = names(drug.shortlist[[i]]) # name drugs
+    drugNegCor[[i]] = Filter(function(x) ! is.null(x), drugNegCor[[i]]) # filter out empty drug table
+    names(drugNegCor[[i]]) = names(drug.shortlist[[i]]) # name drugs
 }
 
 drug.path = vector('list', length(drugNegCor)) # create list of lists
 names(drug.path) = names(drugNegCor)
 
-for(i in seq_along(drugNegCor)){
-  for(j in seq_along(drugNegCor[[i]])){
-    drug.path[[i]][[j]] = drugNegCor[[i]][[j]][,c(1,11)] # use 2 for ID, 1 for Name
-    names(drug.path[[i]])[[j]] = names(drugNegCor[[i]])[[j]]
-  }
+for (i in seq_along(drugNegCor)) {
+    for (j in seq_along(drugNegCor[[i]])) {
+        drug.path[[i]][[j]] = drugNegCor[[i]][[j]][, c(1, 11)] # use 2 for ID, 1 for Name
+        names(drug.path[[i]])[[j]] = names(drugNegCor[[i]])[[j]]
+    }
 }
 
 #' filter drug path with only 1 disease, since they can't be used for combination
 drug.path = Filter(function(x) length(x) > 1, drug.path)
 
 
-comb1=list()
-comb2=list()
+comb1 = list()
+comb2 = list()
 set.seed(123)
-for(i in seq_along(drug.path)){
-  comb1[[i]] = combn(drug.path[[i]],2)
-  comb2[[i]] = combn(names(drug.path[[i]]),2)
+for (i in seq_along(drug.path)) {
+    comb1[[i]] = combn(drug.path[[i]], 2)
+    comb2[[i]] = combn(names(drug.path[[i]]), 2)
 }
 
-rm(drug.dis.path,drug.shortlist,drug.Correlation)
+rm(drug.dis.path, drug.shortlist, drug.Correlation)
 
 drug.comb.path = vector('list', length(drug.path)) # create list of lists
 names(drug.comb.path) = names(drug.path)
 
 rm(drug.path)
 
-for (i in 1:length(comb1)){
-  for (j in 1:(length(comb1[[i]])/2)) {
-    
-    drug.comb.path[[i]][[j]] = data.table(merge(comb1[[i]][,j][1],comb1[[i]][,j][2],by="Name",all=TRUE)) #Name/ID
-    names(drug.comb.path[[i]])[[j]] = paste(comb2[[i]][,j][1],comb2[[i]][,j][2],sep = "_")
-    # create a dummy column by copmaring disease and drug affects columns
-    drug.comb.path[[i]][[j]][, Status.update:= 
-                               ifelse(is.na(drug.comb.path[[i]][[j]]$Status.x),drug.comb.path[[i]][[j]]$Status.y,
-                                      ifelse(is.na(drug.comb.path[[i]][[j]]$Status.y),drug.comb.path[[i]][[j]]$Status.x,
-                                             ifelse(drug.comb.path[[i]][[j]]$Status.x!=drug.comb.path[[i]][[j]]$Status.y,"Neutral",drug.comb.path[[i]][[j]]$Status.y)))]
-    drug.comb.path[[i]][[j]]$Status.x = NULL
-    drug.comb.path[[i]][[j]]$Status.y = NULL
-  }
+for (i in 1 : length(comb1)) {
+    for (j in 1 : (length(comb1[[i]]) / 2)) {
+
+        drug.comb.path[[i]][[j]] = data.table(merge(comb1[[i]][, j][1], comb1[[i]][, j][2], by = "Name", all = TRUE)) #Name/ID
+        names(drug.comb.path[[i]])[[j]] = paste(comb2[[i]][, j][1], comb2[[i]][, j][2], sep = "_")
+        # create a dummy column by copmaring disease and drug affects columns
+        drug.comb.path[[i]][[j]][, Status.update :  =
+        ifelse(is.na(drug.comb.path[[i]][[j]]$Status.x), drug.comb.path[[i]][[j]]$Status.y,
+        ifelse(is.na(drug.comb.path[[i]][[j]]$Status.y), drug.comb.path[[i]][[j]]$Status.x,
+        ifelse(drug.comb.path[[i]][[j]]$Status.x != drug.comb.path[[i]][[j]]$Status.y, "Neutral", drug.comb.path[[i]][[j]]$Status.y)))]
+        drug.comb.path[[i]][[j]]$Status.x = NULL
+        drug.comb.path[[i]][[j]]$Status.y = NULL
+    }
 }
 
 # save(drug.comb.path,file="./data/drug.comb.path.drugGWAS.RData")
-save(drug.comb.path,file="./data/drug.comb.path.drugPdisease.RData")
-rm(comb1,comb2)
+save(drug.comb.path, file = "./data/drug.comb.path.drugPdisease.RData")
+rm(comb1, comb2)
 load("./data/drug.comb.path.drugPdisease.RData")
 # load("./data/drug.comb.path.drugGWAS.RData")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #' discard diseases from dis.path which are not in drug.comb.path
-a = setdiff(names(dis.path),names(drug.comb.path))
+a = setdiff(names(dis.path), names(drug.comb.path))
 for (i in seq_along(dis.path)) {
-  if(names(dis.path)[i] %in% a){
-    dis.path[[i]] = NULL
-  }
+    if (names(dis.path)[i] %in% a) {
+        dis.path[[i]] = NULL
+    }
 }
 
 drug.dis.path = vector('list', length(drug.comb.path)) # create list of lists
@@ -148,66 +148,69 @@ names(drug.dis.path) = names(drug.comb.path)
 drug.Correlation = vector('list', length(drug.comb.path)) # create list of lists
 names(drug.Correlation) = names(drug.comb.path)
 
-rm(spia_drug_kegg,drug.path)
+rm(spia_drug_kegg, drug.path)
 
 for (i in seq_along(drug.comb.path)) {
-  for (j in seq_along(drug.comb.path[[i]])) {
-    drug.dis.path[[i]][[j]] = merge(dis.path[[i]],drug.comb.path[[i]][[j]],by="Name")
-    names(drug.dis.path[[i]])[[j]] = names(drug.comb.path[[i]])[[j]]
-    names(drug.dis.path[[i]][[j]]) = c("Pathways","Disease.Influence","Drug.Influence")
-    drug.dis.path[[i]][[j]]$Disease.Influence = ifelse(drug.dis.path[[i]][[j]]$Disease.Influence == "Activated",1,-1)
-    drug.dis.path[[i]][[j]]$Drug.Influence = ifelse(drug.dis.path[[i]][[j]]$Drug.Influence == "Activated",1,-1)
-    
-    
-    drug.Correlation[[i]][[j]] = cor(drug.dis.path[[i]][[j]]$Drug.Influence, drug.dis.path[[i]][[j]]$Disease.Influence)
-    names(drug.Correlation[[i]])[[j]] = names(drug.dis.path[[i]])[[j]]
-    drug.Correlation[[i]][[j]] = as.data.frame(drug.Correlation[[i]][[j]])
-    names(drug.Correlation[[i]][[j]]) = "Correlation.Score"
-    drug.Correlation[[i]][[j]]$"Dissimilarity.Score" = (sum(levenshteinDist(as.character(drug.dis.path[[i]][[j]]$Drug.Influence),as.character(drug.dis.path[[i]][[j]]$Disease.Influence))) * 100) / length(drug.dis.path[[i]][[j]]$Drug.Influence)
-    drug.Correlation[[i]][[j]]$"DrugPathway" = length(drug.dis.path[[i]][[j]]$Drug.Influence)
-    drug.Correlation[[i]][[j]]$"DiseasePathway" = length(dis.path[[i]]$Name) #change for ID/Name
-    drug.Correlation[[i]][[j]]$"affectedPathway" = round((drug.Correlation[[i]][[j]]$"DrugPathway" / drug.Correlation[[i]][[j]]$"DiseasePathway")*100,2)
-    drug.Correlation[[i]][[j]]$"Disease" = names(dis.path)[[i]]
-  }
+    for (j in seq_along(drug.comb.path[[i]])) {
+        drug.dis.path[[i]][[j]] = merge(dis.path[[i]], drug.comb.path[[i]][[j]], by = "Name")
+        names(drug.dis.path[[i]])[[j]] = names(drug.comb.path[[i]])[[j]]
+        names(drug.dis.path[[i]][[j]]) = c("Pathways", "Disease.Influence", "Drug.Influence")
+        drug.dis.path[[i]][[j]]$Disease.Influence = ifelse(drug.dis.path[[i]][[j]]$Disease.Influence == "Activated", 1, - 1)
+        drug.dis.path[[i]][[j]]$Drug.Influence = ifelse(drug.dis.path[[i]][[j]]$Drug.Influence == "Activated", 1, - 1)
+
+
+        drug.Correlation[[i]][[j]] = cor(drug.dis.path[[i]][[j]]$Drug.Influence, drug.dis.path[[i]][[j]]$Disease.Influence)
+        names(drug.Correlation[[i]])[[j]] = names(drug.dis.path[[i]])[[j]]
+        drug.Correlation[[i]][[j]] = as.data.frame(drug.Correlation[[i]][[j]])
+        names(drug.Correlation[[i]][[j]]) = "Correlation.Score"
+        drug.Correlation[[i]][[j]]$"Dissimilarity.Score" = (sum(levenshteinDist(as.character(drug.dis.path[[i]][[j]]$Drug.Influence), as.character(drug.dis.path[[i]][[j]]$Disease.Influence))) * 100) / length(drug.dis.path[[i]][[j]]$Drug.Influence)
+        drug.Correlation[[i]][[j]]$"DrugPathway" = length(drug.dis.path[[i]][[j]]$Drug.Influence)
+        drug.Correlation[[i]][[j]]$"DiseasePathway" = length(dis.path[[i]]$Name) #change for ID/Name
+        drug.Correlation[[i]][[j]]$"affectedPathway" = round((drug.Correlation[[i]][[j]]$"DrugPathway" / drug.Correlation[[i]][[j]]$"DiseasePathway") * 100, 2)
+        drug.Correlation[[i]][[j]]$"Disease" = names(dis.path)[[i]]
+    }
 }
 
 ##~~~~~create a single data.frame from all drugs in a disease~~~##
 
 #x=do.call(rbind,drug.Correlation[["Alzheimer's disease"]])
 for (i in seq_along(drug.Correlation)) {
-  drug.Correlation[[i]] = do.call(rbind,drug.Correlation[[i]])
-  drug.Correlation[[i]]$Drug = rownames(drug.Correlation[[i]])
-  drug.Correlation[[i]] = drug.Correlation[[i]][,c(7,6,1,2,3,4,5)]
+    drug.Correlation[[i]] = do.call(rbind, drug.Correlation[[i]])
+    drug.Correlation[[i]]$Drug = rownames(drug.Correlation[[i]])
+    drug.Correlation[[i]] = drug.Correlation[[i]][, c(7, 6, 1, 2, 3, 4, 5)]
 }
 
-save(drug.dis.path,drug.Correlation, file = "./data/drugCombination.correlationScore.drugPdisease.RData")
+save(drug.dis.path, drug.Correlation, file = "./data/drugCombination.correlationScore.drugPdisease.RData")
 
 load("./data/drugCombination.correlationScore.drugPdisease.RData")
-x = drug.Correlation[["lung carcinoma"]][order(drug.Correlation[["lung carcinoma"]]$Correlation.Score,-drug.Correlation[["lung carcinoma"]]$affectedPathway),]
-x = drug.Correlation[[5]][order(-drug.Correlation[[5]]$affectedPathway,drug.Correlation[[5]]$Correlation.Score),]
+x = drug.Correlation[["lung carcinoma"]][order(drug.Correlation[["lung carcinoma"]]$Correlation.Score, - drug.Correlation[["lung carcinoma"]]$affectedPathway),]
+x = drug.Correlation[[5]][order(- drug.Correlation[[5]]$affectedPathway, drug.Correlation[[5]]$Correlation.Score),]
 x = data.table(x)
-x$Correlation.Score = round(x$Correlation.Score,2)
-x = x[x$Correlation.Score <= -0.5 & x$affectedPathway >= 80]
-x = x[order(-x$affectedPathway,x$Correlation.Score),]
-x = x[,c(1,3,7)]
+x$Correlation.Score = round(x$Correlation.Score, 2)
+x = x[x$Correlation.Score <= - 0.5 & x$affectedPathway >= 80]
+x = x[order(- x$affectedPathway, x$Correlation.Score),]
+x = x[, c(1, 3, 7)]
 fwrite(x, file = "./data/drugComb.breastCancer.csv")
 x$Drug = tolower(x$Drug)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##~~~~~~~~~~~~~~~~~~~~~Scatter Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-drugCor = do.call(rbind,drug.Correlation)
+drugCor = do.call(rbind, drug.Correlation)
 drugCor$Drug = as.factor(drugCor$Drug)
 drugCor = data.table(drugCor %>% drop_na())
 #' remove few extreme correlation scores
 # drugCor = drugCor[Correlation.Score > -1 & Correlation.Score < 1]
 
 # jpeg(file="./data/ScatterPlots_combination_Diseases_DrugGWAS.jpeg", width=2800, height=1980, res=200)
-jpeg(file="./data/ScatterPlots_combination_Diseases_DrugPdisease.jpeg", width=2800, height=1980, res=200)
-ggplot(drugCor,aes(x= affectedPathway,y=Correlation.Score, col=Disease)) + geom_point(size=2, shape=1) +
-  labs(title="Scatter Plots of Correlation Scores and affected pathways(%)") + 
-  theme(legend.position = "bottom",legend.title=element_text(size=10)) + 
-  theme(plot.title = element_text(hjust = 0.5)) + ylab("Correlation Sore") + xlab("affected Pathway (%)")
+jpeg(file = "./data/ScatterPlots_combination_Diseases_DrugPdisease.jpeg", width = 2800, height = 1980, res = 200)
+ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = Disease)) +
+    geom_point(size = 2, shape = 1) +
+    labs(title = "Scatter Plots of Correlation Scores and affected pathways(%)") +
+    theme(legend.position = "bottom", legend.title = element_text(size = 10)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    ylab("Correlation Sore") +
+    xlab("affected Pathway (%)")
 dev.off()
 # save(drugCor, file = "./data/drugCombcorScoreDrugGWAS.RData")
 length(unique(drugCor$Disease))
@@ -215,14 +218,18 @@ save(drugCor, file = "./data/drugCombcorScoreDrugPdisease.RData")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 load("./data/drugCombcorScoreDrugGWAS.RData")
 drugCor2 = drugCor
-sle = drugCor[Disease == "systemic lupus erythematosus" & Correlation.Score <= -0.5 & affectedPathway >= 50]
+sle = drugCor[Disease == "systemic lupus erythematosus" &
+    Correlation.Score <= - 0.5 &
+    affectedPathway >= 50]
 
-sle = sle[order(Correlation.Score), ]
-fwrite(sle,file = "./data/sle_drugs.csv")
+sle = sle[order(Correlation.Score),]
+fwrite(sle, file = "./data/sle_drugs.csv")
 
 
-bc = drugCor[Disease == "breast carcinoma" & Correlation.Score <= -0.3 & affectedPathway >= 40]
-bc = bc[order(Correlation.Score), ]
+bc = drugCor[Disease == "breast carcinoma" &
+    Correlation.Score <= - 0.3 &
+    affectedPathway >= 40]
+bc = bc[order(Correlation.Score),]
 
 
 # 

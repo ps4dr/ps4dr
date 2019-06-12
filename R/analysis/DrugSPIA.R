@@ -35,17 +35,17 @@ load("./data/gene.id.entrez.RData")
 
 # get LINCS dataset
 load("./data/L1000.RData")
-L1000 = L1000[,c(5,1,7)]
+L1000 = L1000[, c(5, 1, 7)]
 length(unique(L1000$chembl.id))
 length(unique(L1000$ensembl.id))
-L1000 = L1000[order(ensembl.id,decreasing = TRUE), ]
-L1000 = L1000[!duplicated(L1000[,c('ensembl.id', 'chembl.id')]),]
-L1000 = merge(L1000,gene.id.entrez,by="ensembl.id")
+L1000 = L1000[order(ensembl.id, decreasing = TRUE),]
+L1000 = L1000[! duplicated(L1000[, c('ensembl.id', 'chembl.id')]),]
+L1000 = merge(L1000, gene.id.entrez, by = "ensembl.id")
 
 load("./data/drug2715details.RData")
-dmap = data.table(dmap[,c(1,2,3)])
-dmap = dmap[phase==4|phase==3|phase==2|phase==1] #673 Drugs
-L1000 = merge(dmap[,c(1,2)],L1000,by="chembl.id")
+dmap = data.table(dmap[, c(1, 2, 3)])
+dmap = dmap[phase == 4 | phase == 3 | phase == 2 | phase == 1] #673 Drugs
+L1000 = merge(dmap[, c(1, 2)], L1000, by = "chembl.id")
 length(unique(L1000$chembl.id))
 
 #' Users can select any of following two data sets 
@@ -62,23 +62,23 @@ length(unique(L1000$chembl.id))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # load("./data/drugPdisease.genes50.padj1e-5.RData")
 load("./data/drugPdisease.genes50.padj.RData")
-super.drugs = drugPdisease.genes[,c(2,3,4,9)]
+super.drugs = drugPdisease.genes[, c(2, 3, 4, 9)]
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #' to select only those diseases from disease.genes50
 load("./data/disease.genes50.RData")
-disease.genes = unique(disease.genes[,c(1,2)])
-super.drugs = merge(super.drugs,disease.genes,by.x="efo.id",by.y="efo.id.DEGs")
+disease.genes = unique(disease.genes[, c(1, 2)])
+super.drugs = merge(super.drugs, disease.genes, by.x = "efo.id", by.y = "efo.id.DEGs")
 length(unique(super.drugs$efo.id))
 
 # split multiple genes in same column to multiple rows
-drug.genes = unique(super.drugs %>% 
-                       mutate(ensembl.id = strsplit(as.character(commonGenes), ",")) %>% 
-                       unnest(ensembl.id))
+drug.genes = unique(super.drugs %>%
+    mutate(ensembl.id = strsplit(as.character(commonGenes), ",")) %>%
+    unnest(ensembl.id))
 #clean up special symbols
-drug.genes$ensembl.id = gsub("\"","",drug.genes$ensembl.id)
-drug.genes$ensembl.id = gsub("c\\(","",drug.genes$ensembl.id)
-drug.genes$ensembl.id = gsub("\\)","",drug.genes$ensembl.id)
+drug.genes$ensembl.id = gsub("\"", "", drug.genes$ensembl.id)
+drug.genes$ensembl.id = gsub("c\\(", "", drug.genes$ensembl.id)
+drug.genes$ensembl.id = gsub("\\)", "", drug.genes$ensembl.id)
 drug.genes$ensembl.id = trimws(drug.genes$ensembl.id)
 
 length(unique(drug.genes$chembl.name))
@@ -92,11 +92,11 @@ length(unique(drug.genes$ensembl.id))
 load("./data/spia/spia_kegg_disease47.genes50_results.RData")
 Disease47 = as.data.frame(names(spia_kegg))
 names(Disease47) = "efo.term"
-drug.genes = merge(Disease47,drug.genes,by.x="efo.term",by.y="efo.term.DEGs")
+drug.genes = merge(Disease47, drug.genes, by.x = "efo.term", by.y = "efo.term.DEGs")
 
 #' now merge with clinically trialled Drugs only from L1000 Data
-drug.genes = merge(drug.genes,L1000,by=c('chembl.name','ensembl.id')) # merge with L1000
-drug.genes = drug.genes[!duplicated(drug.genes[,c('chembl.id','ensembl.id','efo.term')]),]
+drug.genes = merge(drug.genes, L1000, by = c('chembl.name', 'ensembl.id')) # merge with L1000
+drug.genes = drug.genes[! duplicated(drug.genes[, c('chembl.id', 'ensembl.id', 'efo.term')]),]
 
 #' count efo_chembl pair frequency, to remove rows frequencies less than 10
 # tmp = count(drug.genes, c('efo.term','chembl.id'))
@@ -109,18 +109,18 @@ topDiseases.drug = topDiseases.drug[lapply(topDiseases.drug, length) > 10] # rem
 
 
 ### remove chemble.name, chemble.id and efo.term columns sicne they are not required any more
-for (element in 1:length(topDiseases.drug)){
-  for (subelem in 1:length(topDiseases.drug[[element]])){
-    topDiseases.drug[[element]][[subelem]]$chembl.name = NULL
-    topDiseases.drug[[element]][[subelem]]$chembl.id = NULL
-    topDiseases.drug[[element]][[subelem]]$efo.id = NULL
-    topDiseases.drug[[element]][[subelem]]$efo.term = NULL
-    topDiseases.drug[[element]][[subelem]]$efo.term.y = NULL
-  }
+for (element in 1 : length(topDiseases.drug)) {
+    for (subelem in 1 : length(topDiseases.drug[[element]])) {
+        topDiseases.drug[[element]][[subelem]]$chembl.name = NULL
+        topDiseases.drug[[element]][[subelem]]$chembl.id = NULL
+        topDiseases.drug[[element]][[subelem]]$efo.id = NULL
+        topDiseases.drug[[element]][[subelem]]$efo.term = NULL
+        topDiseases.drug[[element]][[subelem]]$efo.term.y = NULL
+    }
 }
 
 # save(topDiseases.drug,file = "./data/drug.genes.list.drugGWAS.disease47.genes50.padj1e-10.RData")
-save(topDiseases.drug,file = "./data/drug.genes.list.drugPdisease.genes50.padj.RData")
+save(topDiseases.drug, file = "./data/drug.genes.list.drugPdisease.genes50.padj.RData")
 
 
 ####____Create named entity list for each drug_disease pairs___####
@@ -129,41 +129,41 @@ save(topDiseases.drug,file = "./data/drug.genes.list.drugPdisease.genes50.padj.R
 load("./data/drug.genes.list.drugPdisease.genes50.padj.RData")
 
 lfc_drug_ensembl = topDiseases.drug
-for (i in 1:length(topDiseases.drug)) {
-  for (j in 1:length(topDiseases.drug[[i]])){
-    lfc_drug_ensembl[[i]][[j]] = setNames(as.numeric(topDiseases.drug[[i]][[j]][[2]]),as.character(topDiseases.drug[[i]][[j]][[1]]))
-  }
+for (i in 1 : length(topDiseases.drug)) {
+    for (j in 1 : length(topDiseases.drug[[i]])) {
+        lfc_drug_ensembl[[i]][[j]] = setNames(as.numeric(topDiseases.drug[[i]][[j]][[2]]), as.character(topDiseases.drug[[i]][[j]][[1]]))
+    }
 }
 
 lfc_drug_entrez = topDiseases.drug
-for (i in 1:length(topDiseases.drug)) {
-  for (j in 1:length(topDiseases.drug[[i]])){
-    lfc_drug_entrez[[i]][[j]] = setNames(as.numeric(topDiseases.drug[[i]][[j]][[2]]),as.character(topDiseases.drug[[i]][[j]][[3]]))
-    #names(lfc_drug_entrez)[i] = names(topDiseases.drug)[i]
-    #names(lfc_drug_entrez[[i]][j]) = names(topDiseases.drug[[i]][j])
-  }
+for (i in 1 : length(topDiseases.drug)) {
+    for (j in 1 : length(topDiseases.drug[[i]])) {
+        lfc_drug_entrez[[i]][[j]] = setNames(as.numeric(topDiseases.drug[[i]][[j]][[2]]), as.character(topDiseases.drug[[i]][[j]][[3]]))
+        #names(lfc_drug_entrez)[i] = names(topDiseases.drug)[i]
+        #names(lfc_drug_entrez[[i]][j]) = names(topDiseases.drug[[i]][j])
+    }
 }
 
 lfc_drug_entrezID = topDiseases.drug
-for (i in 1:length(topDiseases.drug)) {
-  for (j in 1:length(topDiseases.drug[[i]])){
-    lfc_drug_entrezID[[i]][[j]] = setNames(as.numeric(topDiseases.drug[[i]][[j]][[2]]),as.character(gsub("^","ENTREZID:",topDiseases.drug[[i]][[j]][[3]])))
-  }
+for (i in 1 : length(topDiseases.drug)) {
+    for (j in 1 : length(topDiseases.drug[[i]])) {
+        lfc_drug_entrezID[[i]][[j]] = setNames(as.numeric(topDiseases.drug[[i]][[j]][[2]]), as.character(gsub("^", "ENTREZID:", topDiseases.drug[[i]][[j]][[3]])))
+    }
 }
 
 ##_____Create a vector with all Gene universe to proxy Array Genes_________###
 load("./data/gene.id.entrez.RData")
 ensembl_all = unique(gene.id.entrez$ensembl.id)
 entrez_all = unique(gene.id.entrez$ENTREZ)
-entrezID_all = unique(gsub("^","ENTREZID:",gene.id.entrez$ENTREZ)) ## with ENTREZID: in front of each id
+entrezID_all = unique(gsub("^", "ENTREZID:", gene.id.entrez$ENTREZ)) ## with ENTREZID: in front of each id
 
 # save(lfc_drug_ensembl,ensembl_all,file="./data/lfc.drug.drugGWAS.disease47.genes50.padj1e-5.ensembl.RData")
 # save(lfc_drug_entrez,entrez_all,file="./data/lfc.drug.drugGWAS.disease47.genes50.padj1e-5.entrez.RData")
 # save(lfc_drug_entrezID,entrezID_all,file="./data/lfc.drug.drugGWAS.disease47.genes50.padj1e-5.entrezID.RData")
 
-save(lfc_drug_ensembl,ensembl_all,file="./data/lfc.drug.drugPdisease.disease47.genes50.padj.ensembl.RData")
-save(lfc_drug_entrez,entrez_all,file="./data/lfc.drug.drugPdisease.disease47.genes50.padj.entrez.RData")
-save(lfc_drug_entrezID,entrezID_all,file="./data/lfc.drug.drugPdisease.disease47.genes50.padj.entrezID.RData")
+save(lfc_drug_ensembl, ensembl_all, file = "./data/lfc.drug.drugPdisease.disease47.genes50.padj.ensembl.RData")
+save(lfc_drug_entrez, entrez_all, file = "./data/lfc.drug.drugPdisease.disease47.genes50.padj.entrez.RData")
+save(lfc_drug_entrezID, entrezID_all, file = "./data/lfc.drug.drugPdisease.disease47.genes50.padj.entrezID.RData")
 
 
 
@@ -174,8 +174,8 @@ save(lfc_drug_entrezID,entrezID_all,file="./data/lfc.drug.drugPdisease.disease47
 
 #~~~~~~~~~SPIA Function~~~~~~~~~~#
 spia_fun = function(x){
-  spia_drug_kegg = list()
-  spia_drug_kegg = spia(de = x, all = entrez_all, data.dir="./data/real_kegg/",organism="hsa")
+    spia_drug_kegg = list()
+    spia_drug_kegg = spia(de = x, all = entrez_all, data.dir = "./data/real_kegg/", organism = "hsa")
 }
 
 #~~~~~~~~~Get Disease-Drugs list~~~~~~~~~#
@@ -189,16 +189,16 @@ lfc_test = lfc_drug_entrez
 
 spia_kegg_47D = list()
 
-for (diseases in 1:length(lfc_test)){
-  spia_kegg_47D[[diseases]] = mclapply(lfc_test[[diseases]], spia_fun, mc.cores = no_cores)
-  names(spia_kegg_47D)[[diseases]] = names(lfc_test)[[diseases]]
+for (diseases in 1 : length(lfc_test)) {
+    spia_kegg_47D[[diseases]] = mclapply(lfc_test[[diseases]], spia_fun, mc.cores = no_cores)
+    names(spia_kegg_47D)[[diseases]] = names(lfc_test)[[diseases]]
 }
 
-for (i in 1:length(spia_kegg_47D)){
-  spia_kegg_47D[[i]] = Filter(function(x) !is.null(x), spia_kegg_47D[[i]])
+for (i in 1 : length(spia_kegg_47D)) {
+    spia_kegg_47D[[i]] = Filter(function(x) ! is.null(x), spia_kegg_47D[[i]])
 }
 
 # save(spia_kegg_47D,file = "./data/spia/spia_kegg_47Diseases_drugGWAS_nopar.RData")
-save(spia_kegg_47D,file = "./data/spia/spia_kegg_47Diseases_drugPdisease_nopar.RData")
+save(spia_kegg_47D, file = "./data/spia/spia_kegg_47Diseases_drugPdisease_nopar.RData")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

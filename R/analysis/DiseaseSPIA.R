@@ -24,31 +24,31 @@ setwd("/home/memon/projects/msdrp/")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 load("./data/DEGs.RData")
-DEGs = DEGs[,c(1,3,6,7)]
+DEGs = DEGs[, c(1, 3, 6, 7)]
 
 # process positive lfc 
 lfc.pos = DEGs[lfc >= 0]
 #lfc.pos = lfc.pos[order(lfc,decreasing = TRUE), ] #lfc or pvalue we should sort the dataframe?
 lfc.pos$pval.pos = abs(log10(lfc.pos$pval)) #created dummy variable for pvalue to order it decreasingly, since there are multiple lfc with same pvalue sometimes.
 #lfc.pos = lfc.pos[order(pval), ]
-lfc.pos = lfc.pos[order(lfc,pval.pos,decreasing = TRUE), ] 
-lfc.pos = lfc.pos[!duplicated(lfc.pos[,c('efo.id', 'ensembl.id')]),]
+lfc.pos = lfc.pos[order(lfc, pval.pos, decreasing = TRUE),]
+lfc.pos = lfc.pos[! duplicated(lfc.pos[, c('efo.id', 'ensembl.id')]),]
 #lfc.pos.efo = split(lfc.pos, lfc.pos$efo.id)
 lfc.pos$pval.pos = NULL
 
 # process negative lfc 
 lfc.neg = DEGs[lfc < 0]
 #lfc.neg = lfc.neg[order(lfc), ] #lfc or pvalue we should sort the dataframe?
-lfc.neg = lfc.neg[order(pval,lfc), ]
-lfc.neg = lfc.neg[!duplicated(lfc.neg[,c('efo.id','ensembl.id')]),]
+lfc.neg = lfc.neg[order(pval, lfc),]
+lfc.neg = lfc.neg[! duplicated(lfc.neg[, c('efo.id', 'ensembl.id')]),]
 #lfc.neg.efo = split(lfc.neg, lfc.neg$efo.id)
 
 # combine both lfc 
-lfc.com = rbind(lfc.pos,lfc.neg) #combine positive and negative lfc change back to a single data frame
-lfc.com = lfc.com[order(pval), ]
-lfc.com = lfc.com[!duplicated(lfc.com[,c('efo.id','ensembl.id')]),]
+lfc.com = rbind(lfc.pos, lfc.neg) #combine positive and negative lfc change back to a single data frame
+lfc.com = lfc.com[order(pval),]
+lfc.com = lfc.com[! duplicated(lfc.com[, c('efo.id', 'ensembl.id')]),]
 lfc.com$pval = NULL
-rm(lfc.neg,lfc.pos,DEGs)
+rm(lfc.neg, lfc.pos, DEGs)
 #__map ensembl IDs to ENTREZ ID___#
 
 #-----get mapping among ENTREZ_HGNC_ENSEMBL_IDs---------#
@@ -64,41 +64,43 @@ rm(lfc.neg,lfc.pos,DEGs)
 load("./data/geneID.RData")
 gene.id$entrezgene = gsub("^$", NA, gene.id$entrezgene)
 
-gene.id = gene.id[which(!is.na(gene.id$entrezgene)),]
+gene.id = gene.id[which(! is.na(gene.id$entrezgene)),]
 gene.id = data.table(gene.id)
-gene.id= unique(gene.id[,c('entrezgene','ensembl_gene_id','hgnc_symbol')])
-names(gene.id) = c("ENTREZ","ensembl.id","HGNC")
-gene.id = gene.id[!duplicated(gene.id$ensembl.id),]
+gene.id = unique(gene.id[, c('entrezgene', 'ensembl_gene_id', 'hgnc_symbol')])
+names(gene.id) = c("ENTREZ", "ensembl.id", "HGNC")
+gene.id = gene.id[! duplicated(gene.id$ensembl.id),]
 
 
-lfc.com = merge(lfc.com,gene.id,by="ensembl.id")
-lfc.com = lfc.com[!duplicated(lfc.com[,c('efo.id','ENTREZ')]),]
+lfc.com = merge(lfc.com, gene.id, by = "ensembl.id")
+lfc.com = lfc.com[! duplicated(lfc.com[, c('efo.id', 'ENTREZ')]),]
 
 # lfc.efo = split(lfc.com, lfc.com$efo.id)
 load("./data/disease.genes50.RData")
-DisGen = disease.genes[same.disease == TRUE & overlap > 0 & p.adjusted < 0.05]
+DisGen = disease.genes[same.disease == TRUE &
+    overlap > 0 &
+    p.adjusted < 0.05]
 # remove duplicated rows, since sometimes a disease id is paired with same disease because of slight different names
-DisGen = DisGen[!duplicated(DisGen$efo.id.DEGs),] #remove duplicated rows based on one column
-DisGen = DisGen[,c(1,2,9)]
-DisGen = unique(DisGen %>% 
-                   mutate(ensembl.id = strsplit(as.character(commonGenes), ",")) %>% 
-                   unnest(ensembl.id))
-DisGen$ensembl.id = gsub("\"","",DisGen$ensembl.id)
-DisGen$ensembl.id = gsub("c\\(","",DisGen$ensembl.id)
-DisGen$ensembl.id = gsub("\\)","",DisGen$ensembl.id)
+DisGen = DisGen[! duplicated(DisGen$efo.id.DEGs),] #remove duplicated rows based on one column
+DisGen = DisGen[, c(1, 2, 9)]
+DisGen = unique(DisGen %>%
+    mutate(ensembl.id = strsplit(as.character(commonGenes), ",")) %>%
+    unnest(ensembl.id))
+DisGen$ensembl.id = gsub("\"", "", DisGen$ensembl.id)
+DisGen$ensembl.id = gsub("c\\(", "", DisGen$ensembl.id)
+DisGen$ensembl.id = gsub("\\)", "", DisGen$ensembl.id)
 DisGen$ensembl.id = trimws(DisGen$ensembl.id)
 length(unique(DisGen$efo.id))
 length(unique(DisGen$ensembl.id))
 DisGen$commonGenes = NULL
-names(DisGen) = c("efo.id","efo.term","ensembl.id")
-DisGen = merge(DisGen,lfc.com,by=c('ensembl.id','efo.id')) # merge with harmonizome
+names(DisGen) = c("efo.id", "efo.term", "ensembl.id")
+DisGen = merge(DisGen, lfc.com, by = c('ensembl.id', 'efo.id')) # merge with harmonizome
 
 lfc.efo = split(DisGen, DisGen$efo.term)
 lfc.efo = Filter(function(x) dim(x)[1] > 10, lfc.efo) # remove diseases with very few (less than 10) genes to test
 
 rm(lfc.com)
 
-save(lfc.efo,file="./data/disease47.genes50.lfc.RData")
+save(lfc.efo, file = "./data/disease47.genes50.lfc.RData")
 
 #~~~test with direct DEGs
 lfc.efo = split(lfc.com, lfc.com$efo.id)
@@ -109,36 +111,36 @@ lfc.efo = Filter(function(x) dim(x)[1] > 10, lfc.efo)
 load("./data/disease47.genes50.lfc.RData")###--get log fold change for all genes for each diseases-##
 
 lfc_ensembl = list()
-for (i in 1:length(lfc.efo)) {
-  lfc_ensembl[[i]] = setNames(as.numeric(lfc.efo[[i]][[4]]),as.character(lfc.efo[[i]][[1]]))
-  names(lfc_ensembl)[[i]] = names(lfc.efo)[[i]]
+for (i in 1 : length(lfc.efo)) {
+    lfc_ensembl[[i]] = setNames(as.numeric(lfc.efo[[i]][[4]]), as.character(lfc.efo[[i]][[1]]))
+    names(lfc_ensembl)[[i]] = names(lfc.efo)[[i]]
 }
 
 lfc_entrez = list()
-for (i in 1:length(lfc.efo)) {
-  lfc_entrez[[i]] = setNames(as.numeric(lfc.efo[[i]][[4]]),as.character(lfc.efo[[i]][[5]]))
-  names(lfc_entrez)[[i]] = names(lfc.efo)[[i]]
+for (i in 1 : length(lfc.efo)) {
+    lfc_entrez[[i]] = setNames(as.numeric(lfc.efo[[i]][[4]]), as.character(lfc.efo[[i]][[5]]))
+    names(lfc_entrez)[[i]] = names(lfc.efo)[[i]]
 }
 
 lfc_entrezID = list()
-for (i in 1:length(lfc.efo)) {
-  lfc_entrezID[[i]] = setNames(as.numeric(lfc.efo[[i]][[4]]),as.character(gsub("^","ENTREZID:",lfc.efo[[i]][[5]])))
-  names(lfc_entrezID)[[i]] = names(lfc.efo)[[i]]
+for (i in 1 : length(lfc.efo)) {
+    lfc_entrezID[[i]] = setNames(as.numeric(lfc.efo[[i]][[4]]), as.character(gsub("^", "ENTREZID:", lfc.efo[[i]][[5]])))
+    names(lfc_entrezID)[[i]] = names(lfc.efo)[[i]]
 }
 
 lfc_hgnc = list()
-for (i in 1:length(lfc.efo)) {
-  lfc_hgnc[[i]] = setNames(as.numeric(lfc.efo[[i]][[4]]),as.character(lfc.efo[[i]][[6]]))
-  names(lfc_hgnc)[[i]] = names(lfc.efo)[[i]]
+for (i in 1 : length(lfc.efo)) {
+    lfc_hgnc[[i]] = setNames(as.numeric(lfc.efo[[i]][[4]]), as.character(lfc.efo[[i]][[6]]))
+    names(lfc_hgnc)[[i]] = names(lfc.efo)[[i]]
 }
 
 #~~~~~~Create a vector with all Gene universe to proxy Array Genes~~~~~~~#
 hgnc_all = unique(gene.id$HGNC)
 ensembl_all = unique(gene.id$ensembl.id)
 entrez_all = unique(gene.id$ENTREZ)
-entrezID_all = unique(gsub("^","ENTREZID:",gene.id$ENTREZ)) ## with ENTREZID: in front of each id
+entrezID_all = unique(gsub("^", "ENTREZID:", gene.id$ENTREZ)) ## with ENTREZID: in front of each id
 
-save(lfc_hgnc,lfc_ensembl,lfc_entrez,lfc_entrezID,hgnc_all,ensembl_all,entrez_all,entrezID_all,file="./data/disease47.genes50.lfc.namedVec.RData")
+save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, entrez_all, entrezID_all, file = "./data/disease47.genes50.lfc.namedVec.RData")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -159,28 +161,28 @@ save(lfc_hgnc,lfc_ensembl,lfc_entrez,lfc_entrezID,hgnc_all,ensembl_all,entrez_al
 load("./data/disease47.genes50.lfc.namedVec.RData")
 
 spia_kegg = list()
-for (i in 1:length(lfc_entrez)) {
-  spia_kegg[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir="./data/real_kegg/",organism="hsa")
+for (i in 1 : length(lfc_entrez)) {
+    spia_kegg[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = "./data/real_kegg/", organism = "hsa")
 }
 names(spia_kegg) = names(lfc_entrez)
 
-save(spia_kegg,file = "./data/spia/spia_kegg_disease47.genes50_results.RData")
+save(spia_kegg, file = "./data/spia/spia_kegg_disease47.genes50_results.RData")
 
 
 #~~~~Test with direct DEGs~~~~~#
 lfc_new = list()
 for (i in seq_along(CommonDis)) {
-  for (j in seq_along(lfc_entrez)){
-    if (CommonDis[[i]] == names(lfc_entrez)[j]) {
-      lfc_new[[i]] = lfc_entrez[[j]]
-      names(lfc_new)[i] = names(lfc_entrez)[j]
+    for (j in seq_along(lfc_entrez)) {
+        if (CommonDis[[i]] == names(lfc_entrez)[j]) {
+            lfc_new[[i]] = lfc_entrez[[j]]
+            names(lfc_new)[i] = names(lfc_entrez)[j]
+        }
     }
-  }
 }
 lfc_entrez = lfc_new
 spia_kegg_degs = list()
-for (i in 1:length(lfc_entrez)) {
-  spia_kegg_degs[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir="./data/real_kegg/",organism="hsa")
+for (i in 1 : length(lfc_entrez)) {
+    spia_kegg_degs[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = "./data/real_kegg/", organism = "hsa")
 }
 
 # CommonDis = as.data.frame(intersect(GWASs$efo.id,DEGs$efo.id))
@@ -190,7 +192,7 @@ for (i in 1:length(lfc_entrez)) {
 # names(spia_kegg_degs) = CommonDis$efo.term
 # 
 # names(spia_kegg_degs) = names(lfc_entrez)
-save(spia_kegg_degs,file = "./data/spia/spia_kegg_degs_disease61.genes50_results.RData")
+save(spia_kegg_degs, file = "./data/spia/spia_kegg_degs_disease61.genes50_results.RData")
 
 load("./data/spia/spia_kegg_degs_disease61.genes50_results.RData")
 
@@ -200,11 +202,11 @@ plotP(spia_kegg_degs[[4]])
 load("./data/spia/spia_kegg_disease47.genes50_results.RData")
 spia_kegg = lapply(spia_kegg, function(x) x[x$pNDE <= 0.05,])
 
-ad1 = spia_kegg_degs$EFO_0000249[,c(1,11)]
-ad2 = spia_kegg$`Alzheimer's disease`[,c(1,11)]
+ad1 = spia_kegg_degs$EFO_0000249[, c(1, 11)]
+ad2 = spia_kegg$`Alzheimer's disease`[, c(1, 11)]
 
-adcomb = data.table(merge(ad1,ad2, by="Name"))
-adcomb[, sameStatus := ifelse(adcomb$Status.x == adcomb$Status.y, TRUE, FALSE)]
+adcomb = data.table(merge(ad1, ad2, by = "Name"))
+adcomb[, sameStatus :  = ifelse(adcomb$Status.x == adcomb$Status.y, TRUE, FALSE)]
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~Fake KEGG SPIA~~~~~~~~~~~#
@@ -215,18 +217,18 @@ adcomb[, sameStatus := ifelse(adcomb$Status.x == adcomb$Status.y, TRUE, FALSE)]
 #' Here is the SPIA calculation with fake KEGG pathway data
 
 spia_kegg_fake = list()
-for (i in 1:length(lfc_entrez)) {
-  spia_kegg_fake[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir="./data/pseudo_kegg/",organism="hsa")
+for (i in 1 : length(lfc_entrez)) {
+    spia_kegg_fake[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = "./data/pseudo_kegg/", organism = "hsa")
 }
-save(spia_kegg_fake,file = "./data/spia/spia_kegg_disease47.genes50_fake_results.RData")
+save(spia_kegg_fake, file = "./data/spia/spia_kegg_disease47.genes50_fake_results.RData")
 plotP(spia_kegg[[4]])
-rm(list=ls())
+rm(list = ls())
 gc()
 
 load("./data/spia/spia_kegg_disease47.genes50_results.RData")
 names(lfc_entrez$EFO_0000249)
 
-spia_kegg_ad = spia(de = lfc_entrez[[3]], all = entrez_all, data.dir="./data/real_kegg/",organism="hsa")
+spia_kegg_ad = spia(de = lfc_entrez[[3]], all = entrez_all, data.dir = "./data/real_kegg/", organism = "hsa")
 plotP(spia_kegg_ad)
 
 # pdf(file="./data/spia/spia_kegg_plotsX.pdf")
@@ -242,22 +244,22 @@ plotP(spia_kegg_ad)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
-dmap = read.csv("/home/memon/projects/msdrp/2725_drugs_details.csv",header = F)
-dmap$V1 = gsub("[A-z]+\\':","",dmap$V1)
-dmap$V1 = gsub("u","",dmap$V1)
-dmap$V1 = gsub("\'","",dmap$V1)
-dmap$V1 = gsub(" ","",dmap$V1)
-dmap$V1 = gsub("\\{","",dmap$V1)
-dmap$V1 = gsub("\\}","",dmap$V1)
+dmap = read.csv("/home/memon/projects/msdrp/2725_drugs_details.csv", header = F)
+dmap$V1 = gsub("[A-z]+\\':", "", dmap$V1)
+dmap$V1 = gsub("u", "", dmap$V1)
+dmap$V1 = gsub("\'", "", dmap$V1)
+dmap$V1 = gsub(" ", "", dmap$V1)
+dmap$V1 = gsub("\\{", "", dmap$V1)
+dmap$V1 = gsub("\\}", "", dmap$V1)
 
 library(stringr)
 dmap = as.data.frame(str_split_fixed(dmap$V1, ",", 26))
-dmap = dmap[,c(2,26,1,3,9)]
-names(dmap) = c("chembl.id","chembl.name","phase","indication","ruleof5")
-dmap= dmap %>% mutate_all(as.character)
-dmap$chembl.name = gsub("[0-9]+.[0-9]+,","",dmap$chembl.name)
+dmap = dmap[, c(2, 26, 1, 3, 9)]
+names(dmap) = c("chembl.id", "chembl.name", "phase", "indication", "ruleof5")
+dmap = dmap %>% mutate_all(as.character)
+dmap$chembl.name = gsub("[0-9]+.[0-9]+,", "", dmap$chembl.name)
 dmap[dmap == "None"] = NA
-save(dmap,file = "./data/drug2715details.RData")
+save(dmap, file = "./data/drug2715details.RData")
 load("./data/drug2715details.RData")
 
 

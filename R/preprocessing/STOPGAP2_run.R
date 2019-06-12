@@ -17,11 +17,11 @@ p.threshold <- 1E-04
 
 ensureFolder = function(folder) {
     if (! file.exists(folder)) {
-    dir.create(folder)
+        dir.create(folder)
     }
 }
 
-args = commandArgs(trailingOnly=TRUE)
+args = commandArgs(trailingOnly = TRUE)
 resultsFolder = normalizePath(args[1])
 ensureFolder(resultsFolder)
 sprintf("Using results folder at %s", resultsFolder)
