@@ -22,7 +22,7 @@ resultsFolder = normalizePath(args[1])
 ensureFolder(resultsFolder)
 sprintf("Using results folder at %s", resultsFolder)
 
-dataFolder = = file.path(resultsFolder, "data")
+dataFolder = file.path(resultsFolder, "data")
 
 # get GWASs Data from STOPGAP pipeline output 
 load(dataFolder + "stopgap.gene.mesh.RData")
