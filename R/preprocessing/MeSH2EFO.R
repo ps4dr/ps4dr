@@ -84,5 +84,3 @@ length(unique(GWASs$ensembl.id))
 stopgap = fread(dataFolder + "stopgap.tsv")
 length(unique(stopgap$efo.id))
 length(unique(stopgap$ensembl.id))
-
-
