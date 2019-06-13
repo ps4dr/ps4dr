@@ -1,6 +1,6 @@
-MSDRP (A Modular and Multi-Scale Drug Repositioning Workflow)
-=============================================================
-This package comprises a modular workflow designed to identify drug repositioning candidates using multi omics data
+PS4DR (Pathway Signatures for Drug Repositioning)
+=================================================
+This package comprises a modular workflow designed to identify drug repositioning candidates using multi-omics data
 sets.
 
 Installation
