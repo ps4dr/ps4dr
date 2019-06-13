@@ -16,28 +16,28 @@ from `R Package primer <https://kbroman.org/pkg_primer/pages/github.html>`_:
 
 .. code-block:: sh
 
-   $ R -e 'library(devtools); install_github("asifemon/msdrp")'
+   $ R -e 'library(devtools); install_github("ps4dr/ps4dr")'
 
 Alternatively, ``msrdp`` can be cloned then installed from the source with:
 
 .. code-block:: sh
 
-   $ git clone https://github.com/asifemon/msdrp.git
+   $ git clone https://github.com/ps4dr/ps4dr.git
    $ R -e 'library(devtools); install("msdrp")'
 
 Reproduction
 ------------
 1. Run all pre-processing scripts using the instructions at
-   https://github.com/asifemon/msdrp/tree/master/R/preprocessing
+   https://github.com/ps4dr/ps4dr/tree/master/R/preprocessing
 2. Run all analysis scripts using the instructions at
-   https://github.com/asifemon/msdrp/tree/master/R/analysis
+   https://github.com/ps4dr/ps4dr/tree/master/R/analysis
 
 Results
 -------
 A schematic figure of the workflow is presented below. The R scripts necessary to run the MSDRP pipeline are located
-`in the R directory <https://github.com/asifemon/msdrp/tree/master/R>`_.
+`in the R directory <https://github.com/ps4dr/ps4dr/tree/master/R>`_.
 
-.. image:: https://github.com/asifemon/msdrp/blob/master/data/img/workflow.jpg
+.. image:: https://github.com/ps4dr/ps4dr/blob/master/data/img/workflow.jpg
     :width: 500px
 
 **Figure** 1. Design of the MSDRP workflow. Differentially expressed genes/proteins (i.e., DEG/DEP) from disease and
@@ -49,11 +49,6 @@ GWAS studies. Next, a previously selected pathway enrichment method is applied t
 the disease and drug perturbed profiles to evaluate the direction of dysregulation for each affected pathway in each of
 these contexts. Finally, the workflow prioritizes drugs by finding the drugs that are predicted to invert the pathway
 signatures observed in the pathophysiology context.
-
-Case Scenario
-~~~~~~~~~~~~~
-The case scenario uses different datasets that are described `in the preprocessing folder
-<https://github.com/asifemon/msdrp/tree/master/R/preprocessing>`_.
 
 How to Modify the Workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
