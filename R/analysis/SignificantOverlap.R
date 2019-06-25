@@ -67,49 +67,6 @@ tmp = dplyr::count(DEGs, efo.id)
 tmp2 = subset(tmp, n > 50)
 DEGs = merge(DEGs, tmp2, by = "efo.id")
 
-#'
-#'
-
-# CommonDis = as.data.frame(intersect(GWASs$efo.id,DEGs$efo.id))
-# names(CommonDis) = "efo.id"
-# 
-# GWASs2 = merge(CommonDis,GWASs, by="efo.id")
-# gwascnt = count(GWASs2,efo.id)
-# DEGs2 = merge(CommonDis,DEGs, by="efo.id")
-# degcnt = count(DEGs2,efo.id)
-# 
-# GWASs2.list = split(GWASs2, GWASs2$efo.id)
-# DEGs2.list = split(DEGs2, DEGs2$efo.id)
-# 
-# allcount = data.table(merge(gwascnt,degcnt, by="efo.id"))
-# names(allcount) = c('efo.id','gwas','degs')
-# allcount$dif = 0
-# allcount$common = 0
-# for (i in 1:nrow(allcount)) {
-#   allcount[i][[4]] = abs((min(allcount[i,2:3]) -max(allcount[i,2:3]))/min(allcount[i,2:3]))*100
-#   allcount[i][[5]] = (length(intersect(DEGs2.list[[i]][["ensembl.id"]],GWASs2.list[[i]][["ensembl.id"]])) / min(allcount[i,2:3])) * 100
-# }
-# allcount = allcount[order(dif), ]
-# allcount = allcount[dif >= 2000 | common < 1]
-# allcount = as.character(allcount$efo.id)
-# 
-# gwas.efo = unique(as.character(GWASs$efo.id))
-# gwas.efo = as.data.frame(setdiff(gwas.efo,allcount))
-# names(gwas.efo) = "efo.id"
-# gwas.efo$efo.id = as.character(gwas.efo$efo.id)
-# 
-# deg.efo = unique(as.character(DEGs$efo.id))
-# deg.efo = as.data.frame(setdiff(deg.efo,allcount))
-# names(deg.efo) = "efo.id"
-# deg.efo$efo.id = as.character(deg.efo$efo.id)
-# 
-# GWASs = merge(GWASs,gwas.efo, by="efo.id")
-# DEGs = merge(DEGs,deg.efo, by="efo.id")
-# 
-# rm(DEGs2,DEGs2.list,GWASs2,GWASs2.list,deg.efo,degcnt,gwas.efo,gwascnt,tmp,tmp2,allcount,i,CommonDis)
-
-#################################################
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##____DEGs to GWAS Genes >>> DISEASE Genes_____####
@@ -142,30 +99,44 @@ disease.genes <- foreach (i = seq(DEGs.list), .combine = rbind, .errorhandling =
 # correct p-values
 disease.genes[p.value == 0, p.value :  = 3e-324]
 disease.genes = disease.genes[order(p.value),]
-disease.genes = disease.genes[overlap > 0]
 disease.genes[, p.adjusted :  = p.adjust(p.value, method = "fdr")]
 # add dummy variable
 disease.genes[, same.disease :  = ifelse(efo.id.DEGs == efo.id.GWASs, TRUE, FALSE)]
-disease.genes = disease.genes[p.adjusted < 1]
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#'p-value comparison between same diseases and different diseases Gene sets
+
+# man.wtny <- wilcox.test(x = disease.genes[same.disease == FALSE, -log10(p.adjusted)], y = disease.genes[same.disease == TRUE, -log10(p.adjusted)])
+# print(man.wtny)
+# print(man.wtny$p.value)
+# png("./dat/disease.genes.pvalues.boxplots.png", width = 6 * 150, height = 6 * 150, res = 150)
+# print(ggplot(disease.genes, aes(x = same.disease, y = -log10(p.adjusted))) +
+#         geom_boxplot(fill = "#0066ff", outlier.shape = NA) +
+#         coord_cartesian(ylim = quantile(disease.genes[, -log10(p.adjusted)], c(0.03, 0.97))) +
+#         xlab("Same disease") +
+#         ylab("-log10(adjusted p-value)") +
+#         theme_bw(18) +
+#         scale_x_discrete(breaks = c(FALSE, TRUE), labels = c("No", "Yes")) +
+#         ggtitle(paste("p-value =", sprintf("%.2e", man.wtny$p.value))))
+# dev.off()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~ROC Curve~~~~~~~~~~~~~~#
 
-preds <- as.numeric(disease.genes[, - log10(p.adjusted)])
-labls <- as.numeric(disease.genes[, same.disease])
-
-#produce errors, need to do it in laptop
-roc.res <- roc(response = as.numeric(labls), predictor = as.numeric(preds), algorithm = 2, ci = TRUE, ci.method = "bootstrap", smooth = TRUE, boot.n = 1000, parallel = TRUE, progress = "none")
-print(roc.res)
-sp.ci <- ci.sp(roc.res, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
-se.ci <- ci.se(roc.res, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
-png(file.path(dataFolder,"disease.genes.roc.png", width = 6 * 150, height = 6 * 150, res = 150))
-par(pty = "s")
-plot(roc.res, main = paste("AUC =", round(roc.res$auc, 2)), xlab = "False positive rate", ylab = "True positive rate", identity.lty = 2, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.5)
-plot(se.ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
-plot(sp.ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
-plot(roc.res, add = TRUE, col = "#0066ff", lwd = 3)
-dev.off()
+# pred <- as.numeric(disease.genes[, - log10(p.adjusted)])
+# resp <- as.numeric(disease.genes[, same.disease])
+# 
+# roc.curve <- roc(response = as.numeric(resp), predictor = as.numeric(pred), algorithm = 2, ci = TRUE, ci.method = "bootstrap", smooth = TRUE, boot.n = 1000, parallel = TRUE, progress = "none")
+# print(roc.curve)
+# sp.ci <- ci.sp(roc.curve, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
+# se.ci <- ci.se(roc.curve, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
+# png(file.path(dataFolder,"disease.genes.roc.png", width = 6 * 150, height = 6 * 150, res = 150))
+# par(pty = "s")
+# plot(roc.curve, main = paste("AUC =", round(roc.curve$auc, 2)), xlab = "False positive rate", ylab = "True positive rate", identity.lty = 2, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.5)
+# plot(se.ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
+# plot(sp.ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
+# plot(roc.curve, add = TRUE, col = "#0066ff", lwd = 3)
+# dev.off()
 
 
 disease.genes = disease.genes[p.adjusted <= 0.05]
