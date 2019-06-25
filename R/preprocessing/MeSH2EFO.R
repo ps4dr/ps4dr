@@ -11,6 +11,9 @@ library(tidyr)
 library(httr)
 library(jsonlite)
 
+#####################################################################
+#TODO: Change to the directory where you cloned this repository
+#~~~~~~~Using relative path~~~~~~~#
 ensureFolder = function(folder) {
     if (! file.exists(folder)) {
         dir.create(folder)
@@ -22,27 +25,35 @@ resultsFolder = normalizePath(args[1])
 ensureFolder(resultsFolder)
 sprintf("Using results folder at %s", resultsFolder)
 
-dataFolder = file.path(resultsFolder, "data")
+dataFolder = file.path(resultsFolder)
+#####################################################################
 
 # get GWASs Data from STOPGAP pipeline output 
 load(file.path(dataFolder, "stopgap.gene.mesh.RData"))
-GWASs = stopgap.gene.mesh
+GWASs = data.table(stopgap.gene.mesh)
 rm(stopgap.gene.mesh)
 
-length(unique(GWASs$msh))
-length(unique(GWASs$gene.v19))
-length(unique(GWASs$snp.ld))
+sprintf("Number of unique MeSH terms: %d", length(unique(GWASs$msh)))
+sprintf("Number of unique genes: %d", length(unique(GWASs$gene.v19)))
+sprintf("Number of unique SNPs: %d", length(unique(GWASs$snp.ld)))
 
-# keep relevant columns
-GWASs = data.table(GWASs)
+# keep relevant columns and remove redundant rows
 GWASs = unique(GWASs[, .(snp.ld, gene.v19, msh, pvalue, gene.score, gene.rank.min, source)])
+
+sprintf("Number of p-values with underflow: %d", nrow(GWASs[pvalue == 0]))
 # replace p-values of zero with arbitrarily low p-value
-GWASs[pvalue == 0, pvalue :  = 3e-324]
+GWASs[pvalue == 0, pvalue := 3e-324]
 
 # map gene symbols to Ensembl
-GWASs.genes = unique(GWASs[, gene.v19])
-anno = as.data.table(select(EnsDb.Hsapiens.v86, keys = GWASs.genes, keytype = "SYMBOL", columns = c("GENEID", "SYMBOL")))
-GWASs = merge(GWASs, anno, by.x = "gene.v19", by.y = "SYMBOL", all = FALSE)
+GWASs.geneSymbols = unique(GWASs[, gene.v19])
+sprintf("Number of unique GWAS genes: %d", length(GWASs.geneSymbols))
+
+ensembleToGeneSymbolTable = ensembldb::select(EnsDb.Hsapiens.v86, keys = GWASs.geneSymbols, keytype = "SYMBOL", columns = c("GENEID", "SYMBOL"))
+ensembleToGeneSymbolTable = data.table(ensembleToGeneSymbolTable)
+sprintf("Number of Ensembl to HGNC Gene Symbol mappings: %d", nrow(ensembleToGeneSymbolTable))
+
+# anno = as.data.table(ensembleToGeneSymbolTable)
+GWASs = merge(GWASs, ensembleToGeneSymbolTable, by.x = "gene.v19", by.y = "SYMBOL", all = FALSE)
 
 #' read EFO ontolgy (version 2.105) files in csv format downloaded from bioportal on 11th March, 2019
 #' "http://data.bioontology.org/ontologies/EFO/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb&download_format=csv"
@@ -71,15 +82,14 @@ mesh.terms$upper = trimws(mesh.terms$upper, which = "both")
 mesh2efo = merge(mesh.terms, efo, by = "upper")
 mesh2efo = mesh2efo[, c(2, 3, 4)]
 names(mesh2efo) = c("mesh", "efo.id", "efo.term")
+mesh2efo = mesh2efo[!duplicated(mesh2efo[,c('efo.id')]),]
 
 # merge GWASs with mesh2efo table
 GWASs = merge(GWASs, mesh2efo, by.x = "msh", by.y = "mesh", all = FALSE)
 GWASs = GWASs[, .(snp.ld, ensembl.id = GENEID, gene.symbol = gene.v19, efo.id, efo.term, GWASs.pvalue = pvalue, GWASs.gene.score = gene.score, GWASs.gene.rank = gene.rank.min, source)]
-unique(GWASs$efo.id)
 
 save(GWASs, file = file.path(dataFolder, "GWASs.RData"))
 length(unique(GWASs$efo.id))
 length(unique(GWASs$ensembl.id))
-stopgap = fread(file.path(dataFolder, "stopgap.tsv"))
-length(unique(stopgap$efo.id))
-length(unique(stopgap$ensembl.id))
+
+

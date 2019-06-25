@@ -21,7 +21,19 @@ library(pROC)
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository
-setwd("/home/memon/projects/msdrp/")
+#~~~~~~~Using relative path~~~~~~~#
+ensureFolder = function(folder) {
+  if (! file.exists(folder)) {
+    dir.create(folder)
+  }
+}
+
+args = commandArgs(trailingOnly = TRUE)
+resultsFolder = normalizePath(args[1])
+ensureFolder(resultsFolder)
+sprintf("Using results folder at %s", resultsFolder)
+
+dataFolder = file.path(resultsFolder)
 #####################################################################
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -45,12 +57,12 @@ SignificantOverlap <- function(geneSet1, geneSet2, universe) {
 #~~~~~~~~~~~~~~~~~~~~Datasets~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load("./data/GWASs.RData")
+load(file.path(dataFolder,"GWASs.RData"))
 tmp = dplyr::count(GWASs, efo.id)
 tmp2 = subset(tmp, n > 50)
 GWASs = merge(GWASs, tmp2, by = "efo.id")
 
-load("./data/DEGs.RData")
+load(file.path(dataFolder,"DEGs.RData"))
 tmp = dplyr::count(DEGs, efo.id)
 tmp2 = subset(tmp, n > 50)
 DEGs = merge(DEGs, tmp2, by = "efo.id")
@@ -147,7 +159,7 @@ roc.res <- roc(response = as.numeric(labls), predictor = as.numeric(preds), algo
 print(roc.res)
 sp.ci <- ci.sp(roc.res, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
 se.ci <- ci.se(roc.res, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
-png("./data/disease.genes.roc.png", width = 6 * 150, height = 6 * 150, res = 150)
+png(file.path(dataFolder,"disease.genes.roc.png", width = 6 * 150, height = 6 * 150, res = 150))
 par(pty = "s")
 plot(roc.res, main = paste("AUC =", round(roc.res$auc, 2)), xlab = "False positive rate", ylab = "True positive rate", identity.lty = 2, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.5)
 plot(se.ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
@@ -157,8 +169,8 @@ dev.off()
 
 
 disease.genes = disease.genes[p.adjusted <= 0.05]
-save(disease.genes, file = "./data/disease.genes50.RData")
-# load("./data/disease.genes50.RData")
+save(disease.genes, file = file.path(dataFolder,"disease.genes50.RData"))
+# load(file.path(dataFolder,"disease.genes50.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##___________Drugs to DISEASE Genes___________#####
@@ -169,11 +181,11 @@ save(disease.genes, file = "./data/disease.genes50.RData")
 #' Output would be the disease specific genes which are also perturbed by the drugs.
 
 # should make a separate script with all smal code snippets used for creating these small files 
-load("./data/gene.id.entrez.RData")
+load(file.path(dataFolder,"gene.id.entrez.RData"))
 
 # get LINCS dataset
-load("./data/L1000.RData")
-# harmonizome = unique(fread("./data/harmonizome.tsv"))
+load(file.path(dataFolder,"L1000.RData"))
+# harmonizome = unique(fread(file.path(dataFolder,"harmonizome.tsv")))
 L1000 = L1000[, c(5, 1, 7)]
 length(unique(L1000$chembl.id))
 length(unique(L1000$ensembl.id))
@@ -187,7 +199,7 @@ L1000 = merge(L1000, gene.id.entrez, by = "ensembl.id") # merging with ENTREZ ID
 #' In our case we want to investigate all drugs which went until at least any clinical trial phases
 #' if users want to investigate all drugs they can comment out next 4 lines
 
-load("./data/drug2715details.RData")
+load(file.path(dataFolder,"drug2715details.RData"))
 dmap = data.table(dmap[, c(1, 2, 3)])
 dmap = dmap[phase == 4 | phase == 3 | phase == 2 | phase == 1] #673 Drugs
 L1000 = merge(dmap[, c(1, 2)], L1000, by = "chembl.id")
@@ -195,8 +207,8 @@ length(unique(L1000$chembl.id))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 ##### create Disease-Genes list #####
-load("./data/disease.genes50.RData")
-# disease.genes = fread("./data/disease.genes50.tsv")
+load(file.path(dataFolder,"disease.genes50.RData"))
+# disease.genes = fread(file.path(dataFolder,"disease.genes50.tsv"))
 # considering all those gene sets where DEGs and GWAS came from same diseases.
 DisGen = disease.genes[same.disease == TRUE & overlap > 0]
 # remove duplicated rows, since sometimes a disease id is paired with same disease because of slight different names
@@ -234,12 +246,12 @@ SignificantOverlap <- function(geneSet1, geneSet2, universe) {
 #~~~~~~~~~~~~~~~~~~~~Datasets~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load("./data/GWASs.RData")
+load(file.path(dataFolder,"GWASs.RData"))
 tmp = dplyr::count(GWASs, efo.id)
 tmp2 = subset(tmp, n > 50)
 GWASs = merge(GWASs, tmp2, by = "efo.id")
 
-load("./data/DEGs.RData")
+load(file.path(dataFolder,"DEGs.RData"))
 tmp = dplyr::count(DEGs, efo.id)
 tmp2 = subset(tmp, n > 50)
 DEGs = merge(DEGs, tmp2, by = "efo.id")
@@ -284,7 +296,7 @@ disease.genes[, p.adjusted :  = p.adjust(p.value, method = "fdr")]
 disease.genes = disease.genes[p.adjusted <= 0.05]
 # add dummy variable
 disease.genes[, same.disease :  = ifelse(efo.id.DEGs == efo.id.GWASs, TRUE, FALSE)]
-save(disease.genes, file = "./data/disease.genes50.RData")
+save(disease.genes, file = file.path(dataFolder,"disease.genes50.RData"))
 
 
 
@@ -297,11 +309,11 @@ save(disease.genes, file = "./data/disease.genes50.RData")
 #' Output would be the disease specific genes which are also perturbed by the drugs.
 
 # should make a separate script with all smal code snippets used for creating these small files 
-load("./data/gene.id.entrez.RData")
+load(file.path(dataFolder,"gene.id.entrez.RData"))
 
 # get LINCS dataset
-load("./data/L1000.RData")
-# harmonizome = unique(fread("./data/harmonizome.tsv"))
+load(file.path(dataFolder,"L1000.RData"))
+# harmonizome = unique(fread(file.path(dataFolder,"harmonizome.tsv")))
 L1000 = L1000[, c(5, 1, 7)]
 length(unique(L1000$chembl.id))
 length(unique(L1000$ensembl.id))
@@ -315,7 +327,7 @@ L1000 = merge(L1000, gene.id.entrez, by = "ensembl.id") # merging with ENTREZ ID
 #' In our case we want to investigate all drugs which went until at least any clinical trial phases
 #' if users want to investigate all drugs they can comment out next 4 lines
 
-load("./data/drug2715details.RData")
+load(file.path(dataFolder,"drug2715details.RData"))
 dmap = data.table(dmap[, c(1, 2, 3)])
 dmap = dmap[phase == 4 | phase == 3 | phase == 2 | phase == 1] #673 Drugs
 L1000 = merge(dmap[, c(1, 2)], L1000, by = "chembl.id")
@@ -323,8 +335,8 @@ length(unique(L1000$chembl.id))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 ##### create Disease-Genes list #####
-load("./data/disease.genes50.RData")
-# disease.genes = fread("./data/disease.genes50.tsv")
+load(file.path(dataFolder,"disease.genes50.RData"))
+# disease.genes = fread(file.path(dataFolder,"disease.genes50.tsv"))
 # considering all those gene sets where DEGs and GWAS came from same diseases.
 DisGen = disease.genes[same.disease == TRUE & overlap > 0]
 # remove duplicated rows, since sometimes a disease id is paired with same disease because of slight different names
@@ -345,8 +357,8 @@ DisGen.list = split(DisGenX, DisGenX$efo.id.DEGs)
 efo.ids = unique(DisGen$efo.id.DEGs)
 ensembl.ids = unique(keys(EnsDb.Hsapiens.v86))
 chembl.ids = unique(L1000[, chembl.id])
-load("./data/drug2disease.RData")
-opentargets.drugs = unique(fread("./data/opentargets.drugs.tsv"))
+load(file.path(dataFolder,"drug2disease.RData"))
+opentargets.drugs = unique(fread(file.path(dataFolder,"opentargets.drugs.tsv")))
 
 ## Signifcant overlap calculation
 drugPdisease.genes <- foreach (i = seq(efo.ids), .combine = rbind, .errorhandling = "remove") %dopar% {
@@ -374,15 +386,15 @@ drugPdisease.genes = unique(drugPdisease.genes)
 drugPdisease.genes = drugPdisease.genes[overlap > 0]
 length(unique(drugPdisease.genes$chembl.id))
 length(unique(drugPdisease.genes$efo.id))
-save(drugPdisease.genes, file = "./data/drugPdisease.genes50.RData")
+save(drugPdisease.genes, file = file.path(dataFolder,"drugPdisease.genes50.RData"))
 
-#load("./data/drugPdisease.genes50.RData")
+#load(file.path(dataFolder,"drugPdisease.genes50.RData"))
 # correct p-values
 drugPdisease.genes[, p.adjusted :  = p.adjust(p.value, method = "fdr")]
 drugPdisease.genes = drugPdisease.genes[p.adjusted < 0.05]
-save(drugPdisease.genes, file = "./data/drugPdisease.genes50.padj.RData")
+save(drugPdisease.genes, file = file.path(dataFolder,"drugPdisease.genes50.padj.RData"))
 drugPdisease.genes = drugPdisease.genes[p.adjusted < 1e-05]
-save(drugPdisease.genes, file = "./data/drugPdisease.genes50.padj1e-5.RData")
+save(drugPdisease.genes, file = file.path(dataFolder,"drugPdisease.genes50.padj1e-5.RData"))
 #md2 = unique(min.drugs[,c(1,3,12)]) #filtering columns for merging indication area to our super drugs
 #drugPdisease.genes = merge(drugPdisease.genes,md2,by=c("chembl.id","efo.id"))
 drugPdisease.genes = drugPdisease.genes[order(p.adjusted),]
@@ -398,9 +410,9 @@ drugPdisease.genes = drugPdisease.genes[order(p.adjusted),]
 #' and also recorded from GWAS.
 #' 
 
-# GWASs = unique(fread("./data/stopgap.tsv"))
-load("./data/drug2disease.RData")
-load("./data/GWASs.RData")
+# GWASs = unique(fread(file.path(dataFolder,"stopgap.tsv")))
+load(file.path(dataFolder,"drug2disease.RData"))
+load(file.path(dataFolder,"GWASs.RData"))
 GWASs = data.table(GWASs[, c(4, 5, 2, 3)])
 tmp = dplyr::count(GWASs, efo.id)
 
@@ -415,7 +427,7 @@ tmp3 = subset(tmp, n >= 100)
 tmp4 = subset(tmp, n >= 500)
 # disgen_plot4 = ggplot(tmp4, aes(x=n)) + geom_freqpoly(color="darkred", bins = 30)+ ggtitle("Genes (>= 500) per Disease frequency plot")
 # 
-# jpeg(file="./data/frequency_plots_GWASs_diseaseGenes.jpeg", width=1800, height=1980, res=200)
+# jpeg(file=file.path(dataFolder,"frequency_plots_GWASs_diseaseGenes.jpeg", width=1800, height=1980, res=200))
 # plot_grid(disgen_plot1,disgen_plot2, disgen_plot3,disgen_plot4,align = "h", ncol = 2,nrow =2, rel_heights = c(1/4, 1/4))
 # dev.off()
 
@@ -463,19 +475,19 @@ drugGWAS.genes[p.value == 0, p.value :  = 3e-324]
 drugGWAS.genes = drugGWAS.genes[overlap > 0]
 drugGWAS.genes = drugGWAS.genes[order(p.value),]
 drugGWAS.genes[, p.adjusted :  = p.adjust(p.value, method = "fdr")]
-save(drugGWAS.genes, file = "./data/drugGWAS.genes50.RData")
+save(drugGWAS.genes, file = file.path(dataFolder,"drugGWAS.genes50.RData"))
 
 drugGWAS.genes = drugGWAS.genes[p.adjusted < 1e-05]
-save(drugGWAS.genes, file = "./data/drugGWAS.genes50.padj1e-5.RData")
+save(drugGWAS.genes, file = file.path(dataFolder,"drugGWAS.genes50.padj1e-5.RData"))
 
 drugGWAS.genes = drugGWAS.genes[p.adjusted < 1e-10]
-save(drugGWAS.genes, file = "./data/drugGWAS.genes50.padj1e-10.RData")
+save(drugGWAS.genes, file = file.path(dataFolder,"drugGWAS.genes50.padj1e-10.RData"))
 
 
-load("./data/drugGWAS.genes50.padj1e-5.RData")
-load("./data/drugGWAS.genes50.padj1e-10.RData")
+load(file.path(dataFolder,"drugGWAS.genes50.padj1e-5.RData"))
+load(file.path(dataFolder,"drugGWAS.genes50.padj1e-10.RData"))
 length(unique(drugGWAS.genes$chembl.id))
 length(unique(drugGWAS.genes$efo.id))
 
-load("./data/drugPdisease.genes.48D.padj1e-5.RData")
+load(file.path(dataFolder,"drugPdisease.genes.48D.padj1e-5.RData"))
 length(unique(drugPdisease.genes$efo.id))

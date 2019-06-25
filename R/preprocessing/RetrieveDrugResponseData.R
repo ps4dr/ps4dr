@@ -18,7 +18,19 @@ registerDoParallel(parallel::detectCores() - 1)
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository
-setwd("/home/memon/projects/msdrp/")
+#~~~~~~~Using relative path~~~~~~~#
+ensureFolder = function(folder) {
+  if (! file.exists(folder)) {
+    dir.create(folder)
+  }
+}
+
+args = commandArgs(trailingOnly = TRUE)
+resultsFolder = normalizePath(args[1])
+ensureFolder(resultsFolder)
+sprintf("Using results folder at %s", resultsFolder)
+
+dataFolder = file.path(resultsFolder)
 #####################################################################
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -58,7 +70,7 @@ lincs.mappings = data.table(unique(lincs.mappings))
 
 L1000.genes = L1000[, as.character(unique(GeneID))]
 anno = as.data.table(select(EnsDb.Hsapiens.v86, keys = L1000.genes, keytype = "ENTREZID", columns = c("GENEID", "ENTREZID")))
-L1000 = merge(anno[, ENTREZID :  = as.numeric(ENTREZID)], L1000, by.x = "ENTREZID", by.y = "GeneID", allow.cartesian = TRUE)
+L1000 = merge(anno[, ENTREZID := as.numeric(ENTREZID)], L1000, by.x = "ENTREZID", by.y = "GeneID", allow.cartesian = TRUE)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -75,10 +87,10 @@ unichem.res = foreach(i = seq(lincs.mappings[, pubchem_cid]), .combine = rbind) 
     }
 }
 
-L1000[, lincs.id :  = substr(`Perturbation ID_Perturbagen_Cell Line_Time_Time Unit_Dose_Dose Unit`, 1, 13)]
+L1000[, lincs.id := substr(`Perturbation ID_Perturbagen_Cell Line_Time_Time Unit_Dose_Dose Unit`, 1, 13)]
 L1000 = merge(L1000, unichem.res, by = "lincs.id")
 L1000 = L1000[, .(ensembl.id = GENEID, gene.symbol = GeneSym, lincs.id, pubchem.id, chembl.id, perturbation = `Perturbation ID_Perturbagen_Cell Line_Time_Time Unit_Dose_Dose Unit`, direction = weight)]
-save(L1000, file = "./data/L1000.RData")
+save(L1000, file = file.path(dataFolder,"L1000.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~L1000 Drugs~~~~~~~~~~~~~~~~~~~#
@@ -89,7 +101,7 @@ save(L1000, file = "./data/L1000.RData")
 #' using chemblid2name.ipynb script
 
 L1000Drugs = unique(L1000[, 5])
-fwrite(L1000Drugs, "./data/L1000Drugs.csv", col.names = F)
+fwrite(L1000Drugs, file.path(dataFolder,"L1000Drugs.csv"), col.names = F)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 

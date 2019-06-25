@@ -9,21 +9,30 @@ library(data.table)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-library(cowplot)
-
 library(SPIA)
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository
-setwd("/home/memon/projects/msdrp/")
-#####################################################################
+#~~~~~~~Using relative path~~~~~~~#
+ensureFolder = function(folder) {
+  if (! file.exists(folder)) {
+    dir.create(folder)
+  }
+}
 
+args = commandArgs(trailingOnly = TRUE)
+resultsFolder = normalizePath(args[1])
+ensureFolder(resultsFolder)
+sprintf("Using results folder at %s", resultsFolder)
+
+dataFolder = file.path(resultsFolder)
+#####################################################################
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~Prepare DEGs data set for SPIA~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load("./data/DEGs.RData")
+load(file.path(dataFolder,"DEGs.RData"))
 DEGs = DEGs[, c(1, 3, 6, 7)]
 
 # process positive lfc 
@@ -49,19 +58,21 @@ lfc.com = lfc.com[order(pval),]
 lfc.com = lfc.com[! duplicated(lfc.com[, c('efo.id', 'ensembl.id')]),]
 lfc.com$pval = NULL
 rm(lfc.neg, lfc.pos, DEGs)
+
 #__map ensembl IDs to ENTREZ ID___#
-
 #-----get mapping among ENTREZ_HGNC_ENSEMBL_IDs---------#
-# library(biomaRt)
-# ensembl = useEnsembl(biomart="ensembl", version=92, dataset="hsapiens_gene_ensembl") # v92 has less id than v79
-# val = c(1:23,"X","Y")
-# gene.id = getBM(attributes=c('entrezgene','hgnc_symbol','ensembl_gene_id','chromosome_name','start_position','end_position'),
-#                    filters ='chromosome_name', values =val, mart = ensembl)
-# 
-# save(gene.id,file = "./data/geneID.RData")
-# rm(ensembl,val)
+library(biomaRt)
+ensembl = useEnsembl(biomart="ensembl", version=92, dataset="hsapiens_gene_ensembl") # v92 has less id than v79
+val = c(1:23,"X","Y")
+gene.id = getBM(attributes=c('entrezgene','hgnc_symbol','ensembl_gene_id','chromosome_name','start_position','end_position'),
+                   filters ='chromosome_name', values =val, mart = ensembl)
 
-load("./data/geneID.RData")
+save(gene.id,file = file.path(dataFolder,"geneID.RData"))
+rm(ensembl,val)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+load(file.path(dataFolder,"geneID.RData"))
 gene.id$entrezgene = gsub("^$", NA, gene.id$entrezgene)
 
 gene.id = gene.id[which(! is.na(gene.id$entrezgene)),]
@@ -75,7 +86,7 @@ lfc.com = merge(lfc.com, gene.id, by = "ensembl.id")
 lfc.com = lfc.com[! duplicated(lfc.com[, c('efo.id', 'ENTREZ')]),]
 
 # lfc.efo = split(lfc.com, lfc.com$efo.id)
-load("./data/disease.genes50.RData")
+load(file.path(dataFolder,"disease.genes50.RData"))
 DisGen = disease.genes[same.disease == TRUE &
     overlap > 0 &
     p.adjusted < 0.05]
@@ -98,17 +109,12 @@ DisGen = merge(DisGen, lfc.com, by = c('ensembl.id', 'efo.id')) # merge with har
 lfc.efo = split(DisGen, DisGen$efo.term)
 lfc.efo = Filter(function(x) dim(x)[1] > 10, lfc.efo) # remove diseases with very few (less than 10) genes to test
 
+save(lfc.efo, file = file.path(dataFolder,"disease47.genes50.lfc.RData"))
 rm(lfc.com)
-
-save(lfc.efo, file = "./data/disease47.genes50.lfc.RData")
-
-#~~~test with direct DEGs
-lfc.efo = split(lfc.com, lfc.com$efo.id)
-lfc.efo = Filter(function(x) dim(x)[1] > 10, lfc.efo)
 
 #~~~~~~~~~~Create Named Vector for log fold changes in each disease~~~~~~~~~~#
 
-load("./data/disease47.genes50.lfc.RData")###--get log fold change for all genes for each diseases-##
+load(file.path(dataFolder,"disease47.genes50.lfc.RData"))###--get log fold change for all genes for each diseases-##
 
 lfc_ensembl = list()
 for (i in 1 : length(lfc.efo)) {
@@ -140,7 +146,7 @@ ensembl_all = unique(gene.id$ensembl.id)
 entrez_all = unique(gene.id$ENTREZ)
 entrezID_all = unique(gsub("^", "ENTREZID:", gene.id$ENTREZ)) ## with ENTREZID: in front of each id
 
-save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, entrez_all, entrezID_all, file = "./data/disease47.genes50.lfc.namedVec.RData")
+save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, entrez_all, entrezID_all, file = file.path(dataFolder,"disease47.genes50.lfc.namedVec.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -158,15 +164,15 @@ save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, ent
 
 #~~~~~~~~~~~~~KEGG SPIA~~~~~~~~~~~~~#
 
-load("./data/disease47.genes50.lfc.namedVec.RData")
+load(file.path(dataFolder,"disease47.genes50.lfc.namedVec.RData"))
 
 spia_kegg = list()
 for (i in 1 : length(lfc_entrez)) {
-    spia_kegg[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = "./data/real_kegg/", organism = "hsa")
+    spia_kegg[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"real_kegg/"), organism = "hsa")
 }
 names(spia_kegg) = names(lfc_entrez)
 
-save(spia_kegg, file = "./data/spia/spia_kegg_disease47.genes50_results.RData")
+save(spia_kegg, file = file.path(dataFolder,"spia/spia_kegg_disease47.genes50_results.RData"))
 
 
 #~~~~Test with direct DEGs~~~~~#
@@ -182,7 +188,7 @@ for (i in seq_along(CommonDis)) {
 lfc_entrez = lfc_new
 spia_kegg_degs = list()
 for (i in 1 : length(lfc_entrez)) {
-    spia_kegg_degs[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = "./data/real_kegg/", organism = "hsa")
+    spia_kegg_degs[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"real_kegg/"), organism = "hsa")
 }
 
 # CommonDis = as.data.frame(intersect(GWASs$efo.id,DEGs$efo.id))
@@ -192,14 +198,14 @@ for (i in 1 : length(lfc_entrez)) {
 # names(spia_kegg_degs) = CommonDis$efo.term
 # 
 # names(spia_kegg_degs) = names(lfc_entrez)
-save(spia_kegg_degs, file = "./data/spia/spia_kegg_degs_disease61.genes50_results.RData")
+save(spia_kegg_degs, file = file.path(dataFolder,"spia/spia_kegg_degs_disease61.genes50_results.RData"))
 
-load("./data/spia/spia_kegg_degs_disease61.genes50_results.RData")
+load(file.path(dataFolder,"spia/spia_kegg_degs_disease61.genes50_results.RData"))
 
 
 spia_kegg_degs = lapply(spia_kegg_degs, function(x) x[x$pNDE <= 0.05,])
 plotP(spia_kegg_degs[[4]])
-load("./data/spia/spia_kegg_disease47.genes50_results.RData")
+load(file.path(dataFolder,"spia/spia_kegg_disease47.genes50_results.RData"))
 spia_kegg = lapply(spia_kegg, function(x) x[x$pNDE <= 0.05,])
 
 ad1 = spia_kegg_degs$EFO_0000249[, c(1, 11)]
@@ -209,57 +215,57 @@ adcomb = data.table(merge(ad1, ad2, by = "Name"))
 adcomb[, sameStatus :  = ifelse(adcomb$Status.x == adcomb$Status.y, TRUE, FALSE)]
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-#~~~~~~~~~~~Fake KEGG SPIA~~~~~~~~~~~#
+#~~~~~~~~~~~Pseudo KEGG SPIA~~~~~~~~~~~#
 
 #' we have created SPIA data sets for all three pathways 
 #' with random gene sets to see whether our results are by 
 #' random chance or meaningful indeed.
-#' Here is the SPIA calculation with fake KEGG pathway data
+#' Here is the SPIA calculation with Pseudo KEGG pathway data
 
-spia_kegg_fake = list()
+spia_kegg_pseudo = list()
 for (i in 1 : length(lfc_entrez)) {
-    spia_kegg_fake[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = "./data/pseudo_kegg/", organism = "hsa")
+    spia_kegg_pseudo[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"pseudo_kegg/"), organism = "hsa")
 }
-save(spia_kegg_fake, file = "./data/spia/spia_kegg_disease47.genes50_fake_results.RData")
+save(spia_kegg_pseudo, file = file.path(dataFolder,"spia/spia_kegg_disease47.genes50_pseudo_results.RData"))
 plotP(spia_kegg[[4]])
 rm(list = ls())
 gc()
 
-load("./data/spia/spia_kegg_disease47.genes50_results.RData")
+load(file.path(dataFolder,"spia/spia_kegg_disease47.genes50_results.RData"))
 names(lfc_entrez$EFO_0000249)
 
-spia_kegg_ad = spia(de = lfc_entrez[[3]], all = entrez_all, data.dir = "./data/real_kegg/", organism = "hsa")
+spia_kegg_ad = spia(de = lfc_entrez[[3]], all = entrez_all, data.dir = file.path(dataFolder,"real_kegg/", organism = "hsa"))
 plotP(spia_kegg_ad)
 
-# pdf(file="./data/spia/spia_kegg_plotsX.pdf")
+# pdf(file=file.path(dataFolder,"spia/spia_kegg_plotsX.pdf"))
 # plotP(spia_kegg,threshold=0.1)
-# plotP(spia_kegg_fake,threshold=0.1)
+# plotP(spia_kegg_pseudo,threshold=0.1)
 # dev.off()
 # 
 # spia_kegg1 = data.table(spia_kegg)
 # spia_kegg1 = spia_kegg1[pGFdr <= 0.05]
-# spia_kegg_fake1 = data.table(spia_kegg_fake)
-# spia_kegg_fake1 = spia_kegg_fake1[pGFdr <= 0.05] 
+# spia_kegg_pseudo1 = data.table(spia_kegg_pseudo)
+# spia_kegg_pseudo1 = spia_kegg_pseudo1[pGFdr <= 0.05] 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-
-dmap = read.csv("/home/memon/projects/msdrp/2725_drugs_details.csv", header = F)
-dmap$V1 = gsub("[A-z]+\\':", "", dmap$V1)
-dmap$V1 = gsub("u", "", dmap$V1)
-dmap$V1 = gsub("\'", "", dmap$V1)
-dmap$V1 = gsub(" ", "", dmap$V1)
-dmap$V1 = gsub("\\{", "", dmap$V1)
-dmap$V1 = gsub("\\}", "", dmap$V1)
-
-library(stringr)
-dmap = as.data.frame(str_split_fixed(dmap$V1, ",", 26))
-dmap = dmap[, c(2, 26, 1, 3, 9)]
-names(dmap) = c("chembl.id", "chembl.name", "phase", "indication", "ruleof5")
-dmap = dmap %>% mutate_all(as.character)
-dmap$chembl.name = gsub("[0-9]+.[0-9]+,", "", dmap$chembl.name)
-dmap[dmap == "None"] = NA
-save(dmap, file = "./data/drug2715details.RData")
-load("./data/drug2715details.RData")
+#' delte later
+# dmap = read.csv("/home/memon/projects/msdrp/2725_drugs_details.csv", header = F)
+# dmap$V1 = gsub("[A-z]+\\':", "", dmap$V1)
+# dmap$V1 = gsub("u", "", dmap$V1)
+# dmap$V1 = gsub("\'", "", dmap$V1)
+# dmap$V1 = gsub(" ", "", dmap$V1)
+# dmap$V1 = gsub("\\{", "", dmap$V1)
+# dmap$V1 = gsub("\\}", "", dmap$V1)
+# 
+# library(stringr)
+# dmap = as.data.frame(str_split_fixed(dmap$V1, ",", 26))
+# dmap = dmap[, c(2, 26, 1, 3, 9)]
+# names(dmap) = c("chembl.id", "chembl.name", "phase", "indication", "ruleof5")
+# dmap = dmap %>% mutate_all(as.character)
+# dmap$chembl.name = gsub("[0-9]+.[0-9]+,", "", dmap$chembl.name)
+# dmap[dmap == "None"] = NA
+# save(dmap, file = file.path(dataFolder,"drug2715details.RData"))
+# load(file.path(dataFolder,"drug2715details.RData"))
 
 

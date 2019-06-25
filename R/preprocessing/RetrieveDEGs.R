@@ -11,16 +11,31 @@ library(httr)
 library(jsonlite)
 library(foreach)
 library(doParallel)
+library(dplyr)
+library(tidyr)
 registerDoParallel(parallel::detectCores() - 1)
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository
-setwd("/home/memon/projects/msdrp/")
+setwd("/home/memon/projects/ps4dr/ps4dr/data/")
+#~~~~~~~Using relative path~~~~~~~#
+ensureFolder = function(folder) {
+  if (! file.exists(folder)) {
+    dir.create(folder)
+  }
+}
+
+args = commandArgs(trailingOnly = TRUE)
+resultsFolder = normalizePath(args[1])
+ensureFolder(resultsFolder)
+sprintf("Using results folder at %s", resultsFolder)
+
+dataFolder = file.path(resultsFolder)
 #####################################################################
 
 # load gwas.data data to get EFO IDs for diseases
-load("./data/gwas.data.RData")
-efo.ids = unique(gwas.data[, efo.id])
+load(file.path(dataFolder,"GWASs.RData"))
+efo.ids = unique(GWASs[, efo.id])
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~Retrieve Differentially Expressed Genes (DEGs)~~~~~~#
@@ -41,7 +56,7 @@ DEGs = unique(DEGs)
 length(unique(DEGs$efo.term))
 length(unique(DEGs$gene.symbol))
 
-save(DEGs, file = "./data/DEGs.RData")
+# save(DEGs, file = file.path(dataFolder, "DEGs.RData"))
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -55,7 +70,7 @@ drug2disease = foreach(i = seq(efo.ids), .combine = rbind) %dopar% {
     tmp = fromJSON(content(tmp, type = "text", encoding = "UTF-8"))
     if (length(tmp$data) > 0) {
         tmp = unique(as.data.table(flatten(tmp$data)))
-        tmp[, chembl.id :  = sub("http://identifiers.org/chembl.compound/", "", drug.id)]
+        tmp[, chembl.id := sub("http://identifiers.org/chembl.compound/", "", drug.id)]
         tmp = tmp[, .(efo.id = disease.id, efo.term = disease.efo_info.label, chembl.id, chembl.name = drug.molecule_name, chembl.type = drug.molecule_type, phase = drug.max_phase_for_all_diseases.numeric_index)]
     }
 }
@@ -64,7 +79,7 @@ drug2disease = unique(drug2disease)
 length(unique(drug2disease$efo.term))
 length(unique(drug2disease$chembl.name))
 
-save(drug2disease, file = "./data/drug2disease.RData")
+save(drug2disease, file = file.path(dataFolder, "drug2disease.RData"))
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -96,7 +111,7 @@ drug2disease.therapeutic$therapeutic.area = gsub("\"", "", drug2disease.therapeu
 length(unique(drug2disease.therapeutic$efo.term))
 length(unique(drug2disease.therapeutic$therapeutic.area))
 
-save(drug2disease.therapeutic, file = "./data/drug2disease.therapeutic.RData")
+save(drug2disease.therapeutic, file = file.path(dataFolder, "drug2disease.therapeutic.RData"))
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
