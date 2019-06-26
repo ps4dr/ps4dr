@@ -10,6 +10,8 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(SPIA)
+library(graphite)
+library(org.Hs.eg.db)
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository
@@ -35,7 +37,7 @@ dataFolder = file.path(resultsFolder)
 load(file.path(dataFolder,"DEGs.RData"))
 DEGs = DEGs[, c(1, 3, 6, 7)]
 
-# process positive lfc 
+# process positive lfc
 lfc.pos = DEGs[lfc >= 0]
 #lfc.pos = lfc.pos[order(lfc,decreasing = TRUE), ] #lfc or pvalue we should sort the dataframe?
 lfc.pos$pval.pos = abs(log10(lfc.pos$pval)) #created dummy variable for pvalue to order it decreasingly, since there are multiple lfc with same pvalue sometimes.
@@ -45,42 +47,31 @@ lfc.pos = lfc.pos[! duplicated(lfc.pos[, c('efo.id', 'ensembl.id')]),]
 #lfc.pos.efo = split(lfc.pos, lfc.pos$efo.id)
 lfc.pos$pval.pos = NULL
 
-# process negative lfc 
+# process negative lfc
 lfc.neg = DEGs[lfc < 0]
 #lfc.neg = lfc.neg[order(lfc), ] #lfc or pvalue we should sort the dataframe?
 lfc.neg = lfc.neg[order(pval, lfc),]
 lfc.neg = lfc.neg[! duplicated(lfc.neg[, c('efo.id', 'ensembl.id')]),]
 #lfc.neg.efo = split(lfc.neg, lfc.neg$efo.id)
 
-# combine both lfc 
+# combine both lfc
 lfc.com = rbind(lfc.pos, lfc.neg) #combine positive and negative lfc change back to a single data frame
 lfc.com = lfc.com[order(pval),]
 lfc.com = lfc.com[! duplicated(lfc.com[, c('efo.id', 'ensembl.id')]),]
 lfc.com$pval = NULL
 rm(lfc.neg, lfc.pos, DEGs)
 
-#__map ensembl IDs to ENTREZ ID___#
-#-----get mapping among ENTREZ_HGNC_ENSEMBL_IDs---------#
-library(biomaRt)
-ensembl = useEnsembl(biomart="ensembl", version=92, dataset="hsapiens_gene_ensembl") # v92 has less id than v79
-val = c(1:23,"X","Y")
-gene.id = getBM(attributes=c('entrezgene','hgnc_symbol','ensembl_gene_id','chromosome_name','start_position','end_position'),
-                   filters ='chromosome_name', values =val, mart = ensembl)
-
-save(gene.id,file = file.path(dataFolder,"geneID.RData"))
-rm(ensembl,val)
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 load(file.path(dataFolder,"geneID.RData"))
 gene.id$entrezgene = gsub("^$", NA, gene.id$entrezgene)
-
 gene.id = gene.id[which(! is.na(gene.id$entrezgene)),]
 gene.id = data.table(gene.id)
 gene.id = unique(gene.id[, c('entrezgene', 'ensembl_gene_id', 'hgnc_symbol')])
 names(gene.id) = c("ENTREZ", "ensembl.id", "HGNC")
 gene.id = gene.id[! duplicated(gene.id$ensembl.id),]
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 lfc.com = merge(lfc.com, gene.id, by = "ensembl.id")
 lfc.com = lfc.com[! duplicated(lfc.com[, c('efo.id', 'ENTREZ')]),]
@@ -150,6 +141,28 @@ save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, ent
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~Preapre SPIA Pathway Data sets~~~~~~~~~~~#
+
+#~~~Prepare KEGG SPIA pathway file from KEGG pathway kgml files~~~#
+#' Here we assume that the user obtained the KGML (xml) files from
+#' KEGG ftp site (or downloaded them one by one from the KEGG website).
+#' We will not keep KEGG pathway data since the access to the KEGG ftp server requires a license
+
+makeSPIAdata(kgml.path=file.path(dataFolder,"spia_input/kgml/"),organism="hsa",out.path=file.path(dataFolder,"spia_input/real_kegg/"))
+
+#~~~Prepare Reactome SPIA pathway file with graphite package~~~#
+
+reactome <- pathways("hsapiens", "reactome")
+reactome <- convertIdentifiers(reactome, "ENTREZID")
+prepareSPIA(reactome, file.path(dataFolder,"spia_input/real_react/hsa"))
+
+#~~~Prepare Reactome SPIA pathway file with graphite package~~~#
+biocarta <- pathways("hsapiens", "biocarta")
+biocarta <- convertIdentifiers(biocarta, "ENTREZID")
+prepareSPIA(biocarta, file.path(dataFolder,"spia_input/real_biocarta/hsa"))
+
+##_______________________________###
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -158,7 +171,7 @@ save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, ent
 
 #' SPIA can be calcualted for KEGG, Reactome and WikiPathways
 #' Here, we showed only with KEGG Pathways
-#' Necessary data sets for calculating SPIA for Reactome 
+#' Necessary data sets for calculating SPIA for Reactome
 #' and WikiPathways are uploaded in the git repository
 
 
@@ -168,84 +181,78 @@ load(file.path(dataFolder,"disease47.genes50.lfc.namedVec.RData"))
 
 spia_kegg = list()
 for (i in 1 : length(lfc_entrez)) {
-    spia_kegg[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"real_kegg/"), organism = "hsa")
+    spia_kegg[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/real_kegg/"), organism = "hsa")
 }
 names(spia_kegg) = names(lfc_entrez)
 
-save(spia_kegg, file = file.path(dataFolder,"spia/spia_kegg_disease47.genes50_results.RData"))
-
-
-#~~~~Test with direct DEGs~~~~~#
-lfc_new = list()
-for (i in seq_along(CommonDis)) {
-    for (j in seq_along(lfc_entrez)) {
-        if (CommonDis[[i]] == names(lfc_entrez)[j]) {
-            lfc_new[[i]] = lfc_entrez[[j]]
-            names(lfc_new)[i] = names(lfc_entrez)[j]
-        }
-    }
-}
-lfc_entrez = lfc_new
-spia_kegg_degs = list()
-for (i in 1 : length(lfc_entrez)) {
-    spia_kegg_degs[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"real_kegg/"), organism = "hsa")
-}
-
-# CommonDis = as.data.frame(intersect(GWASs$efo.id,DEGs$efo.id))
-# names(CommonDis) = "efo.id"
-# CommonDis = merge(CommonDis,DEGs,by="efo.id")
-# CommonDis = unique(CommonDis[,c(1,2)])
-# names(spia_kegg_degs) = CommonDis$efo.term
-# 
-# names(spia_kegg_degs) = names(lfc_entrez)
-save(spia_kegg_degs, file = file.path(dataFolder,"spia/spia_kegg_degs_disease61.genes50_results.RData"))
-
-load(file.path(dataFolder,"spia/spia_kegg_degs_disease61.genes50_results.RData"))
-
+save(spia_kegg, file = file.path(dataFolder,"spia_output/spia_kegg_disease47.genes50_results.RData"))
 
 spia_kegg_degs = lapply(spia_kegg_degs, function(x) x[x$pNDE <= 0.05,])
 plotP(spia_kegg_degs[[4]])
-load(file.path(dataFolder,"spia/spia_kegg_disease47.genes50_results.RData"))
-spia_kegg = lapply(spia_kegg, function(x) x[x$pNDE <= 0.05,])
 
-ad1 = spia_kegg_degs$EFO_0000249[, c(1, 11)]
-ad2 = spia_kegg$`Alzheimer's disease`[, c(1, 11)]
-
-adcomb = data.table(merge(ad1, ad2, by = "Name"))
-adcomb[, sameStatus :  = ifelse(adcomb$Status.x == adcomb$Status.y, TRUE, FALSE)]
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~Pseudo KEGG SPIA~~~~~~~~~~~#
 
-#' we have created SPIA data sets for all three pathways 
-#' with random gene sets to see whether our results are by 
+#' we create pseudo SPIA data sets for all three pathways
+#' with random gene sets to see whether our results are by
 #' random chance or meaningful indeed.
-#' Here is the SPIA calculation with Pseudo KEGG pathway data
+
+
+###___Create Pseudo (Random) Pathways____####
+
+#___create universe with ENTREZID:____#
+load(file.path(dataFolder,"geneID.RData"))
+universe = unique(na.omit(gene.id$entrezgene)) # for kegg
+# universe = unique(na.omit(gsub("^","ENTREZID:",gene.id$entrezgene))) # for reactome, biocarta
+
+load(file.path(dataFolder,"spia_input/real_kegg/hsaSPIA.RData"))
+# load(file.path(dataFolder,"spia_input/real_react/hsaSPIA.RData"))
+# load(file.path(dataFolder,"spia_input/real_biocarta/hsaSPIA.RData"))
+
+pseudo_path = path.info
+rm(path.info)
+
+#_____Shuffle first 25 matrices in pseudo_path______#
+for (mylist in 1:length(pseudo_path)) {
+  for (mymat in 1:(length(pseudo_path[[mylist]])-3)) { #not looping for last 3 indices since they are not matrices
+    pseudo_path[[mylist]][[mymat]][] = pseudo_path[[mylist]][[mymat]][sample(length(pseudo_path[[mylist]][[mymat]]))]
+  }
+}
+
+#___Replace ENTREZ ID with ENTREZ ID from Universe_____#
+for (mylist in 1:length(pseudo_path)) {
+  for (mymat in length(pseudo_path[[mylist]])-2) { #need to change index number to '1' for reactome and biocarta, and to '2' for kegg
+    pseudo_path[[mylist]][[mymat]] = as.character(sample(universe,size = length(pseudo_path[[mylist]][[mymat]]),replace = TRUE))
+  }
+}
+
+#_____change row & column names of (25) matrices______#
+for (mylist in 1:length(pseudo_path)) {
+  for (mymat in 1:(length(pseudo_path[[mylist]])-3)) { #not looping for last 3 indices since they are not matrices
+    colnames(pseudo_path[[mylist]][[mymat]]) = pseudo_path[[mylist]][[26]] #change index to '27' for reactome and biocarta, and to '26' for kegg
+    rownames(pseudo_path[[mylist]][[mymat]]) = pseudo_path[[mylist]][[26]] #change index to '27' for reactome and biocarta, and to '26' for kegg
+  }
+}
+
+path.info <- pseudo_path
+
+save(path.info,file = file.path(dataFolder,"spia_input/pseudo_kegg/hsaSPIA.RData"))
+# save(path.info,file = file.path(dataFolder,"spia_input/pseudo_react/hsaSPIA.RData"))
+# save(path.info,file = file.path(dataFolder,"spia_input/pseudo_biocarta/hsaSPIA.RData"))
+rm(path.info,pseudo_path)
+#_______________________________________________________##
+
+#~~~~~~~~~~~~~Pseudo KEGG SPIA~~~~~~~~~~~~~#
 
 spia_kegg_pseudo = list()
 for (i in 1 : length(lfc_entrez)) {
-    spia_kegg_pseudo[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"pseudo_kegg/"), organism = "hsa")
+    spia_kegg_pseudo[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/pseudo_kegg/"), organism = "hsa")
 }
-save(spia_kegg_pseudo, file = file.path(dataFolder,"spia/spia_kegg_disease47.genes50_pseudo_results.RData"))
-plotP(spia_kegg[[4]])
+save(spia_kegg_pseudo, file = file.path(dataFolder,"spia_output/spia_kegg_disease47.genes50_pseudo_results.RData"))
 rm(list = ls())
 gc()
 
-load(file.path(dataFolder,"spia/spia_kegg_disease47.genes50_results.RData"))
-names(lfc_entrez$EFO_0000249)
-
-spia_kegg_ad = spia(de = lfc_entrez[[3]], all = entrez_all, data.dir = file.path(dataFolder,"real_kegg/", organism = "hsa"))
-plotP(spia_kegg_ad)
-
-# pdf(file=file.path(dataFolder,"spia/spia_kegg_plotsX.pdf"))
-# plotP(spia_kegg,threshold=0.1)
-# plotP(spia_kegg_pseudo,threshold=0.1)
-# dev.off()
-# 
-# spia_kegg1 = data.table(spia_kegg)
-# spia_kegg1 = spia_kegg1[pGFdr <= 0.05]
-# spia_kegg_pseudo1 = data.table(spia_kegg_pseudo)
-# spia_kegg_pseudo1 = spia_kegg_pseudo1[pGFdr <= 0.05] 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 

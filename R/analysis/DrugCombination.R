@@ -7,6 +7,7 @@ library(data.table)
 library(tidyr)
 library(RecordLinkage)
 library(ggplot2)
+library(purrr)
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository
@@ -48,8 +49,8 @@ for (i in seq_along(drug.shortlist)) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~load KEGG Drug SPIA results~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-# load(file.path(dataFolder,"spia/spia_kegg_47Diseases_drugGWAS_nopar.RData"))
-load(file.path(dataFolder,"spia/spia_kegg_47Diseases_drugPdisease_nopar.RData"))
+# load(file.path(dataFolder,"spia_output/spia_kegg_47Diseases_drugGWAS_nopar.RData"))
+load(file.path(dataFolder,"spia_output/spia_kegg_47Diseases_drugPdisease_nopar.RData"))
 
 spia_drug_kegg = spia_kegg_47D
 rm(spia_kegg_47D)
@@ -66,36 +67,52 @@ for (i in seq_along(spia_drug_kegg)) {
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#' since combination of drug pair is a computationally expensive
+#' we will test it for the drugs that appeared in our drug.shortlist
+#' So, fisrt we filter diseases from "spia_drug_kegg" which are not in drug.shortlist
+#' Then, we filter the drugs in those idseases that are not in drug.shortlist
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-#~~~~~~~~~~~~~~~~~~~~~~~~#
-#test
-a = setdiff(names(spia_drug_kegg), names(drug.shortlist))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#' 1. Filter Diseases from "spia_drug_kegg" which are not in drug.shortlist
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-for (i in seq_along(spia_drug_kegg)) {
-    if (names(spia_drug_kegg)[i] %in% a) {
-        spia_drug_kegg[[i]] = NULL
-    }
+spia_drug_kegg_short = vector('list', length(spia_drug_kegg))
+names(spia_drug_kegg_short) = names(spia_drug_kegg)
+
+for (i in 1 : length(spia_drug_kegg)) {
+  if (names(spia_drug_kegg)[[i]] %in% names(drug.shortlist)) {
+    spia_drug_kegg_short[[i]] = spia_drug_kegg[[i]]
+    names(spia_drug_kegg_short)[[i]] = names(spia_drug_kegg)[[i]]
+  }
 }
 
+#' remove empty disease frames
+spia_drug_kegg_short = discard(spia_drug_kegg_short, ~ all(is.na(.x)))
 
-#~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-# deleting it since this disease is not in drug.shortlist
-# spia_drug_kegg$`renal cell carcinoma` = NULL
-# dis.path$`renal cell carcinoma` = NULL
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#' 2. Filter Drugs from Diseases in "spia_drug_kegg" which are not in drug.shortlist
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 drugNegCor = vector('list', length(drug.shortlist)) # create list of lists
 names(drugNegCor) = names(drug.shortlist)
 
-for (i in 1 : length(spia_drug_kegg)) {
-    for (j in 1 : length(spia_drug_kegg[[i]])) {
-        if (names(spia_drug_kegg[[i]])[[j]] %in% names(drug.shortlist[[i]])) {
-            drugNegCor[[i]][[j]] = spia_drug_kegg[[i]][[j]]
+for (i in 1 : length(spia_drug_kegg_short)) {
+    for (j in 1 : length(spia_drug_kegg_short[[i]])) {
+        if (names(spia_drug_kegg_short[[i]])[[j]] %in% names(drug.shortlist[[i]])) {
+            drugNegCor[[i]][[j]] = spia_drug_kegg_short[[i]][[j]]
         }
     }
     drugNegCor[[i]] = Filter(function(x) ! is.null(x), drugNegCor[[i]]) # filter out empty drug table
     names(drugNegCor[[i]]) = names(drug.shortlist[[i]]) # name drugs
 }
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#' Create data frame with afftected pathways and affect direction by the drugs
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 drug.path = vector('list', length(drugNegCor)) # create list of lists
 names(drug.path) = names(drugNegCor)
@@ -110,16 +127,21 @@ for (i in seq_along(drugNegCor)) {
 #' filter drug path with only 1 disease, since they can't be used for combination
 drug.path = Filter(function(x) length(x) > 1, drug.path)
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-comb1 = list()
-comb2 = list()
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#' Create drug combinations
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+comb1 = list() # combination of data
+comb2 = list() # combination of drug names
 set.seed(123)
 for (i in seq_along(drug.path)) {
     comb1[[i]] = combn(drug.path[[i]], 2)
     comb2[[i]] = combn(names(drug.path[[i]]), 2)
 }
 
-rm(drug.dis.path, drug.shortlist, drug.Correlation)
+rm(drug.dis.path, drug.shortlist, drug.Correlation,spia_drug_kegg,spia_drug_kegg_short)
 
 drug.comb.path = vector('list', length(drug.path)) # create list of lists
 names(drug.comb.path) = names(drug.path)
@@ -132,7 +154,7 @@ for (i in 1 : length(comb1)) {
         drug.comb.path[[i]][[j]] = data.table(merge(comb1[[i]][, j][1], comb1[[i]][, j][2], by = "Name", all = TRUE)) #Name/ID
         names(drug.comb.path[[i]])[[j]] = paste(comb2[[i]][, j][1], comb2[[i]][, j][2], sep = "_")
         # create a dummy column by copmaring disease and drug affects columns
-        drug.comb.path[[i]][[j]][, Status.update :  =
+        drug.comb.path[[i]][[j]][, Status.update :=
         ifelse(is.na(drug.comb.path[[i]][[j]]$Status.x), drug.comb.path[[i]][[j]]$Status.y,
         ifelse(is.na(drug.comb.path[[i]][[j]]$Status.y), drug.comb.path[[i]][[j]]$Status.x,
         ifelse(drug.comb.path[[i]][[j]]$Status.x != drug.comb.path[[i]][[j]]$Status.y, "Neutral", drug.comb.path[[i]][[j]]$Status.y)))]
@@ -159,8 +181,6 @@ drug.dis.path = vector('list', length(drug.comb.path)) # create list of lists
 names(drug.dis.path) = names(drug.comb.path)
 drug.Correlation = vector('list', length(drug.comb.path)) # create list of lists
 names(drug.Correlation) = names(drug.comb.path)
-
-rm(spia_drug_kegg, drug.path)
 
 for (i in seq_along(drug.comb.path)) {
     for (j in seq_along(drug.comb.path[[i]])) {
@@ -215,7 +235,7 @@ drugCor = data.table(drugCor %>% drop_na())
 # drugCor = drugCor[Correlation.Score > -1 & Correlation.Score < 1]
 
 # jpeg(file=file.path(dataFolder,"ScatterPlots_combination_Diseases_DrugGWAS.jpeg", width=2800, height=1980, res=200))
-jpeg(file = file.path(dataFolder,"ScatterPlots_combination_Diseases_DrugPdisease.jpeg", width = 2800, height = 1980, res = 200))
+jpeg(file = file.path(dataFolder,"ScatterPlots_combination_Diseases_DrugPdisease.jpeg"), width = 2800, height = 1980, res = 200)
 ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = Disease)) +
     geom_point(size = 2, shape = 1) +
     labs(title = "Scatter Plots of Correlation Scores and affected pathways(%)") +
@@ -228,58 +248,3 @@ dev.off()
 length(unique(drugCor$Disease))
 save(drugCor, file = file.path(dataFolder,"drugCombcorScoreDrugPdisease.RData"))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-load(file.path(dataFolder,"drugCombcorScoreDrugGWAS.RData"))
-drugCor2 = drugCor
-sle = drugCor[Disease == "systemic lupus erythematosus" &
-    Correlation.Score <= - 0.5 &
-    affectedPathway >= 50]
-
-sle = sle[order(Correlation.Score),]
-fwrite(sle, file = file.path(dataFolder,"sle_drugs.csv"))
-
-
-bc = drugCor[Disease == "breast carcinoma" &
-    Correlation.Score <= - 0.3 &
-    affectedPathway >= 40]
-bc = bc[order(Correlation.Score),]
-
-
-# 
-# load(file.path(dataFolder,"drugCombination.correlationScore.drugGWAS.RData"))
-# rm(drug.dis.path)
-# drugPair.Correlation = drug.Correlation
-# save(drugPair.Correlation,drug.Correlation, file = file.path(dataFolder,"completeDrug.correlationScore.drugGWAS.RData"))
-# 
-# # save(drug.Correlation, file = file.path(dataFolder,"Drug.correlationScore1.RData"))
-# # save(drugPair.Correlation, file = file.path(dataFolder,"Drug.correlationScore2.RData"))
-# 
-# load(file.path(dataFolder,"completeDrug.correlationScore.drugGWAS.RData"))
-# drug.cor = drugPair.Correlation
-# 
-# for (i in seq_along(drug.cor)) {
-#   for (j in seq_along(drug.cor[[i]])) {
-#     drug.cor[[i]]$Dissimilarity.Score = NULL
-#     drug.cor[[i]]$DrugPathway = NULL
-#     drug.cor[[i]]$DiseasePathway = NULL
-#     
-#   }
-#   names(drug.cor[[i]])[[2]] = names(drug.cor)[[i]]
-# }
-# 
-# #following two disease mess up the plot 
-# drug.cor$epilepsy = NULL
-# drug.cor$`HIV infection` = NULL
-# density.score = lapply(drug.cor, melt)
-# density.score = do.call(rbind,density.score)
-# names(density.score) = c("Drug","Diseases","Correlation_Score")
-#                           
-# density.score = density.score %>% drop_na()
-# density.score = data.table(density.score)
-# 
-# jpeg(file=file.path(dataFolder,"densityPlots_allDiseases_drugPairs.jpeg", width=2800, height=1980, res=200))
-# ggplot(density.score,aes(x=Correlation_Score, fill=Diseases)) + geom_density(alpha=0.25) + 
-#   labs(title="Distribution of Correlation Scores of all Drug-Pairs for each Diseases")+ theme(legend.position = "bottom",legend.title=element_text(size=10)) + theme(plot.title = element_text(hjust = 0.5)) + ylab("Density") + xlab("Correlation Score")
-# dev.off()
-# 
-# 
-# 

@@ -40,11 +40,14 @@ dataFolder = file.path(resultsFolder)
 #####___Drug Data Preperation for SPIA___#####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"gene.id.entrez.RData"))
-
-# fisher.drugs = fread(file.path(dataFolder,"fisher.drugs.commongenes.tsv"))
-# fisher.drugs = as.data.frame(unique(fisher.drugs$chembl.id))
-# names(fisher.drugs) = "chembl.id"
+load(file.path(dataFolder,"geneID.RData"))
+gene.id$entrezgene = gsub("^$", NA, gene.id$entrezgene)
+gene.id = gene.id[which(! is.na(gene.id$entrezgene)),]
+gene.id = data.table(gene.id)
+gene.id = unique(gene.id[, c('entrezgene', 'ensembl_gene_id', 'hgnc_symbol')])
+names(gene.id) = c("ENTREZ", "ensembl.id", "HGNC")
+gene.id = gene.id[! duplicated(gene.id$ensembl.id),]
+gene.id = gene.id[, c(1, 2)]
 
 # get LINCS dataset
 load(file.path(dataFolder,"L1000.RData"))
@@ -53,7 +56,7 @@ length(unique(L1000$chembl.id))
 length(unique(L1000$ensembl.id))
 L1000 = L1000[order(ensembl.id, decreasing = TRUE),]
 L1000 = L1000[! duplicated(L1000[, c('ensembl.id', 'chembl.id')]),]
-L1000 = merge(L1000, gene.id.entrez, by = "ensembl.id")
+L1000 = merge(L1000, gene.id, by = "ensembl.id")
 
 load(file.path(dataFolder,"drug2715details.RData"))
 dmap = data.table(dmap[, c(1, 2, 3)])
@@ -102,7 +105,7 @@ length(unique(drug.genes$ensembl.id))
 #' we will filter out all the entries from drug.genes which 
 #' do not match the EFO.ID from Disease SPIA
 #' 
-load(file.path(dataFolder,"spia/spia_kegg_disease47.genes50_results.RData"))
+load(file.path(dataFolder,"spia_output/spia_kegg_disease47.genes50_results.RData"))
 Disease47 = as.data.frame(names(spia_kegg))
 names(Disease47) = "efo.term"
 drug.genes = merge(Disease47, drug.genes, by.x = "efo.term", by.y = "efo.term.DEGs")
@@ -152,8 +155,6 @@ lfc_drug_entrez = topDiseases.drug
 for (i in 1 : length(topDiseases.drug)) {
     for (j in 1 : length(topDiseases.drug[[i]])) {
         lfc_drug_entrez[[i]][[j]] = setNames(as.numeric(topDiseases.drug[[i]][[j]][[2]]), as.character(topDiseases.drug[[i]][[j]][[3]]))
-        #names(lfc_drug_entrez)[i] = names(topDiseases.drug)[i]
-        #names(lfc_drug_entrez[[i]][j]) = names(topDiseases.drug[[i]][j])
     }
 }
 
@@ -165,19 +166,14 @@ for (i in 1 : length(topDiseases.drug)) {
 }
 
 ##_____Create a vector with all Gene universe to proxy Array Genes_________###
-load(file.path(dataFolder,"gene.id.entrez.RData"))
-ensembl_all = unique(gene.id.entrez$ensembl.id)
-entrez_all = unique(gene.id.entrez$ENTREZ)
-entrezID_all = unique(gsub("^", "ENTREZID:", gene.id.entrez$ENTREZ)) ## with ENTREZID: in front of each id
-
-# save(lfc_drug_ensembl,ensembl_all,file=file.path(dataFolder,"lfc.drug.drugGWAS.disease47.genes50.padj1e-5.ensembl.RData"))
-# save(lfc_drug_entrez,entrez_all,file=file.path(dataFolder,"lfc.drug.drugGWAS.disease47.genes50.padj1e-5.entrez.RData"))
-# save(lfc_drug_entrezID,entrezID_all,file=file.path(dataFolder,"lfc.drug.drugGWAS.disease47.genes50.padj1e-5.entrezID.RData"))
+load(file.path(dataFolder,"geneID.RData"))
+ensembl_all = unique(gene.id$ensembl.id)
+entrez_all = unique(gene.id$ENTREZ)
+entrezID_all = unique(gsub("^", "ENTREZID:", gene.id$ENTREZ)) ## with ENTREZID: in front of each id
 
 save(lfc_drug_ensembl, ensembl_all, file = file.path(dataFolder,"lfc.drug.drugPdisease.disease47.genes50.padj.ensembl.RData"))
 save(lfc_drug_entrez, entrez_all, file = file.path(dataFolder,"lfc.drug.drugPdisease.disease47.genes50.padj.entrez.RData"))
 save(lfc_drug_entrezID, entrezID_all, file = file.path(dataFolder,"lfc.drug.drugPdisease.disease47.genes50.padj.entrezID.RData"))
-
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -188,7 +184,7 @@ save(lfc_drug_entrezID, entrezID_all, file = file.path(dataFolder,"lfc.drug.drug
 #~~~~~~~~~SPIA Function~~~~~~~~~~#
 spia_fun = function(x){
     spia_drug_kegg = list()
-    spia_drug_kegg = spia(de = x, all = entrez_all, data.dir = file.path(dataFolder,"real_kegg/"), organism = "hsa")
+    spia_drug_kegg = spia(de = x, all = entrez_all, data.dir = file.path(dataFolder,"spia_input/real_kegg/"), organism = "hsa")
 }
 
 #~~~~~~~~~Get Disease-Drugs list~~~~~~~~~#
@@ -211,7 +207,7 @@ for (i in 1 : length(spia_kegg_47D)) {
     spia_kegg_47D[[i]] = Filter(function(x) ! is.null(x), spia_kegg_47D[[i]])
 }
 
-# save(spia_kegg_47D,file = file.path(dataFolder,"spia/spia_kegg_47Diseases_drugGWAS_nopar.RData"))
-save(spia_kegg_47D, file = file.path(dataFolder,"spia/spia_kegg_47Diseases_drugPdisease_nopar.RData"))
+# save(spia_kegg_47D,file = file.path(dataFolder,"spia_output/spia_kegg_47Diseases_drugGWAS_nopar.RData"))
+save(spia_kegg_47D, file = file.path(dataFolder,"spia_output/spia_kegg_47Diseases_drugPdisease_nopar.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

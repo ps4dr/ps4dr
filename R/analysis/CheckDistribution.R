@@ -32,9 +32,9 @@ dataFolder = file.path(resultsFolder)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~load KEGG Drug SPIA results~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-# load(file.path(dataFolder,"spia/spia_kegg_30Diseases_nopar.RData"))
-# load(file.path(dataFolder,"spia/spia_kegg_47Diseases_drugGWAS_nopar.RData"))
-load(file.path(dataFolder,"spia/spia_kegg_47Diseases_drugPdisease_nopar.RData"))
+# load(file.path(dataFolder,"spia_output/spia_kegg_30Diseases_nopar.RData"))
+# load(file.path(dataFolder,"spia_output/spia_kegg_47Diseases_drugGWAS_nopar.RData"))
+load(file.path(dataFolder,"spia_output/spia_kegg_47Diseases_drugPdisease_nopar.RData"))
 spia_drug_kegg = spia_kegg_47D
 rm(spia_kegg_47D)
 spia_drug_kegg = Filter(function(x) ! is.null(x), spia_drug_kegg) #delete empty df from list
@@ -68,9 +68,9 @@ for (i in seq_along(drug.path)) {
 #~~~~~~load KEGG Disease SPIA results~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-# load(file.path(dataFolder,"spia/spia_kegg_disease42.genes50_results.RData"))
-load(file.path(dataFolder,"spia/spia_kegg_disease47.genes50_results.RData"))
-# load(file.path(dataFolder,"spia/spia_kegg_degs_disease61.genes50_results.RData"))
+# load(file.path(dataFolder,"spia_output/spia_kegg_disease42.genes50_results.RData"))
+load(file.path(dataFolder,"spia_output/spia_kegg_disease47.genes50_results.RData"))
+# load(file.path(dataFolder,"spia_output/spia_kegg_degs_disease61.genes50_results.RData"))
 # spia_kegg = spia_kegg_degs
 # dis.path = lapply(spia_kegg, function(x) x[,c(1,11)])
 
@@ -160,12 +160,9 @@ drug.shortlist = Filter(function(x) dim(x)[1] >= 1, drug.shortlist)
 drug.shortlist.df = do.call(rbind, drug.shortlist)
 drug.shortlist.df$Drug = tolower(drug.shortlist.df$Drug)
 drug.shortlist.df$Drug = capitalize(drug.shortlist.df$Drug)
-# fwrite(drug.shortlist.df, file = file.path(dataFolder,"drug.shortlist.csv"))
-# save(drug.path,dis.path,drug.dis.path,drug.Correlation,drug.shortlist,file=file.path(dataFolder,"drugCorraltion.drugGWAS.RData"))
-# save(drug.path,dis.path,drug.dis.path,drug.Correlation,drug.shortlist,file=file.path(dataFolder,"drugCorraltion.drug_onlyDEGS.RData"))
-# save(drug.path,dis.path,drug.dis.path,drug.Correlation,drug.shortlist,file=file.path(dataFolder,"drugCorraltion-1.drugPdisease.RData"))
-# load(file.path(dataFolder,"drugCorraltion.drugGWAS.RData"))
-load(file.path(dataFolder,"drugCorraltion-1.drugPdisease.RData"))
+fwrite(drug.shortlist.df, file = file.path(dataFolder,"drug.shortlist.csv"))
+save(drug.path,dis.path,drug.dis.path,drug.Correlation,drug.shortlist,file=file.path(dataFolder,"drugCorraltion.drugPdisease.RData"))
+load(file.path(dataFolder,"drugCorraltion.drugPdisease.RData"))
 
 drug.Correlation.df = do.call(rbind, drug.Correlation)
 x = drug.Correlation.df[drug.Correlation.df$Correlation.Score >= 0.5 & drug.Correlation.df$affectedPathway >= 80]
@@ -185,7 +182,7 @@ drugCor$Drug = capitalize(drugCor$Drug)
 
 #' remove few extreme correlation scores
 
-jpeg(file = file.path(dataFolder,"ScatterPlots_DrugPDisease_CorrelationScore.jpeg", width = 2800, height = 1980, res = 200))
+jpeg(file = file.path(dataFolder,"ScatterPlots_DrugPDisease_CorrelationScore.jpeg"), width = 2800, height = 1980, res = 200)
 ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = Disease)) +
     geom_point(size = 2, shape = 1) +
     labs(title = "Scatter Plots of Correlation Scores and affected pathways(%)") +
@@ -196,7 +193,7 @@ ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = Disease)) 
 dev.off()
 
 #' additional
-# jpeg(file=file.path(dataFolder,"ScatterPlots_highlighted_DrugPDisease_CorrelationScore.jpeg", width=2800, height=1980, res=200))
+# jpeg(file=file.path(dataFolder,"ScatterPlots_highlighted_DrugPDisease_CorrelationScore.jpeg"), width=2800, height=1980, res=200)
 # ggplot(drugCor,aes(x= affectedPathway,y=Correlation.Score, col=Disease)) + geom_point(size=3, shape=1, colour ="grey") + 
 #   geom_point(data = cmap2, aes(x= DrugPathway,y=Correlation.Score, col=Disease), size=3) +
 #   labs(title="Scatter Plots of Correlation Scores and affected pathways(%)") + 
@@ -211,7 +208,7 @@ dev.off()
 ##~~~~~~~~~~~~~~~~~~~~~~~~~Q-Q Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-jpeg(file = file.path(dataFolder,"qqPlots_DrugPDisease_CorrelationScore.jpeg", width = 2800, height = 1980, res = 200))
+jpeg(file = file.path(dataFolder,"qqPlots_DrugPDisease_CorrelationScore.jpeg"), width = 2800, height = 1980, res = 200)
 p = list()
 for (i in seq_along(drug.Correlation)) {
     p[[i]] = ggplot(drug.Correlation[[i]], aes(sample = Correlation.Score, col = Disease)) +
@@ -233,7 +230,7 @@ dev.off()
 ##~~~~~~~~~~~~~~~~~~~~~Density Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"drugCorraltion-1.drugPdisease.RData"))
+load(file.path(dataFolder,"drugCorraltion.drugPdisease.RData"))
 
 for (i in seq_along(drug.Correlation)) {
     for (j in seq_along(drug.Correlation[[i]])) {
@@ -263,8 +260,8 @@ density.score = lapply(drug.Correlation, melt)
 density.score = do.call(rbind, density.score)
 names(density.score) = c("Drug", "Diseases", "Correlation_Score")
 
-# jpeg(file=file.path(dataFolder,"densityPlots_allDiseases_DrugGWAS.jpeg", width=2800, height=1980, res=200))
-# jpeg(file=file.path(dataFolder,"densityPlots_allDiseases_DrugPdisease_pval_30D.jpeg", width=2800, height=1980, res=200))
+# jpeg(file=file.path(dataFolder,"densityPlots_allDiseases_DrugGWAS.jpeg"), width=2800, height=1980, res=200)
+# jpeg(file=file.path(dataFolder,"densityPlots_allDiseases_DrugPdisease_pval_30D.jpeg"), width=2800, height=1980, res=200)
 ggplot(density.score, aes(x = Correlation_Score, fill = Diseases)) +
     geom_density(alpha = 0.25) +
     labs(title = "Distribution of Correlation Scores of all Drugs for each Diseases") +
@@ -278,7 +275,7 @@ dev.off()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~Standization~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-load(file.path(dataFolder,"drugCorraltion-1.drugPdisease.RData"))
+load(file.path(dataFolder,"drugCorraltion.drugPdisease.RData"))
 #' Standization with scale function (Z-score normalization)
 #' 
 # drug.Correlation = do.call(rbind,drug.Correlation) # list to df
@@ -317,7 +314,7 @@ drug.Cor.Scaled$Drug = capitalize(drug.Cor.Scaled$Drug)
 #drug.Cor.Scaled$Disease = capitalize(drug.Cor.Scaled$Disease)
 
 
-# jpeg(file=file.path(dataFolder,"densityPlots_DrugPdisease_CorrelationScore_scaled.jpeg", width=2800, height=1980, res=200))
+# jpeg(file=file.path(dataFolder,"densityPlots_DrugPdisease_CorrelationScore_scaled.jpeg"), width=2800, height=1980, res=200)
 ggplot(drug.Cor.Scaled, aes(x = Correlation.Score, fill = Disease)) +
     geom_density(alpha = 0.25) +
     labs(title = "Distribution of Correlation Scores of all Drugs for each Diseases") +
@@ -328,7 +325,7 @@ ggplot(drug.Cor.Scaled, aes(x = Correlation.Score, fill = Disease)) +
 dev.off()
 
 
-# jpeg(file=file.path(dataFolder,"ScatterPlots_DrugPDisease_scaled_CorrelationScore.jpeg", width=2800, height=1980, res=200))
+# jpeg(file=file.path(dataFolder,"ScatterPlots_DrugPDisease_scaled_CorrelationScore.jpeg"), width=2800, height=1980, res=200)
 ggplot(drug.Cor.Scaled, aes(x = affectedPathway, y = Correlation.Score, col = Disease)) +
     geom_point(size = 2, shape = 1) +
     labs(title = "Scatter Plots of Correlation Scores and affected pathways(%)") +
@@ -337,148 +334,3 @@ ggplot(drug.Cor.Scaled, aes(x = affectedPathway, y = Correlation.Score, col = Di
     ylab("Correlation Sore") +
     xlab("affected Pathway (%)")
 dev.off()
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-##~~~~~~~~~~~~~~~~Drug mapping to Diseases~~~~~~~~~~~~~~~~~~~~~~##
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
-drugsA = unique(drug.Cor.Scaled$Drug)
-
-#' this drug-indications table is downloaded from ChEMBL https://www.ebi.ac.uk/chembl/drug/indications on 15 March, 2019
-chembl = fread("/home/memon/projects/msdrp/data/chembl_indications-19_10_36_41.txt")
-chembl = chembl[, c(1, 2, 5 : 9)]
-chembl = chembl[MAX_PHASE_FOR_IND == 1 |
-    MAX_PHASE_FOR_IND == 2 |
-    MAX_PHASE_FOR_IND == 3 |
-    MAX_PHASE_FOR_IND == 4]
-#chembl = chembl[MAX_PHASE_FOR_IND ==3 | MAX_PHASE_FOR_IND == 4] 
-chembl2 = chembl[, c(2, 6, 7)]
-#chembl2$MOLECULE_NAME = toupper(chembl2$MOLECULE_NAME)
-# drugsB = unique(toupper(chembl2$MOLECULE_NAME))
-drugsB = unique(chembl2$MOLECULE_NAME)
-
-DrugCommon = as.data.frame(intersect(drugsB, drugsA))
-names(DrugCommon) = "Drug"
-length(intersect(unique(chembl2$EFO_NAME), unique(drug.Cor.Scaled$Disease)))
-
-#' update with drugs which are present in chemble table 
-drug.Cor.Scaled = merge(drug.Cor.Scaled, DrugCommon, by = "Drug")
-
-#' Clinically trialled drugs that appears in our analysis
-cmap = merge(drug.Cor.Scaled, chembl2, by.x = c("Drug", "Disease"), by.y = c("MOLECULE_NAME", "EFO_NAME"))
-# cmap2 = merge(drugCor, chembl2, by.x = c("Drug","Disease"),by.y=c("MOLECULE_NAME","EFO_NAME"))
-names(cmap)[4] = "phase"
-length(unique(cmap$Drug))
-length(unique(cmap$Disease))
-
-#' compute 10th percentile scores for each diseases
-#' 
-library(dplyr)
-library(purrr)
-qn10 = cmap %>%
-    dplyr::group_by(Disease) %>%
-    dplyr::summarize(quants = quantile(Correlation.Score, probs = 0.1))
-qn10 = split(qn10, qn10$Disease)
-cmap2 = split(cmap, cmap$Disease)
-
-#' get all approved drugs that appear in 10th percentile
-for (i in seq_along(cmap2)) {
-    cmap2[[i]] = cmap2[[i]][Correlation.Score <= qn10[[i]][["quants"]]]
-}
-cmap3 = do.call(rbind, cmap2)
-
-#' get any drugs that appear in 10th percentile
-disease21 = as.data.frame(unique(cmap3$Disease))
-names(disease21) = "Disease"
-drug.Cor.Scaled2 = data.table(merge(disease21, drug.Cor.Scaled, by = "Disease"))
-
-qn10all = drug.Cor.Scaled2 %>%
-    dplyr::group_by(Disease) %>%
-    dplyr::summarize(quants = quantile(Correlation.Score, probs = 0.1))
-qn10all = split(qn10all, qn10all$Disease)
-
-drug.Cor.Scaled2 = split(drug.Cor.Scaled2, drug.Cor.Scaled2$Disease)
-for (i in seq_along(drug.Cor.Scaled2)) {
-    drug.Cor.Scaled2[[i]] = drug.Cor.Scaled2[[i]][Correlation.Score <= qn10all[[i]][["quants"]]]
-}
-drug.Cor.Scaled2 = do.call(rbind, drug.Cor.Scaled2)
-
-
-#~~~~~~~#
-library(dplyr)
-topDrugs = count(cmap3, Disease)
-allDrugs = count(drug.Cor.Scaled, Disease)
-Drugs10thParc = count(drug.Cor.Scaled2, Disease)
-CombinedDrugs = merge(allDrugs, topDrugs, by = "Disease")
-CombinedDrugs = merge(CombinedDrugs, Drugs10thParc, by = "Disease")
-names(CombinedDrugs) = c("Disease", "allDrugs", "FDADrugs", "Drugs10thP")
-CombinedDrugs$percentage1 = round((CombinedDrugs$FDADrugs / CombinedDrugs$allDrugs) * 100, 2)
-CombinedDrugs$percentage2 = round((CombinedDrugs$FDADrugs / CombinedDrugs$Drugs10thP) * 100, 2)
-CombinedDrugs = CombinedDrugs[order(- CombinedDrugs$percentage2),]
-
-write.csv(CombinedDrugs, file.path(dataFolder,"CombinedDrugs.csv", quote = FALSE, row.names = FALSE))
-
-
-
-
-##~~~extra
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-##~~~~~~~~~~~~~~~~Drug mapping to Diseases~~~~~~~~~~~~~~~~~~~~~~##
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-drugCor = do.call(rbind, drug.Correlation)
-drugsA = unique(drugCor$Drug)
-
-#' this drug disease relationships are fetched from OpenTargets
-load(file.path(dataFolder,"drug2disease.RData"))
-d2d = drug2disease[! phase == 0]
-d2d = unique(d2d[, c(4, 2)])
-drugsB = unique(d2d$chembl.name)
-
-length(intersect(drugsA, drugsB))
-
-#' this drug-indications table is downloaded from ChEMBL https://www.ebi.ac.uk/chembl/drug/indications on 15 March, 2019
-chembl = fread("/home/memon/projects/msdrp/data/chembl_indications-19_10_36_41.txt")
-chembl = chembl[, c(1, 2, 5 : 9)]
-chembl = chembl[MAX_PHASE_FOR_IND == 1 |
-    MAX_PHASE_FOR_IND == 2 |
-    MAX_PHASE_FOR_IND == 3 |
-    MAX_PHASE_FOR_IND == 4]
-chembl2 = chembl[, c(2, 6, 7)]
-chembl2$MOLECULE_NAME = toupper(chembl2$MOLECULE_NAME)
-drugsC = unique(toupper(chembl$MOLECULE_NAME))
-
-length(intersect(drugsA, drugsC))
-
-cmap = merge(drugCor, chembl2, by.x = c("Drug", "Disease"), by.y = c("MOLECULE_NAME", "EFO_NAME"))
-#cmap2 = merge(drugCor, d2d, by.x = c("Drug","Disease"),by.y=c("chembl.name","efo.term"))
-names(cmap)[8] = "phase"
-
-#~~~~~~~#
-
-length(unique(cmap$Drug))
-length(unique(cmap$Disease))
-
-dis.list = split(cmap, cmap$Disease)
-dis.list = lapply(dis.list, data.table)
-
-min.phase = 3
-fTest = list()
-for (i in seq_along(dis.list)) {
-    a = nrow(dis.list[[i]][Correlation.Score < 0 & phase >= min.phase])
-    b = nrow(dis.list[[i]][Correlation.Score > 0 & phase >= min.phase])
-    c = nrow(dis.list[[i]][Correlation.Score < 0 & phase < min.phase])
-    d = nrow(dis.list[[i]][Correlation.Score > 0 & phase < min.phase])
-    fisher = fisher.test(matrix(c(a, b, c, d), nrow = 2, ncol = 2, byrow = TRUE), alternative = "greater")
-    fTest[[i]] = data.table(odds.ratio = fisher$estimate, p.value = fisher$p.value, approved_negative = a, approved_positive = b)
-    names(fTest)[[i]] = names(dis.list)[[i]]
-    fTest[[i]]$Disease = names(dis.list)[[i]]
-}
-
-fisherall = do.call(rbind, fTest, envir = parent.frame())
-fisherall = fisherall[, c(5, 3, 4, 1, 2)]
-
-
-test = fread("/home/memon/projects/msdrp/data/chembl_drugtargets-19_14_39_48.txt")
-test = fread("/home/memon/projects/msdrp/data/drugbank_dtis.tsv")
