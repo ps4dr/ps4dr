@@ -16,9 +16,6 @@ suppressWarnings(suppressMessages(library(tidyr)))
 
 registerDoParallel(parallel::detectCores() - 1)
 
-#####################################################################
-#TODO: Change to the directory where you cloned this repository
-setwd("/home/memon/projects/ps4dr/ps4dr/data/")
 #~~~~~~~Using relative path~~~~~~~#
 ensureFolder = function(folder) {
   if (! file.exists(folder)) {
@@ -112,9 +109,6 @@ drug2disease.therapeutic$therapeutic.area = gsub("\"", "", drug2disease.therapeu
 length(unique(drug2disease.therapeutic$efo.term))
 length(unique(drug2disease.therapeutic$therapeutic.area))
 
-save(drug2disease.therapeutic, file = file.path(dataFolder, "drug2disease.therapeutic.RData"))
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
-
+drug2disease_therapeutic_path = file.path(dataFolder, "drug2disease.therapeutic.RData")
+sprintf("Outputting drug2disease info to %s", drug2disease_therapeutic_path)
+save(drug2disease.therapeutic, file = drug2disease_therapeutic_path)
