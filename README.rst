@@ -18,12 +18,19 @@ from `R Package primer <https://kbroman.org/pkg_primer/pages/github.html>`_:
 
    $ R -e 'library(devtools); install_github("ps4dr/ps4dr")'
 
-Alternatively, ``msrdp`` can be cloned then installed from the source with:
+Alternatively, ``ps4dr`` can be cloned then installed from the source with:
+
+.. code-block:: sh
+
+   $ R -e 'install.packages(c("BiocManager", "data.table", "doParallel", "dplyr", "foreach", "gplots", "httr", "jsonlite", "pROC", "RecordLinkage", "riverplot", "tidyr", "tidyverse"))'
+   $ R -e 'BiocManager::install(c("BiocParallel", "EnsDb.Hsapiens.v86", "SPIA", "graphite"))'
+
+Then
 
 .. code-block:: sh
 
    $ git clone https://github.com/ps4dr/ps4dr.git
-   $ R -e 'library(devtools); install("msdrp")'
+   $ R -e 'library(devtools); install("ps4dr")'
 
 Reproduction
 ------------
