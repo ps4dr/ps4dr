@@ -29,7 +29,7 @@ sbind = function(x, y, fill=NA) {
 
 # grasp.import: use unix commands/R scripts to filter the grasp data
 # Assume the input data is a *.zip file originally downloaded from the GRASP website.
-grasp.import <- function(file = "./Data/GRASP2fullDataset.zip", p.thres=1E-04)
+grasp.import <- function(file = file.path(gwasDataFolder,"GRASP2fullDataset.zip"), p.thres=1E-04)
 {
     cat(paste("Start processing the ", file, " data ...", sep = ""), "\n")
     system(paste("zcat", file, "| head -n 1 > header.txt", sep = " "))
@@ -61,14 +61,14 @@ grasp.import <- function(file = "./Data/GRASP2fullDataset.zip", p.thres=1E-04)
     if (any(grep("^Gene expression", grasp$Phenotype)))grasp <- grasp[- grep("^Gene expression", grasp$Phenotype),]
     #ignore warning() because it was occurred by '\x'(UTF-8 mode).
     grasp$PMID <- trimWhiteSpace(grasp$PMID)
-    save(grasp, file = "grasp.RData", compress = TRUE)
+    save(grasp, file = file.path(gwasDataFolder,"grasp.RData"), compress = TRUE)
 
     invisible(grasp)
 }
 
 
 # NHGRI.import: filter the NHGRI data
-NHGRI.import <- function(file = "./Data/gwas_catalog_v1.0-associations_e85_r2016-08-01.tsv", p.thres=1E-04)
+NHGRI.import <- function(file = file.path(gwasDataFolder,"gwas_catalog_v1.0-associations_e85_r2016-08-01.tsv"), p.thres=1E-04)
 {
     cat(paste("Start processing the NHGRI ", file, " data ...", sep = ""), "\n")
     NHGRI <- read.delim(file,
@@ -86,13 +86,13 @@ NHGRI.import <- function(file = "./Data/gwas_catalog_v1.0-associations_e85_r2016
     nhgri <- subset(NHGRI, ! grepl(",", SNPS))
     nhgri <- subset(NHGRI, ! grepl("x", SNPS))
 
-    save(nhgri, file = "nhgri.RData", compress = TRUE)
+    save(nhgri, file = file.path(gwasDataFolder,"nhgri.RData"), compress = TRUE)
 
     invisible(nhgri)
 }
 
 # gwasdb.import: filter the gwasdb data
-gwasdb.import <- function(file = "./Data/gwasdb_20150819_snp_trait.gz", p.thres=1E-04)
+gwasdb.import <- function(file = file.path(gwasDataFolder,"gwasdb_20150819_snp_trait.gz"), p.thres=1E-04)
 {
     cat(paste("Start processing the gwasdb data ", file, "  ...", sep = ""), "\n")
     system(paste("zcat", file, "| head -n 1 > header.txt", sep = " "))
@@ -113,20 +113,20 @@ gwasdb.import <- function(file = "./Data/gwasdb_20150819_snp_trait.gz", p.thres=
     gwasdb$SNPID.dbSNP <- trimWhiteSpace(gwasdb$SNPID.dbSNP)
     gwasdb$ORI_SNP <- trimWhiteSpace(gwasdb$ORI_SNPID)
     gwasdb$PMID <- trimWhiteSpace(gwasdb$PMID)
-    save(gwasdb, file = "gwasdb.RData", compress = TRUE)
+    save(gwasdb, file = file.path(gwasDataFolder,"gwasdb.RData"), compress = TRUE)
 
     invisible(gwasdb)
 }
 
 # phewas.ild.snps.updated.plusGWASsnps.500kb.RDatamport: use unix commands/R scripts to filter the phewas data
 # Assume the input data is a *.csv file originally downloaded from the PheWAS website.
-phewas.import <- function(file = "./Data/phewas-catalog.csv", p.thres=1E-04)
+phewas.import <- function(file = file.path(gwasDataFolder,"phewas-catalog.csv"), p.thres=1E-04)
 {
     cat(paste("Start processing the ", file, " data ...", sep = ""), "\n")
     phewas <- read.csv(file, header = TRUE)
 
-    #  phewas <- phewas[-grep("^[a-z | A-Z]", phewas$p.value), ]
-    phewas <- phewas[! is.na(phewas$p.value),]
+    phewas <- phewas[-grep("^[a-z | A-Z]", phewas$p.value), ]
+    phewas <- phewas[!is.na(phewas$p.value),]
     phewas$p.value <- as.numeric(phewas$p.value)
 
     phewas <- subset(phewas, p.value <= p.thres)
@@ -134,7 +134,7 @@ phewas.import <- function(file = "./Data/phewas-catalog.csv", p.thres=1E-04)
     phewas <- phewas[, vars.keep]
     phewas$snp <- trimWhiteSpace(phewas$snp)
     phewas$phewas.phenotype <- trimWhiteSpace(phewas$phewas.phenotype)
-    save(phewas, file = "phewas.RData", compress = TRUE)
+    save(phewas, file = file.path(gwasDataFolder,"phewas.RData"), compress = TRUE)
 
     invisible(phewas)
 }
@@ -267,7 +267,7 @@ gwas.filter <- function(data){
     #   write.table(data,
     #               "stopgap_grasp_nhgri_gwasdb_merged_filtered.txt",
     #               sep = "\t", row.names = FALSE, quote = F, na = "")
-    # save(data, file = "stopgap_4sources_clean.RData", compress = TRUE)
+    # save(data, file = file.path(gwasDataFolder,"stopgap_4sources_clean.RData"), compress = TRUE)
     data
 }
 
@@ -276,11 +276,11 @@ gwas.filter <- function(data){
 #              by grasp and gwasdb datasets respectively
 # Merge order: NHGRI > GRASP > GWASDB > phewas
 data.merge <- function(nhgri, grasp, gwasdb, phewas){
-    cat("Start merging the data from five sources: nhgri, grasp, gwasdb, and PheWAS ...", "\n")
-    load("nhgri.RData")
-    load("grasp.RData")
-    load("gwasdb.RData")
-    load("phewas.RData")
+    cat("Start merging the data from four sources: nhgri, grasp, gwasdb, and PheWAS ...", "\n")
+    load(file.path(gwasDataFolder,"nhgri.RData"))
+    load(file.path(gwasDataFolder,"grasp.RData"))
+    load(file.path(gwasDataFolder,"gwasdb.RData"))
+    load(file.path(gwasDataFolder,"phewas.RData"))
 
     nhgri <- rename(nhgri, c(SNPS = 'snp_id',
     P.VALUE = "pvalue",
@@ -385,17 +385,17 @@ data.merge <- function(nhgri, grasp, gwasdb, phewas){
     #write.table(data,
     #            "stopgap_grasp_nhgri_gwasdb_merged.txt",
     #            sep = "\t", row.names = FALSE, quote = F, na = "")
-    #  save(data, file = "stopgap_4sources.RData", compress = TRUE)
-    save(gwas.data, file = "stopgap_4sources_clean.RData", compress = TRUE)
+    #  save(data, file = file.path(gwasDataFolder,"stopgap_4sources.RData"), compress = TRUE)
+    save(gwas.data, file = file.path(gwasDataFolder,"stopgap_4sources_clean.RData"), compress = TRUE)
 
     invisible(data)
 }
 
 # new.gwassnps: identify the unique GWAS SNPs for LD calculation
-gwas.snps <- function(gwas.file="stopgap_4sources_clean.RData"){
+gwas.snps <- function(gwas.file=file.path(gwasDataFolder,"stopgap_4sources_clean.RData")){
     load(gwas.file)
     snps <- sort(unique(gwas.data$snp_id))
-    writeLines(snps, "stopgap2_SNPs.txt", sep = "\n", useBytes = FALSE)
+    writeLines(snps, file.path(gwasDataFolder,"stopgap2_SNPs.txt"), sep = "\n", useBytes = FALSE)
 
     invisible(snps)
 }
@@ -423,7 +423,7 @@ gwas.snps <- function(gwas.file="stopgap_4sources_clean.RData"){
 
 # Update rsIDs in the gwas data (data) to dbSNP141 version by using the ./STOPGAP2_LDResults/rsID_Coordinates.txt file
 # Write out the new GWAS data as "stopgap_4sources_dbSNP141.RData"
-rsID.update <- function(gwas.file="stopgap_4sources_clean.RData", #.changed from stopgap_4sources.RData to stopgap_4sources_clean.RData
+rsID.update <- function(gwas.file = file.path(gwasDataFolder,"stopgap_4sources_clean.RData")), #.changed from stopgap_4sources.RData to stopgap_4sources_clean.RData
 coor.file="./STOPGAP2_LDResults/rsID_Coordinates.txt")
 
 {
@@ -438,7 +438,7 @@ coor.file="./STOPGAP2_LDResults/rsID_Coordinates.txt")
     names <- names(gwas.data)[! (names(gwas.data) %in% c("snp_id", "rsid"))]
     gwas.data <- gwas.data[, c("snp_id", "rsid", names)]
 
-    save(gwas.data, file = "stopgap_4sources_dbSNP141.RData", compress = TRUE)
+    save(gwas.data, file = file.path(gwasDataFolder,"stopgap_4sources_dbSNP141.RData"), compress = TRUE)
 
     invisible(gwas.data)
 }
@@ -522,7 +522,7 @@ ld.r2.file="./STOPGAP2_LDResults/gwas_LD/ld.snps.r2.RData"){
 }
 
 # Update the ld.snps.r2 and ld_snps data by including the GWAS SNPs data which don't have any LD information there
-update.ld.snps.r2 <- function(gwas.file="stopgap_4sources_dbSNP141.RData",
+update.ld.snps.r2 <- function(gwas.file = file.path(gwasDataFolder,"stopgap_4sources_dbSNP141.RData"),
 ld.file = "./STOPGAP2_LDResults/gwas_LD/ld.snps.r2.updated.RData",
 rsid.file = "./STOPGAP2_LDResults/rsID_Coordinates.txt"){
     cat("Update the ld.snps.r2 data by including the (154526-147706) GWAS SNPs data there ...", "\n")
@@ -1248,7 +1248,7 @@ Posigene.file="./Data/gencode_v19_clean.RData"){
 # Also Update the var2gene mapping data by removing any rows with conflicting chr.ld with those from the chr information from gencode data
 #
 var2gene.filter <- function(var2gene.file = "./VarGeneMapping/gwas.ld.var2gene.simplified.RData",
-gencode.file = "./Data/gencode_v19_clean.RData"){
+gencode.file = file.path(gwasDataFolder,"gencode_v19_clean.RData")){
 
     cat("Start to filter var2gene data ...", "\n")
     load(var2gene.file)
@@ -1267,7 +1267,7 @@ gencode.file = "./Data/gencode_v19_clean.RData"){
 # gwas.mesh: add mesh terms to the GWAS data.
 # Run it on Windows only
 gwas.mesh <- function(gwas.file="./stopgap_4sources_dbSNP141.RData",
-disease2mesh.file = "./Data/MeSH_Aug2016.txt"){
+disease2mesh.file = file.path(gwasDataFolder,"MeSH_Aug2016.txt")){
 
     cat("Start adding mesh terms to the GWAS data ...", "\n")
     load(gwas.file)
@@ -1384,7 +1384,7 @@ var2gene.file = "./VarGeneMapping/Var2Gene_vepSimp.RData"){
 }
 
 # find MHC genes:
-find.mhc.genes <- function(gencode.file = "./Data/gencode_v19_clean.RData")
+find.mhc.genes <- function(gencode.file = file.path(gwasDataFolder,"gencode_v19_clean.RData"))
 {
     load(gencode.file)
     x <- subset(gencode, chrom %in% "6" &
@@ -1400,7 +1400,7 @@ rm.mhc.genes <- function(data.file="./GWAS_LD_var2gene/Mergedata_VEPsimplified_w
 lRmMHC=TRUE){
 
     load(data.file)
-    mhc.genes <- find.mhc.genes(gencode.file = "./Data/gencode_v19_clean.RData")
+    mhc.genes <- find.mhc.genes(gencode.file = file.path(gwasDataFolder,"gencode_v19_clean.RData"))
     write.table(mhc.genes, "./GWAS_LD_var2gene/MHC_genes.txt", sep = "\t", row.names = F)
     if (lRmMHC)gwas.r2.var2gene.withGene <- subset(gwas.r2.var2gene.withGene, ! (gene %in% trimWhiteSpace(mhc.genes)))
 
@@ -2011,7 +2011,7 @@ mesh.gene <- function(data.file="./GWAS_LD_var2gene/Mergedata_VEPsimplified_with
 # Set Rank=1, pval2 as 0 and GeneScore=max(stopgap.gene.mesh$gene.score)
 # Remove MSH.TOP and OrphID columms and change the names to being consistent with stopgap.gene.mesh
 merge.orphanet <- function(gm.file = "./Mesh_gene/STOPGAP_r2_0.7_rmMHC_bestLD_gene_mesh.RData",
-orphanet.file = "./Data/orphanet.RData",
+orphanet.file = file.path(gwasDataFolder,"orphanet.RData"),
 gencode.file="./Data/gencode_v19_clean.RData"
 ){
     load(gm.file)
@@ -2108,7 +2108,7 @@ gencode.file="./Data/gencode_v19_clean.RData"
     write.table(stopgap.gene.mesh,
     "stopgap.gene.mesh.txt",
     sep = "\t", row.names = FALSE, quote = F, na = "")
-    save(stopgap.gene.mesh, file = "stopgap.gene.mesh.RData", compress = TRUE)
+    save(stopgap.gene.mesh, file = file.path(gwasDataFolder,"stopgap.gene.mesh.RData"), compress = TRUE)
 
     invisible(stopgap.gene.mesh)
 }
@@ -2182,7 +2182,7 @@ gencode.file="./Data/gencode_v19_clean.RData"){
     write.table(stopgap.bestld,
     "stopgap.bestld.txt",
     sep = "\t", row.names = FALSE, quote = F, na = "")
-    save(stopgap.bestld, file = "stopgap.bestld.RData", compress = TRUE)
+    save(stopgap.bestld, file = file.path(gwasDataFolder,"stopgap.bestld.RData"), compress = TRUE)
 
     invisible(stopgap.bestld)
 }

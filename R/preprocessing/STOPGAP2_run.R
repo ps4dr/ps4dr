@@ -7,9 +7,6 @@ suppressWarnings(suppressMessages(library(dplyr)))
 suppressWarnings(suppressMessages(library(reshape)))
 suppressWarnings(suppressMessages(library(ggplot2)))
 
-# Import helper functions
-source("STOPGAP2_functions.R")
-
 #############
 # CONSTANTS #
 #############
@@ -25,6 +22,9 @@ args = commandArgs(trailingOnly = TRUE)
 resultsFolder = normalizePath(args[1])
 ensureFolder(resultsFolder)
 sprintf("Using results folder at %s", resultsFolder)
+
+# Import helper functions
+source("STOPGAP2_functions.R")
 
 stopgapFolder = file.path(resultsFolder, "STOPGAP2_LDResults")
 varGeneMappingFolder = file.path(resultsFolder, "VarGeneMapping")
