@@ -408,17 +408,17 @@ gwas.snps <- function(gwas.file="stopgap_4sources_clean.RData"){
 #  PATH=$PATH\:/GWD/bioinfo/projects/GXapp/EntrezDirect/edirect
 
 
-run.ld <- function(){
-    # Input SNPs: stopgap2_SNPs.txt
-
-    system("mkdir STOPGAP2_LDResults")
-
-    #(1) Coordinate lookup
-    system("python2.7 ./Get_rsID_coord.py -o ./STOPGAP_LD -r ./Example/stopgap2_snps.txt")
-
-    #(2) LD Calculation example for chr. 1
-    system("./LDcalc.sh 1 ./STOPGAP_LD ./STOPGAP_LD")
-}
+# run.ld <- function(){
+#     # Input SNPs: stopgap2_SNPs.txt
+# 
+#     system("mkdir STOPGAP2_LDResults")
+# 
+#     #(1) Coordinate lookup
+#     system("python2.7 ./Get_rsID_coord.py -o ./STOPGAP_LD -r ./Example/stopgap2_snps.txt")
+# 
+#     #(2) LD Calculation example for chr. 1
+#     system("./LDcalc.sh 1 ./STOPGAP_LD ./STOPGAP_LD")
+# }
 # run.ld()
 
 # Update rsIDs in the gwas data (data) to dbSNP141 version by using the ./STOPGAP2_LDResults/rsID_Coordinates.txt file
