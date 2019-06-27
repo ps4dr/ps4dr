@@ -13,7 +13,7 @@ Run the following command to download all of the data and run the STOPGAP2 pipel
 
 .. code-block:: sh
 
-   $ cd msdrp/R/preprocessing/
+   $ cd R/preprocessing/
    $ Rscript STOPGAP2_run.R ../../data/
 
 Prepare MeSH to EFO Mappings
