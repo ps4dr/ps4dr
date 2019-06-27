@@ -1,10 +1,10 @@
 Package: ps4dr
-Title: Identify drug repositioning candidates using multi-omics data
-Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Title: Pathway Signatures 4 Drug Repurposing
+Version: 0.0.1
+Authors@R: person("Asif", "Emon", email = "mohammad.asif.emon@scai.fraunhofer.de", role = c("aut", "cre"))
+Description: Using pathway signatures and multi-modal data for drug repurposing and discovery
 Depends: R (>= 3.5.2)
-License: What license is it under?
+License: Apache License 2.0
 Encoding: UTF-8
 LazyData: true
 Imports:
