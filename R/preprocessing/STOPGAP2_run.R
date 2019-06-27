@@ -1,11 +1,11 @@
 #--------Run STOPGAP2 R functions to generate STOPGAP2 datasets -----------------#
 # Author: Judong Shen and Kijoung Song
 
-library(gplots)
-library(plyr)
-library(dplyr)
-library(reshape)
-library(ggplot2)
+suppressWarnings(suppressMessages(library(gplots)))
+suppressWarnings(suppressMessages(library(plyr)))
+suppressWarnings(suppressMessages(library(dplyr)))
+suppressWarnings(suppressMessages(library(reshape)))
+suppressWarnings(suppressMessages(library(ggplot2)))
 
 # Import helper functions
 source("STOPGAP2_functions.R")

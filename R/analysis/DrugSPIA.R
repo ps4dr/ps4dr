@@ -4,19 +4,20 @@
 #' 01: genes that are drug perturbed, differentially expressed and having SNPs from GWASs and/or
 #' 02: genes that are drug perturbed and having SNPs from GWASs
 
-library(data.table)
-library(dplyr)
-library(plyr)
-library(tidyr)
+suppressWarnings(suppressMessages(library(data.table)))
+suppressWarnings(suppressMessages(library(dplyr)))
+suppressWarnings(suppressMessages(library(plyr)))
+suppressWarnings(suppressMessages(library(tidyr)))
 
-library(parallel)
-library(foreach)
-library(doParallel)
-library(doSNOW)
-library(doMC)
+suppressWarnings(suppressMessages(library(parallel)))
+suppressWarnings(suppressMessages(library(foreach)))
+suppressWarnings(suppressMessages(library(doParallel)))
+suppressWarnings(suppressMessages(library(doSNOW)))
+suppressWarnings(suppressMessages(library(doMC)))
+
 no_cores <- detectCores() - 4
 
-library(SPIA)
+suppressWarnings(suppressMessages(library(SPIA)))
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository

@@ -3,11 +3,11 @@
 #' create pathway activities with the combination of two drugs
 #' then use 2drugs combination pathways to calculate correlation score 
 
-library(data.table)
-library(tidyr)
-library(RecordLinkage)
-library(ggplot2)
-library(purrr)
+suppressWarnings(suppressMessages(library(data.table)))
+suppressWarnings(suppressMessages(library(tidyr)))
+suppressWarnings(suppressMessages(library(RecordLinkage)))
+suppressWarnings(suppressMessages(library(ggplot2)))
+suppressWarnings(suppressMessages(library(purrr)))
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository

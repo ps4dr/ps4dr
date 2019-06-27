@@ -5,13 +5,13 @@
 #' 01: prepare Gene Expression Data sets
 #' 02: calculate SPIA
 
-library(data.table)
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(SPIA)
-library(graphite)
-library(org.Hs.eg.db)
+suppressWarnings(suppressMessages(library(data.table)))
+suppressWarnings(suppressMessages(library(dplyr)))
+suppressWarnings(suppressMessages(library(tidyr)))
+suppressWarnings(suppressMessages(library(ggplot2)))
+suppressWarnings(suppressMessages(library(SPIA)))
+suppressWarnings(suppressMessages(library(graphite)))
+suppressWarnings(suppressMessages(library(org.Hs.eg.db)))
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository

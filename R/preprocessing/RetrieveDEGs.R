@@ -6,13 +6,14 @@
 #' 03: Retrieve Therapeutic area mapping for all diseases as well
 #' last accessed on 11 March, 2019
 
-library(data.table)
-library(httr)
-library(jsonlite)
-library(foreach)
-library(doParallel)
-library(dplyr)
-library(tidyr)
+suppressWarnings(suppressMessages(library(data.table)))
+suppressWarnings(suppressMessages(library(httr)))
+suppressWarnings(suppressMessages(library(jsonlite)))
+suppressWarnings(suppressMessages(library(foreach)))
+suppressWarnings(suppressMessages(library(doParallel)))
+suppressWarnings(suppressMessages(library(dplyr)))
+suppressWarnings(suppressMessages(library(tidyr)))
+
 registerDoParallel(parallel::detectCores() - 1)
 
 #####################################################################

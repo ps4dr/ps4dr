@@ -7,12 +7,13 @@
 # source("http://bioconductor.org/biocLite.R")
 # biocLite("EnsDb.Hsapiens.v86")
 
-library(EnsDb.Hsapiens.v86)
-library(data.table)
-library(httr)
-library(jsonlite)
-library(foreach)
-library(doParallel)
+suppressWarnings(suppressMessages(library(EnsDb.Hsapiens.v86)))
+suppressWarnings(suppressMessages(library(data.table)))
+suppressWarnings(suppressMessages(library(httr)))
+suppressWarnings(suppressMessages(library(jsonlite)))
+suppressWarnings(suppressMessages(library(foreach)))
+suppressWarnings(suppressMessages(library(doParallel)))
+
 registerDoParallel(parallel::detectCores() - 1)
 
 

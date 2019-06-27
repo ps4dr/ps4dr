@@ -4,13 +4,13 @@
 #' plot distribution for all drug correlation scores for each disease 
 
 
-library(data.table)
-library(tidyr)
-library(dplyr)
-library(RecordLinkage)
-library(ggplot2)
-library(gridExtra)
-library(Hmisc)
+suppressWarnings(suppressMessages(library(data.table)))
+suppressWarnings(suppressMessages(library(tidyr)))
+suppressWarnings(suppressMessages(library(dplyr)))
+suppressWarnings(suppressMessages(library(RecordLinkage)))
+suppressWarnings(suppressMessages(library(ggplot2)))
+suppressWarnings(suppressMessages(library(gridExtra)))
+suppressWarnings(suppressMessages(library(Hmisc)))
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository

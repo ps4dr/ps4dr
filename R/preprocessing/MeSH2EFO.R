@@ -4,12 +4,12 @@
 #' for downloading Differential Gene Expression Data from Open Targtets by EFO IDs
 #' EFO ontology (version 2.105) file has been used for these mapping purpose
 
-library(EnsDb.Hsapiens.v86)
-library(data.table)
-library(dplyr)
-library(tidyr)
-library(httr)
-library(jsonlite)
+suppressWarnings(suppressMessages(library(EnsDb.Hsapiens.v86)))
+suppressWarnings(suppressMessages(library(data.table)))
+suppressWarnings(suppressMessages(library(dplyr)))
+suppressWarnings(suppressMessages(library(tidyr)))
+suppressWarnings(suppressMessages(library(httr)))
+suppressWarnings(suppressMessages(library(jsonlite)))
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository

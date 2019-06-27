@@ -6,18 +6,19 @@
 #' 02: Drug Perturbed Genes & DEGs & GWAS data :> drugPdisease.genes,
 #' 03: Drug Perturbed Genes & GWAS data :> drugGWAS.genes.
 
-library(EnsDb.Hsapiens.v86)
+suppressWarnings(suppressMessages(library(EnsDb.Hsapiens.v86)))
 
-library(foreach)
-library(doParallel)
+suppressWarnings(suppressMessages(library(foreach)))
+suppressWarnings(suppressMessages(library(doParallel)))
 registerDoParallel(parallel::detectCores() - 1)
 
-library(data.table)
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(cowplot)
-library(pROC)
+suppressWarnings(suppressMessages(library(data.table)))
+suppressWarnings(suppressMessages(library(dplyr)))
+suppressWarnings(suppressMessages(library(tidyr)))
+suppressWarnings(suppressMessages(library(ggplot2)))
+suppressWarnings(suppressMessages(library(cowplot)))
+suppressWarnings(suppressMessages(library(pROC)))
+suppressWarnings(suppressMessages(library(biomaRt)))
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository
@@ -153,7 +154,7 @@ DEGs = merge(DEGs, tmp2, by = "efo.id")
 
 #__map ensembl IDs to ENTREZ ID___#
 #-----get mapping among ENTREZ_HGNC_ENSEMBL_IDs---------#
-library(biomaRt)
+
 ensembl = useEnsembl(biomart="ensembl", version=92, dataset="hsapiens_gene_ensembl") # v92 has less id than v79
 val = c(1:23,"X","Y")
 gene.id = getBM(attributes=c('entrezgene','hgnc_symbol','ensembl_gene_id','chromosome_name','start_position','end_position'),
