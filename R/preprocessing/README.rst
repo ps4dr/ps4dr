@@ -5,14 +5,20 @@ To run the pre-processing scripts, you have to go into the `R/preprocessing` fol
 **Note** you have to be inside the `preprocessing` folder where the scripts are (right now, until the
 code is properly packaged).
 
-1. Run the following command to download all of the data and run the STOPGAP2 pipeline to generate processed-GWAS data:
+Workflow
+--------
+Preprocess GWAS with STOPGAP2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Run the following command to download all of the data and run the STOPGAP2 pipeline to generate processed-GWAS data:
 
 .. code-block:: sh
 
    $ cd msdrp/R/preprocessing/
    $ Rscript STOPGAP2_run.R ../../data/
 
-2. Convert MeSH terms to EFO identifiers in the processed-GWAS data for harmonizing purposes with the following
+Prepare MeSH to EFO Mappings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Convert MeSH terms to EFO identifiers in the processed-GWAS data for harmonizing purposes with the following
 command:
 
 .. code-block:: sh
@@ -20,14 +26,18 @@ command:
    $ cd R/preprocessing/
    $ Rscript MeSH2EFO.R ../../data/
 
-3. Downloading all data from Open Targets using its API with the following command:
+Download Open Targets Data
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+Downloading all data from Open Targets using its API with the following command:
 
 .. code-block:: sh
 
    $ cd R/preprocessing/
    $ Rscript RetrieveDEGs.R ../../data/
 
-4. Download the LINCS L1000 dataset and maps LINCS identifiers to ChEMBL ids for harmonizing purposes.
+Download and Preprocess LINCS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Download the LINCS L1000 dataset and maps LINCS identifiers to ChEMBL ids for harmonizing purposes.
 
 .. code-block:: sh
 
