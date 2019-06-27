@@ -34,6 +34,14 @@ Then
 
 Reproduction
 ------------
+To run the entire pipeline:
+
+.. code-block:: sh
+
+   $ source reproduction.sh
+
+Alternatively, see the instructions to:
+
 1. Run all pre-processing scripts using the instructions at
    https://github.com/ps4dr/ps4dr/tree/master/R/preprocessing
 2. Run all analysis scripts using the instructions at
