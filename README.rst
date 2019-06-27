@@ -9,7 +9,7 @@ If ``devtools`` is not installed, do:
 
 .. code-block:: sh
 
-   $ R -e 'install.packages("devtools")'
+   $ R -e 'install.packages("devtools", repos="http://cran.us.r-project.org")'
 
 This library can be installed directly from GitHub using the following instructions adapted
 from `R Package primer <https://kbroman.org/pkg_primer/pages/github.html>`_:
