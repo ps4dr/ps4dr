@@ -19,12 +19,18 @@ ensureFolder = function(folder) {
 }
 
 args = commandArgs(trailingOnly = TRUE)
+if (length(args) != 2) {
+    print("Two arguments must be given (data/stopgap script path)")
+    quit(status=1)
+}
+
 resultsFolder = normalizePath(args[1])
+stopgap_functions_path = normalizePath(args[2])
 ensureFolder(resultsFolder)
 sprintf("Using results folder at %s", resultsFolder)
 
 # Import helper functions
-source("STOPGAP2_functions.R")
+source(stopgap_functions_path)
 
 stopgapFolder = file.path(resultsFolder, "STOPGAP2_LDResults")
 varGeneMappingFolder = file.path(resultsFolder, "VarGeneMapping")
