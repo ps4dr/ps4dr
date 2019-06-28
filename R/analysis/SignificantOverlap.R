@@ -74,74 +74,74 @@ DEGs = merge(DEGs, tmp2, by = "efo.id")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #' Calculating significant overlap between Differentially expressed Genes (DEGs) and GWAS genes
-#' Output would be the disease specific genes which are diffrentially expressed in the diseases 
+#' Output would be the disease specific genes which are diffrentially expressed in the diseases
 #' and also recorded from GWAS.
 
-#' # create gene universes for Fisher's test
-#' ensembl.ids = unique(keys(EnsDb.Hsapiens.v86))
-#' 
-#' # split data table by disease
-#' GWASs.list = split(GWASs, GWASs$efo.id)
-#' DEGs.list = split(DEGs, DEGs$efo.id)
-#' 
-#' ## Signifcant overlap calculation
-#' disease.genes <- foreach (i = seq(DEGs.list), .combine = rbind, .errorhandling = "remove") %do% {
-#'     efo.id.DEGs = names(DEGs.list)[i]
-#'     foreach (j = seq(GWASs.list), .combine = rbind, .errorhandling = "remove") %dopar% {
-#'         efo.id.GWASs = names(GWASs.list)[j]
-#'         tmp = SignificantOverlap(DEGs.list[[efo.id.DEGs]]$ensembl.id, GWASs.list[[efo.id.GWASs]]$ensembl.id, ensembl.ids)
-#'         tmp = cbind(efo.id.DEGs, efo.id.GWASs, tmp)
-#'         tmp = merge(tmp, unique(GWASs[, .(efo.id, efo.term)]), by.x = "efo.id.GWASs", by.y = "efo.id", all.x = TRUE, all.y = FALSE)
-#'         tmp = merge(tmp, unique(DEGs[, .(efo.id, efo.term)]), by.x = "efo.id.DEGs", by.y = "efo.id", all.x = TRUE, all.y = FALSE, suffixes = c(".GWASs", ".DEGs"))
-#'         setcolorder(tmp, c("efo.id.DEGs", "efo.term.DEGs", "efo.id.GWASs", "efo.term.GWASs", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value"))
-#'     }
-#' }
-#' 
-#' # correct p-values
-#' disease.genes[p.value == 0, p.value := 3e-324]
-#' disease.genes = disease.genes[order(p.value),]
-#' disease.genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
-#' # add dummy variable
-#' disease.genes[, same.disease := ifelse(efo.id.DEGs == efo.id.GWASs, TRUE, FALSE)]
-#' 
-#' #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#' #'p-value comparison between same diseases and different diseases Gene sets
-#' 
-#' # man.wtny <- wilcox.test(x = disease.genes[same.disease == FALSE, -log10(p.adjusted)], y = disease.genes[same.disease == TRUE, -log10(p.adjusted)])
-#' # print(man.wtny)
-#' # print(man.wtny$p.value)
-#' # png("./dat/disease.genes.pvalues.boxplots.png", width = 6 * 150, height = 6 * 150, res = 150)
-#' # print(ggplot(disease.genes, aes(x = same.disease, y = -log10(p.adjusted))) +
-#' #         geom_boxplot(fill = "#0066ff", outlier.shape = NA) +
-#' #         coord_cartesian(ylim = quantile(disease.genes[, -log10(p.adjusted)], c(0.03, 0.97))) +
-#' #         xlab("Same disease") +
-#' #         ylab("-log10(adjusted p-value)") +
-#' #         theme_bw(18) +
-#' #         scale_x_discrete(breaks = c(FALSE, TRUE), labels = c("No", "Yes")) +
-#' #         ggtitle(paste("p-value =", sprintf("%.2e", man.wtny$p.value))))
-#' # dev.off()
-#' 
-#' #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#' #~~~~~~~~~~~~~~ROC Curve~~~~~~~~~~~~~~#
-#' 
-#' # pred <- as.numeric(disease.genes[, - log10(p.adjusted)])
-#' # resp <- as.numeric(disease.genes[, same.disease])
-#' # 
-#' # roc.curve <- roc(response = as.numeric(resp), predictor = as.numeric(pred), algorithm = 2, ci = TRUE, ci.method = "bootstrap", smooth = TRUE, boot.n = 1000, parallel = TRUE, progress = "none")
-#' # print(roc.curve)
-#' # sp.ci <- ci.sp(roc.curve, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
-#' # se.ci <- ci.se(roc.curve, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
-#' # png(file.path(dataFolder,"disease.genes.roc.png", width = 6 * 150, height = 6 * 150, res = 150))
-#' # par(pty = "s")
-#' # plot(roc.curve, main = paste("AUC =", round(roc.curve$auc, 2)), xlab = "False positive rate", ylab = "True positive rate", identity.lty = 2, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.5)
-#' # plot(se.ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
-#' # plot(sp.ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
-#' # plot(roc.curve, add = TRUE, col = "#0066ff", lwd = 3)
-#' # dev.off()
-#' 
-#' disease.genes = disease.genes[p.adjusted <= 0.05]
-#' save(disease.genes, file = file.path(dataFolder,"disease.genes50.RData"))
-#' # load(file.path(dataFolder,"disease.genes50.RData"))
+# create gene universes for Fisher's test
+ensembl.ids = unique(keys(EnsDb.Hsapiens.v86))
+
+# split data table by disease
+GWASs.list = split(GWASs, GWASs$efo.id)
+DEGs.list = split(DEGs, DEGs$efo.id)
+
+## Signifcant overlap calculation
+disease.genes <- foreach (i = seq(DEGs.list), .combine = rbind, .errorhandling = "remove") %do% {
+    efo.id.DEGs = names(DEGs.list)[i]
+    foreach (j = seq(GWASs.list), .combine = rbind, .errorhandling = "remove") %dopar% {
+        efo.id.GWASs = names(GWASs.list)[j]
+        tmp = SignificantOverlap(DEGs.list[[efo.id.DEGs]]$ensembl.id, GWASs.list[[efo.id.GWASs]]$ensembl.id, ensembl.ids)
+        tmp = cbind(efo.id.DEGs, efo.id.GWASs, tmp)
+        tmp = merge(tmp, unique(GWASs[, .(efo.id, efo.term)]), by.x = "efo.id.GWASs", by.y = "efo.id", all.x = TRUE, all.y = FALSE)
+        tmp = merge(tmp, unique(DEGs[, .(efo.id, efo.term)]), by.x = "efo.id.DEGs", by.y = "efo.id", all.x = TRUE, all.y = FALSE, suffixes = c(".GWASs", ".DEGs"))
+        setcolorder(tmp, c("efo.id.DEGs", "efo.term.DEGs", "efo.id.GWASs", "efo.term.GWASs", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value"))
+    }
+}
+
+# correct p-values
+disease.genes[p.value == 0, p.value := 3e-324]
+disease.genes = disease.genes[order(p.value),]
+disease.genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
+# add dummy variable
+disease.genes[, same.disease := ifelse(efo.id.DEGs == efo.id.GWASs, TRUE, FALSE)]
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#'p-value comparison between same diseases and different diseases Gene sets
+
+# man.wtny <- wilcox.test(x = disease.genes[same.disease == FALSE, -log10(p.adjusted)], y = disease.genes[same.disease == TRUE, -log10(p.adjusted)])
+# print(man.wtny)
+# print(man.wtny$p.value)
+# png("./dat/disease.genes.pvalues.boxplots.png", width = 6 * 150, height = 6 * 150, res = 150)
+# print(ggplot(disease.genes, aes(x = same.disease, y = -log10(p.adjusted))) +
+#         geom_boxplot(fill = "#0066ff", outlier.shape = NA) +
+#         coord_cartesian(ylim = quantile(disease.genes[, -log10(p.adjusted)], c(0.03, 0.97))) +
+#         xlab("Same disease") +
+#         ylab("-log10(adjusted p-value)") +
+#         theme_bw(18) +
+#         scale_x_discrete(breaks = c(FALSE, TRUE), labels = c("No", "Yes")) +
+#         ggtitle(paste("p-value =", sprintf("%.2e", man.wtny$p.value))))
+# dev.off()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~ROC Curve~~~~~~~~~~~~~~#
+
+# pred <- as.numeric(disease.genes[, - log10(p.adjusted)])
+# resp <- as.numeric(disease.genes[, same.disease])
+#
+# roc.curve <- roc(response = as.numeric(resp), predictor = as.numeric(pred), algorithm = 2, ci = TRUE, ci.method = "bootstrap", smooth = TRUE, boot.n = 1000, parallel = TRUE, progress = "none")
+# print(roc.curve)
+# sp.ci <- ci.sp(roc.curve, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
+# se.ci <- ci.se(roc.curve, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
+# png(file.path(dataFolder,"disease.genes.roc.png", width = 6 * 150, height = 6 * 150, res = 150))
+# par(pty = "s")
+# plot(roc.curve, main = paste("AUC =", round(roc.curve$auc, 2)), xlab = "False positive rate", ylab = "True positive rate", identity.lty = 2, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.5)
+# plot(se.ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
+# plot(sp.ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
+# plot(roc.curve, add = TRUE, col = "#0066ff", lwd = 3)
+# dev.off()
+
+disease.genes = disease.genes[p.adjusted <= 0.05]
+save(disease.genes, file = file.path(dataFolder,"disease.genes50.RData"))
+# load(file.path(dataFolder,"disease.genes50.RData"))
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

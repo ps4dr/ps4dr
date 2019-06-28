@@ -79,19 +79,23 @@ L1000 = merge(anno[, ENTREZID := as.numeric(ENTREZID)], L1000, by.x = "ENTREZID"
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 unichem.url = "https://www.ebi.ac.uk/unichem/rest/src_compound_id/"
-unichem.res = foreach(i = seq(lincs.mappings[, pubchem_cid]), .combine = rbind) %dopar% {
-    lincs.id = lincs.mappings[i, pert_id]
-    pubchem.id = lincs.mappings[i, pubchem_cid]
-    chembl.id = as.character(fromJSON(content(GET(paste0(unichem.url, lincs.mappings[i, pubchem_cid], "/22/1")), as = "text", encoding = "UTF-8")))
-    if (length(chembl.id > 0) && startsWith(chembl.id, "CHEMBL")) {
-        tmp = data.table(lincs.id, pubchem.id, chembl.id)
-    }
+unichem.res = foreach(i = seq(lincs.mappings[, pubchem_cid]), .combine = rbind) %do% {
+  lincs.id = lincs.mappings[i, pert_id]
+  pubchem.id = lincs.mappings[i, pubchem_cid]
+  chembl.id = as.character(fromJSON(content(GET(paste0(unichem.url, lincs.mappings[i, pubchem_cid], "/22/1")), as = "text", encoding = "UTF-8")))
+  if (length(chembl.id > 0) && startsWith(chembl.id, "CHEMBL")) {
+    tmp = data.table(lincs.id, pubchem.id, chembl.id)
+  }
 }
+save(unichem.res, file = file.path(dataFolder,"unichem.res.RData"))
 
-L1000[, lincs.id := substr(`Perturbation ID_Perturbagen_Cell Line_Time_Time Unit_Dose_Dose Unit`, 1, 13)]
+load(file.path(dataFolder,"unichem.res.RData"))
+
+L1000[, lincs.id := substr(`Perturbation.ID_Perturbagen_Cell.Line_Time_Time.Unit_Dose_Dose.Unit`, 1, 13)]
 L1000 = merge(L1000, unichem.res, by = "lincs.id")
-L1000 = L1000[, .(ensembl.id = GENEID, gene.symbol = GeneSym, lincs.id, pubchem.id, chembl.id, perturbation = `Perturbation ID_Perturbagen_Cell Line_Time_Time Unit_Dose_Dose Unit`, direction = weight)]
+L1000 = L1000[, .(ensembl.id = GENEID, gene.symbol = GeneSym, lincs.id, pubchem.id, chembl.id, perturbation = `Perturbation.ID_Perturbagen_Cell.Line_Time_Time.Unit_Dose_Dose.Unit`, direction = weight)]
 save(L1000, file = file.path(dataFolder,"L1000.RData"))
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~L1000 Drugs~~~~~~~~~~~~~~~~~~~#
