@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Halt the script on any error. See: https://stackoverflow.com/questions/19622198/what-does-set-e-mean-in-a-bash-script
+set -e
+
 ####################
 # 1. Preprocessing #
 ####################
