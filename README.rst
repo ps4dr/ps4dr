@@ -38,7 +38,7 @@ To run the entire pipeline:
 
 .. code-block:: sh
 
-   $ source reproduction.sh
+   $ sh reproduction.sh
 
 Alternatively, see the instructions to:
 
