@@ -48,13 +48,15 @@ DEGs = foreach(i = seq(efo.ids), .combine = rbind) %dopar% {
         tmp = unique(as.data.table(flatten(tmp$data)))
         tmp = tmp[, .(efo.id = disease.id, efo.term = disease.efo_info.label, ensembl.id = target.id, gene.symbol = target.gene_info.symbol, comparison = evidence.comparison_name, lfc = evidence.log2_fold_change.value, pval = evidence.resource_score.value)]
     }
+    try(print(paste("log of", i, "=", log(i))))
 }
 
-DEGs = unique(DEGs)
-length(unique(DEGs$efo.term))
-length(unique(DEGs$gene.symbol))
 
-# save(DEGs, file = file.path(dataFolder, "DEGs.RData"))
+DEGs = unique(DEGs)
+sprintf("Number of unique EFO terms: %d", length(unique(DEGs$efo.term)))
+sprintf("Number of unique Gene Symbol: %d", length(unique(DEGs$gene.symbol)))
+
+save(DEGs, file = file.path(dataFolder, "DEGs.RData"))
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -74,41 +76,11 @@ drug2disease = foreach(i = seq(efo.ids), .combine = rbind) %dopar% {
 }
 
 drug2disease = unique(drug2disease)
-length(unique(drug2disease$efo.term))
-length(unique(drug2disease$chembl.name))
+sprintf("Number of unique EFO terms: %d", length(unique(drug2disease$efo.term)))
+sprintf("Number of unique ChEMBL Name: %d", length(unique(drug2disease$chembl.name)))
 
 save(drug2disease, file = file.path(dataFolder, "drug2disease.RData"))
 
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~~~~~Retrieve Therapeutic Area for each Diseases~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-drug2disease.therapeutic = foreach(i = seq(efo.ids), .combine = rbind) %dopar% {
-    tmp = GET("https://api.opentargets.io/v3/platform/public/evidence/filter",
-    query = list(disease = efo.ids[i], datatype = "rna_expression",
-    scorevalue_min = - Inf, size = 10000))
-    tmp = fromJSON(content(tmp, type = "text", encoding = "UTF-8"))
-    if (length(tmp$data) > 0) {
-        tmp = unique(as.data.table(flatten(tmp$data)))
-        tmp = tmp[, .(efo.id = disease.id, therapeutic.area = disease.efo_info.therapeutic_area.labels, efo.term = disease.efo_info.label)]
-    }
-}
 
-drug2disease.therapeutic = unique(as.data.frame(drug2disease.therapeutic))
-
-# create new rows for each synonyms of EFO IDs 
-drug2disease.therapeutic = unique(drug2disease.therapeutic %>%
-    mutate(therapeutic.area = strsplit(as.character(therapeutic.area), ",")) %>%
-    unnest(therapeutic.area))
-# cleaning up symbols
-drug2disease.therapeutic$therapeutic.area = gsub("^c\\(", "", drug2disease.therapeutic$therapeutic.area)
-drug2disease.therapeutic$therapeutic.area = gsub("\\)", "", drug2disease.therapeutic$therapeutic.area)
-drug2disease.therapeutic$therapeutic.area = gsub("\"", "", drug2disease.therapeutic$therapeutic.area)
-
-length(unique(drug2disease.therapeutic$efo.term))
-length(unique(drug2disease.therapeutic$therapeutic.area))
-
-drug2disease_therapeutic_path = file.path(dataFolder, "drug2disease.therapeutic.RData")
-sprintf("Outputting drug2disease info to %s", drug2disease_therapeutic_path)
-save(drug2disease.therapeutic, file = drug2disease_therapeutic_path)

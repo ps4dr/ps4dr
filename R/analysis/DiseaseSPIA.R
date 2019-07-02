@@ -38,47 +38,47 @@ load(file.path(dataFolder,"DEGs.RData"))
 DEGs = DEGs[, c(1, 3, 6, 7)]
 
 # process positive lfc
-lfc.pos = DEGs[lfc >= 0]
-#lfc.pos = lfc.pos[order(lfc,decreasing = TRUE), ] #lfc or pvalue we should sort the dataframe?
-lfc.pos$pval.pos = abs(log10(lfc.pos$pval)) #created dummy variable for pvalue to order it decreasingly, since there are multiple lfc with same pvalue sometimes.
-#lfc.pos = lfc.pos[order(pval), ]
-lfc.pos = lfc.pos[order(lfc, pval.pos, decreasing = TRUE),]
-lfc.pos = lfc.pos[! duplicated(lfc.pos[, c('efo.id', 'ensembl.id')]),]
-#lfc.pos.efo = split(lfc.pos, lfc.pos$efo.id)
-lfc.pos$pval.pos = NULL
+lfc_pos = DEGs[lfc >= 0]
+#lfc_pos = lfc_pos[order(lfc,decreasing = TRUE), ] #lfc or pvalue we should sort the dataframe?
+lfc_pos$pval.pos = abs(log10(lfc_pos$pval)) #created dummy variable for pvalue to order it decreasingly, since there are multiple lfc with same pvalue sometimes.
+#lfc_pos = lfc_pos[order(pval), ]
+lfc_pos = lfc_pos[order(lfc, pval.pos, decreasing = TRUE),]
+lfc_pos = lfc_pos[! duplicated(lfc_pos[, c('efo.id', 'ensembl.id')]),]
+#lfc_pos.efo = split(lfc_pos, lfc_pos$efo.id)
+lfc_pos$pval.pos = NULL
 
 # process negative lfc
-lfc.neg = DEGs[lfc < 0]
-#lfc.neg = lfc.neg[order(lfc), ] #lfc or pvalue we should sort the dataframe?
-lfc.neg = lfc.neg[order(pval, lfc),]
-lfc.neg = lfc.neg[! duplicated(lfc.neg[, c('efo.id', 'ensembl.id')]),]
-#lfc.neg.efo = split(lfc.neg, lfc.neg$efo.id)
+lfc_neg = DEGs[lfc < 0]
+#lfc_neg = lfc_neg[order(lfc), ] #lfc or pvalue we should sort the dataframe?
+lfc_neg = lfc_neg[order(pval, lfc),]
+lfc_neg = lfc_neg[! duplicated(lfc_neg[, c('efo.id', 'ensembl.id')]),]
+#lfc_neg.efo = split(lfc_neg, lfc_neg$efo.id)
 
 # combine both lfc
-lfc.com = rbind(lfc.pos, lfc.neg) #combine positive and negative lfc change back to a single data frame
-lfc.com = lfc.com[order(pval),]
-lfc.com = lfc.com[! duplicated(lfc.com[, c('efo.id', 'ensembl.id')]),]
-lfc.com$pval = NULL
-rm(lfc.neg, lfc.pos, DEGs)
+lfc_comb = rbind(lfc_pos, lfc_neg) #combine positive and negative lfc change back to a single data frame
+lfc_comb = lfc_comb[order(pval),]
+lfc_comb = lfc_comb[! duplicated(lfc_comb[, c('efo.id', 'ensembl.id')]),]
+lfc_comb$pval = NULL
+rm(lfc_neg, lfc_pos, DEGs)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 load(file.path(dataFolder,"geneID.RData"))
-gene.id$entrezgene = gsub("^$", NA, gene.id$entrezgene)
-gene.id = gene.id[which(! is.na(gene.id$entrezgene)),]
-gene.id = data.table(gene.id)
-gene.id = unique(gene.id[, c('entrezgene', 'ensembl_gene_id', 'hgnc_symbol')])
-names(gene.id) = c("ENTREZ", "ensembl.id", "HGNC")
-gene.id = gene.id[! duplicated(gene.id$ensembl.id),]
+gene_id$entrezgene = gsub("^$", NA, gene_id$entrezgene)
+gene_id = gene_id[which(! is.na(gene_id$entrezgene)),]
+gene_id = data.table(gene_id)
+gene_id = unique(gene_id[, c('entrezgene', 'ensembl_gene_id', 'hgnc_symbol')])
+names(gene_id) = c("ENTREZ", "ensembl.id", "HGNC")
+gene_id = gene_id[! duplicated(gene_id$ensembl.id),]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-lfc.com = merge(lfc.com, gene.id, by = "ensembl.id")
-lfc.com = lfc.com[! duplicated(lfc.com[, c('efo.id', 'ENTREZ')]),]
+lfc_comb = merge(lfc_comb, gene_id, by = "ensembl.id")
+lfc_comb = lfc_comb[! duplicated(lfc_comb[, c('efo.id', 'ENTREZ')]),]
 
-# lfc.efo = split(lfc.com, lfc.com$efo.id)
-load(file.path(dataFolder,"disease.genes50.RData"))
-DisGen = disease.genes[same.disease == TRUE &
+# lfc_efo = split(lfc_comb, lfc_comb$efo.id)
+load(file.path(dataFolder,"disease_genes50.RData"))
+DisGen = disease_genes[same.disease == TRUE &
     overlap > 0 &
     p.adjusted < 0.05]
 # remove duplicated rows, since sometimes a disease id is paired with same disease because of slight different names
@@ -91,53 +91,51 @@ DisGen$ensembl.id = gsub("\"", "", DisGen$ensembl.id)
 DisGen$ensembl.id = gsub("c\\(", "", DisGen$ensembl.id)
 DisGen$ensembl.id = gsub("\\)", "", DisGen$ensembl.id)
 DisGen$ensembl.id = trimws(DisGen$ensembl.id)
-length(unique(DisGen$efo.id))
-length(unique(DisGen$ensembl.id))
 DisGen$commonGenes = NULL
 names(DisGen) = c("efo.id", "efo.term", "ensembl.id")
-DisGen = merge(DisGen, lfc.com, by = c('ensembl.id', 'efo.id')) # merge with harmonizome
+DisGen = merge(DisGen, lfc_comb, by = c('ensembl.id', 'efo.id')) # merge with harmonizome
 
-lfc.efo = split(DisGen, DisGen$efo.term)
-lfc.efo = Filter(function(x) dim(x)[1] > 10, lfc.efo) # remove diseases with very few (less than 10) genes to test
+lfc_efo = split(DisGen, DisGen$efo.term)
+lfc_efo = Filter(function(x) dim(x)[1] > 10, lfc_efo) # remove diseases with very few (less than 10) genes to test
 
-save(lfc.efo, file = file.path(dataFolder,"disease47.genes50.lfc.RData"))
-rm(lfc.com)
+save(lfc_efo, file = file.path(dataFolder,"disease_genes50.lfc.RData"))
+rm(lfc_comb)
 
 #~~~~~~~~~~Create Named Vector for log fold changes in each disease~~~~~~~~~~#
 
-load(file.path(dataFolder,"disease47.genes50.lfc.RData"))###--get log fold change for all genes for each diseases-##
+load(file.path(dataFolder,"disease_genes50.lfc.RData"))###--get log fold change for all genes for each diseases-##
 
 lfc_ensembl = list()
-for (i in 1 : length(lfc.efo)) {
-    lfc_ensembl[[i]] = setNames(as.numeric(lfc.efo[[i]][[4]]), as.character(lfc.efo[[i]][[1]]))
-    names(lfc_ensembl)[[i]] = names(lfc.efo)[[i]]
+for (i in 1 : length(lfc_efo)) {
+    lfc_ensembl[[i]] = setNames(as.numeric(lfc_efo[[i]][[4]]), as.character(lfc_efo[[i]][[1]]))
+    names(lfc_ensembl)[[i]] = names(lfc_efo)[[i]]
 }
 
 lfc_entrez = list()
-for (i in 1 : length(lfc.efo)) {
-    lfc_entrez[[i]] = setNames(as.numeric(lfc.efo[[i]][[4]]), as.character(lfc.efo[[i]][[5]]))
-    names(lfc_entrez)[[i]] = names(lfc.efo)[[i]]
+for (i in 1 : length(lfc_efo)) {
+    lfc_entrez[[i]] = setNames(as.numeric(lfc_efo[[i]][[4]]), as.character(lfc_efo[[i]][[5]]))
+    names(lfc_entrez)[[i]] = names(lfc_efo)[[i]]
 }
 
 lfc_entrezID = list()
-for (i in 1 : length(lfc.efo)) {
-    lfc_entrezID[[i]] = setNames(as.numeric(lfc.efo[[i]][[4]]), as.character(gsub("^", "ENTREZID:", lfc.efo[[i]][[5]])))
-    names(lfc_entrezID)[[i]] = names(lfc.efo)[[i]]
+for (i in 1 : length(lfc_efo)) {
+    lfc_entrezID[[i]] = setNames(as.numeric(lfc_efo[[i]][[4]]), as.character(gsub("^", "ENTREZID:", lfc_efo[[i]][[5]])))
+    names(lfc_entrezID)[[i]] = names(lfc_efo)[[i]]
 }
 
 lfc_hgnc = list()
-for (i in 1 : length(lfc.efo)) {
-    lfc_hgnc[[i]] = setNames(as.numeric(lfc.efo[[i]][[4]]), as.character(lfc.efo[[i]][[6]]))
-    names(lfc_hgnc)[[i]] = names(lfc.efo)[[i]]
+for (i in 1 : length(lfc_efo)) {
+    lfc_hgnc[[i]] = setNames(as.numeric(lfc_efo[[i]][[4]]), as.character(lfc_efo[[i]][[6]]))
+    names(lfc_hgnc)[[i]] = names(lfc_efo)[[i]]
 }
 
 #~~~~~~Create a vector with all Gene universe to proxy Array Genes~~~~~~~#
-hgnc_all = unique(gene.id$HGNC)
-ensembl_all = unique(gene.id$ensembl.id)
-entrez_all = unique(gene.id$ENTREZ)
-entrezID_all = unique(gsub("^", "ENTREZID:", gene.id$ENTREZ)) ## with ENTREZID: in front of each id
+hgnc_all = unique(gene_id$HGNC)
+ensembl_all = unique(gene_id$ensembl.id)
+entrez_all = unique(gene_id$ENTREZ)
+entrezID_all = unique(gsub("^", "ENTREZID:", gene_id$ENTREZ)) ## with ENTREZID: in front of each id
 
-save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, entrez_all, entrezID_all, file = file.path(dataFolder,"disease47.genes50.lfc.namedVec.RData"))
+save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, entrez_all, entrezID_all, file = file.path(dataFolder,"disease_genes50.lfc.namedVec.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -153,14 +151,15 @@ makeSPIAdata(kgml.path=file.path(dataFolder,"spia_input/kgml/"),organism="hsa",o
 
 #~~~Prepare Reactome SPIA pathway file with graphite package~~~#
 
-reactome <- pathways("hsapiens", "reactome")
-reactome <- convertIdentifiers(reactome, "ENTREZID")
-prepareSPIA(reactome, file.path(dataFolder,"spia_input/real_react/hsa"))
+# reactome <- pathways("hsapiens", "reactome")
+# reactome <- convertIdentifiers(reactome, "ENTREZID")
+# prepareSPIA(reactome, file.path(dataFolder,"spia_input/real_react/hsa"))
 
 #~~~Prepare Reactome SPIA pathway file with graphite package~~~#
-biocarta <- pathways("hsapiens", "biocarta")
-biocarta <- convertIdentifiers(biocarta, "ENTREZID")
-prepareSPIA(biocarta, file.path(dataFolder,"spia_input/real_biocarta/hsa"))
+
+# biocarta <- pathways("hsapiens", "biocarta")
+# biocarta <- convertIdentifiers(biocarta, "ENTREZID")
+# prepareSPIA(biocarta, file.path(dataFolder,"spia_input/real_biocarta/hsa"))
 
 ##_______________________________###
 
@@ -177,18 +176,19 @@ prepareSPIA(biocarta, file.path(dataFolder,"spia_input/real_biocarta/hsa"))
 
 #~~~~~~~~~~~~~KEGG SPIA~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"disease47.genes50.lfc.namedVec.RData"))
+load(file.path(dataFolder,"disease_genes50.lfc.namedVec.RData"))
 
 spia_kegg = list()
 for (i in 1 : length(lfc_entrez)) {
-    spia_kegg[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/real_kegg/"), organism = "hsa")
+  print(paste0("SPIA for Disease # ",(length(lfc_entrez) + 1) -i))
+  spia_kegg[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/real_kegg/"), organism = "hsa")
 }
 names(spia_kegg) = names(lfc_entrez)
 
-save(spia_kegg, file = file.path(dataFolder,"spia_output/spia_kegg_disease47.genes50_results.RData"))
+save(spia_kegg, file = file.path(dataFolder,"spia_output/spia_kegg_diseaseGenes.RData"))
 
-spia_kegg_degs = lapply(spia_kegg_degs, function(x) x[x$pNDE <= 0.05,])
-plotP(spia_kegg_degs[[4]])
+# spia_kegg = lapply(spia_kegg, function(x) x[x$pNDE <= 0.05,])
+# plotP(spia_kegg[[4]])
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -203,8 +203,8 @@ plotP(spia_kegg_degs[[4]])
 
 #___create universe with ENTREZID:____#
 load(file.path(dataFolder,"geneID.RData"))
-universe = unique(na.omit(gene.id$entrezgene)) # for kegg
-# universe = unique(na.omit(gsub("^","ENTREZID:",gene.id$entrezgene))) # for reactome, biocarta
+universe = unique(na.omit(gene_id$entrezgene)) # for kegg
+# universe = unique(na.omit(gsub("^","ENTREZID:",gene_id$entrezgene))) # for reactome, biocarta
 
 load(file.path(dataFolder,"spia_input/real_kegg/hsaSPIA.RData"))
 # load(file.path(dataFolder,"spia_input/real_react/hsaSPIA.RData"))
@@ -247,9 +247,10 @@ rm(path.info,pseudo_path)
 
 spia_kegg_pseudo = list()
 for (i in 1 : length(lfc_entrez)) {
-    spia_kegg_pseudo[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/pseudo_kegg/"), organism = "hsa")
+  print(paste0("SPIA (pseudo) for Disease # ",(length(lfc_entrez) + 1) -i))
+  spia_kegg_pseudo[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/pseudo_kegg/"), organism = "hsa")
 }
-save(spia_kegg_pseudo, file = file.path(dataFolder,"spia_output/spia_kegg_disease47.genes50_pseudo_results.RData"))
+save(spia_kegg_pseudo, file = file.path(dataFolder,"spia_output/spia_kegg_diseaseGenes_pseudo.RData"))
 rm(list = ls())
 gc()
 

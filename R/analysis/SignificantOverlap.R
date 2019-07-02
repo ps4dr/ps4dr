@@ -2,12 +2,13 @@
 #' summary:
 #' This script calculates significant overlap between/among different data sets using Fisher's exact test
 #' Three different overlaps are calculated in this script (Figure 1. "Gene set intersection")
-#' 01: GWAS & DEGs data :> disease.genes,
-#' 02: Drug Perturbed Genes & DEGs & GWAS data :> drugPdisease.genes,
-#' 03: Drug Perturbed Genes & GWAS data :> drugGWAS.genes.
+#' 01: GWAS & DEGs data :> disease_genes,
+#' 02: Drug Perturbed Genes & DEGs & GWAS data :> drugPdisease_genes,
+#' 03: Drug Perturbed Genes & GWAS data :> drugGWAS_genes.
 
 suppressWarnings(suppressMessages(library(EnsDb.Hsapiens.v86)))
 
+suppressWarnings(suppressMessages(library(doSNOW)))
 suppressWarnings(suppressMessages(library(foreach)))
 suppressWarnings(suppressMessages(library(doParallel)))
 registerDoParallel(parallel::detectCores() - 1)
@@ -78,42 +79,43 @@ DEGs = merge(DEGs, tmp2, by = "efo.id")
 #' and also recorded from GWAS.
 
 # create gene universes for Fisher's test
-ensembl.ids = unique(keys(EnsDb.Hsapiens.v86))
+ensembl_ids = unique(keys(EnsDb.Hsapiens.v86))
 
 # split data table by disease
-GWASs.list = split(GWASs, GWASs$efo.id)
-DEGs.list = split(DEGs, DEGs$efo.id)
+GWASs_list = split(GWASs, GWASs$efo.id)
+DEGs_list = split(DEGs, DEGs$efo.id)
 
-## Signifcant overlap calculation
-disease.genes <- foreach (i = seq(DEGs.list), .combine = rbind, .errorhandling = "remove") %do% {
-    efo.id.DEGs = names(DEGs.list)[i]
-    foreach (j = seq(GWASs.list), .combine = rbind, .errorhandling = "remove") %dopar% {
-        efo.id.GWASs = names(GWASs.list)[j]
-        tmp = SignificantOverlap(DEGs.list[[efo.id.DEGs]]$ensembl.id, GWASs.list[[efo.id.GWASs]]$ensembl.id, ensembl.ids)
-        tmp = cbind(efo.id.DEGs, efo.id.GWASs, tmp)
-        tmp = merge(tmp, unique(GWASs[, .(efo.id, efo.term)]), by.x = "efo.id.GWASs", by.y = "efo.id", all.x = TRUE, all.y = FALSE)
-        tmp = merge(tmp, unique(DEGs[, .(efo.id, efo.term)]), by.x = "efo.id.DEGs", by.y = "efo.id", all.x = TRUE, all.y = FALSE, suffixes = c(".GWASs", ".DEGs"))
-        setcolorder(tmp, c("efo.id.DEGs", "efo.term.DEGs", "efo.id.GWASs", "efo.term.GWASs", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value"))
+## Overlap Signifcance calculation
+print("GWAS to DEGs Gene Set Overlap Signifcance Calculation")
+disease_genes <- foreach (i = seq(DEGs_list), .combine = rbind, .errorhandling = "remove",.verbose = T) %do% {
+    efo_id_DEGs = names(DEGs_list)[i]
+    foreach (j = seq(GWASs_list), .combine = rbind, .errorhandling = "remove",.verbose = T) %dopar% {
+        efo_id_GWASs = names(GWASs_list)[j]
+        tmp = SignificantOverlap(DEGs_list[[efo_id_DEGs]]$ensembl.id, GWASs_list[[efo_id_GWASs]]$ensembl.id, ensembl_ids)
+        tmp = cbind(efo_id_DEGs, efo_id_GWASs, tmp)
+        tmp = merge(tmp, unique(GWASs[, .(efo.id, efo.term)]), by.x = "efo_id_GWASs", by.y = "efo.id", all.x = TRUE, all.y = FALSE)
+        tmp = merge(tmp, unique(DEGs[, .(efo.id, efo.term)]), by.x = "efo_id_DEGs", by.y = "efo.id", all.x = TRUE, all.y = FALSE, suffixes = c(".GWASs", ".DEGs"))
+        setcolorder(tmp, c("efo_id_DEGs", "efo.term.DEGs", "efo_id_GWASs", "efo.term.GWASs", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value"))
     }
 }
 
 # correct p-values
-disease.genes[p.value == 0, p.value := 3e-324]
-disease.genes = disease.genes[order(p.value),]
-disease.genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
+disease_genes[p.value == 0, p.value := 3e-324]
+disease_genes = disease_genes[order(p.value),]
+disease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
 # add dummy variable
-disease.genes[, same.disease := ifelse(efo.id.DEGs == efo.id.GWASs, TRUE, FALSE)]
+disease_genes[, same.disease := ifelse(efo_id_DEGs == efo_id_GWASs, TRUE, FALSE)]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #'p-value comparison between same diseases and different diseases Gene sets
 
-# man.wtny <- wilcox.test(x = disease.genes[same.disease == FALSE, -log10(p.adjusted)], y = disease.genes[same.disease == TRUE, -log10(p.adjusted)])
+# man.wtny <- wilcox.test(x = disease_genes[same.disease == FALSE, -log10(p.adjusted)], y = disease_genes[same.disease == TRUE, -log10(p.adjusted)])
 # print(man.wtny)
 # print(man.wtny$p.value)
-# png("./dat/disease.genes.pvalues.boxplots.png", width = 6 * 150, height = 6 * 150, res = 150)
-# print(ggplot(disease.genes, aes(x = same.disease, y = -log10(p.adjusted))) +
+# png("./dat/disease_genes.pvalues.boxplots.png", width = 6 * 150, height = 6 * 150, res = 150)
+# print(ggplot(disease_genes, aes(x = same.disease, y = -log10(p.adjusted))) +
 #         geom_boxplot(fill = "#0066ff", outlier.shape = NA) +
-#         coord_cartesian(ylim = quantile(disease.genes[, -log10(p.adjusted)], c(0.03, 0.97))) +
+#         coord_cartesian(ylim = quantile(disease_genes[, -log10(p.adjusted)], c(0.03, 0.97))) +
 #         xlab("Same disease") +
 #         ylab("-log10(adjusted p-value)") +
 #         theme_bw(18) +
@@ -124,24 +126,24 @@ disease.genes[, same.disease := ifelse(efo.id.DEGs == efo.id.GWASs, TRUE, FALSE)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~ROC Curve~~~~~~~~~~~~~~#
 
-# pred <- as.numeric(disease.genes[, - log10(p.adjusted)])
-# resp <- as.numeric(disease.genes[, same.disease])
+# pred <- as.numeric(disease_genes[, - log10(p.adjusted)])
+# resp <- as.numeric(disease_genes[, same.disease])
 #
 # roc.curve <- roc(response = as.numeric(resp), predictor = as.numeric(pred), algorithm = 2, ci = TRUE, ci.method = "bootstrap", smooth = TRUE, boot.n = 1000, parallel = TRUE, progress = "none")
 # print(roc.curve)
-# sp.ci <- ci.sp(roc.curve, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
-# se.ci <- ci.se(roc.curve, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
-# png(file.path(dataFolder,"disease.genes.roc.png", width = 6 * 150, height = 6 * 150, res = 150))
+# sp_ci <- ci.sp(roc.curve, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
+# se_ci <- ci.se(roc.curve, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
+# png(file.path(dataFolder,"disease_genes.roc.png", width = 6 * 150, height = 6 * 150, res = 150))
 # par(pty = "s")
 # plot(roc.curve, main = paste("AUC =", round(roc.curve$auc, 2)), xlab = "False positive rate", ylab = "True positive rate", identity.lty = 2, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.5)
-# plot(se.ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
-# plot(sp.ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
+# plot(se_ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
+# plot(sp_ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
 # plot(roc.curve, add = TRUE, col = "#0066ff", lwd = 3)
 # dev.off()
 
-disease.genes = disease.genes[p.adjusted <= 0.05]
-save(disease.genes, file = file.path(dataFolder,"disease.genes50.RData"))
-# load(file.path(dataFolder,"disease.genes50.RData"))
+disease_genes = disease_genes[p.adjusted <= 0.05]
+save(disease_genes, file = file.path(dataFolder,"disease_genes50.RData"))
+# load(file.path(dataFolder,"disease_genes50.RData"))
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -157,30 +159,28 @@ save(disease.genes, file = file.path(dataFolder,"disease.genes50.RData"))
 
 ensembl = useEnsembl(biomart="ensembl", version=92, dataset="hsapiens_gene_ensembl") # v92 has less id than v79
 val = c(1:23,"X","Y")
-gene.id = getBM(attributes=c('entrezgene','hgnc_symbol','ensembl_gene_id','chromosome_name','start_position','end_position'),
+gene_id = getBM(attributes=c('entrezgene','hgnc_symbol','ensembl_gene_id','chromosome_name','start_position','end_position'),
                 filters ='chromosome_name', values =val, mart = ensembl)
 
-save(gene.id,file = file.path(dataFolder,"geneID.RData"))
+save(gene_id,file = file.path(dataFolder,"geneID.RData"))
 rm(ensembl,val)
 
-gene.id$entrezgene = gsub("^$", NA, gene.id$entrezgene)
-gene.id = gene.id[which(! is.na(gene.id$entrezgene)),]
-gene.id = data.table(gene.id)
-gene.id = unique(gene.id[, c('entrezgene', 'ensembl_gene_id', 'hgnc_symbol')])
-names(gene.id) = c("ENTREZ", "ensembl.id", "HGNC")
-gene.id = gene.id[! duplicated(gene.id$ensembl.id),]
-gene.id = gene.id[, c(1, 2)]
+gene_id$entrezgene = gsub("^$", NA, gene_id$entrezgene)
+gene_id = gene_id[which(! is.na(gene_id$entrezgene)),]
+gene_id = data.table(gene_id)
+gene_id = unique(gene_id[, c('entrezgene', 'ensembl_gene_id', 'hgnc_symbol')])
+names(gene_id) = c("ENTREZ", "ensembl.id", "HGNC")
+gene_id = gene_id[! duplicated(gene_id$ensembl.id),]
+gene_id = gene_id[, c(1, 2)]
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 # get LINCS dataset
 load(file.path(dataFolder,"L1000.RData"))
 # harmonizome = unique(fread(file.path(dataFolder,"harmonizome.tsv")))
 L1000 = L1000[, c(5, 1, 7)]
-length(unique(L1000$chembl.id))
-length(unique(L1000$ensembl.id))
 L1000 = L1000[order(ensembl.id, decreasing = TRUE),]
-L1000 = L1000[! duplicated(L1000[, c('ensembl.id', 'chembl.id')]),] # remove duplicate entries
-L1000 = merge(L1000, gene.id, by = "ensembl.id") # merging with ENTREZ ID, since we need only ones with ENTREZ IDs for SPIA calculation
+L1000 = L1000[!duplicated(L1000[, c('ensembl.id', 'chembl.id')]),] # remove duplicate entries
+L1000 = merge(L1000, gene_id, by = "ensembl.id") # merging with ENTREZ ID, since we need only ones with ENTREZ IDs for SPIA calculation
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~Optional~~~~~~~~~~~~~~#
@@ -192,16 +192,16 @@ load(file.path(dataFolder,"drug2715details.RData"))
 dmap = data.table(dmap[, c(1, 2, 3)])
 dmap = dmap[phase == 4 | phase == 3 | phase == 2 | phase == 1] #673 Drugs
 L1000 = merge(dmap[, c(1, 2)], L1000, by = "chembl.id")
-length(unique(L1000$chembl.id))
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 ##### create Disease-Genes list #####
-load(file.path(dataFolder,"disease.genes50.RData"))
-# disease.genes = fread(file.path(dataFolder,"disease.genes50.tsv"))
+load(file.path(dataFolder,"disease_genes50.RData"))
+
 # considering all those gene sets where DEGs and GWAS came from same diseases.
-DisGen = disease.genes[same.disease == TRUE & overlap > 0]
+DisGen = disease_genes[same.disease == TRUE & overlap > 0]
 # remove duplicated rows, since sometimes a disease id is paired with same disease because of slight different names
-DisGen = DisGen[! duplicated(DisGen$efo.id.DEGs),] #remove duplicated rows based on one column
+DisGen = DisGen[!duplicated(DisGen$efo_id_DEGs),] #remove duplicated rows based on one column
 DisGenX = unique(DisGen %>%
     mutate(commonGenes = strsplit(as.character(commonGenes), ",")) %>%
     unnest(commonGenes))
@@ -212,54 +212,56 @@ DisGenX$commonGenes = gsub("\\)", "", DisGenX$commonGenes)
 DisGenX$commonGenes = gsub("\"", "", DisGenX$commonGenes)
 DisGenX$commonGenes = trimws(DisGenX$commonGenes, which = "both")
 
-DisGen.list = split(DisGenX, DisGenX$efo.id.DEGs)
+DisGen.list = split(DisGenX, DisGenX$efo_id_DEGs)
 
 # create vector with all disease, ensembl and chemical IDs
-efo.ids = unique(DisGen$efo.id.DEGs)
-ensembl.ids = unique(keys(EnsDb.Hsapiens.v86))
-chembl.ids = unique(L1000[, chembl.id])
+efo_ids = unique(DisGen$efo_id_DEGs)
+ensembl_ids = unique(keys(EnsDb.Hsapiens.v86))
+chembl_ids = unique(L1000[, chembl.id])
 load(file.path(dataFolder,"drug2disease.RData"))
 
-## Signifcant overlap calculation
-drugPdisease.genes <- foreach (i = seq(efo.ids), .combine = rbind, .errorhandling = "remove") %dopar% {
-    this.efo.id = efo.ids[i]
-    # loop through drugs
-    foreach (j = seq(chembl.ids), .combine = rbind, .errorhandling = "remove") %do% {
-        this.chembl.id = chembl.ids[j]
-        degs = unique(L1000[chembl.id == this.chembl.id, ensembl.id])
-        gags = DisGen.list[[this.efo.id]]$commonGenes
-        if (length(degs) > 0 && length(gags) > 0) {
-            # test significance
-            tmp = SignificantOverlap(degs, gags, ensembl.ids)
-            # annotate
-            tmp = cbind(chembl.id = this.chembl.id, efo.id = this.efo.id, tmp)
-            tmp = merge(unique(drug2disease[, .(efo.id, efo.term)]), tmp, by = "efo.id")
-            tmp = merge(unique(L1000[, .(chembl.id, chembl.name)]), tmp, by = "chembl.id")
-            # add dummy variable
-            tmp[, existing.indication := ifelse(nrow(drug2disease[efo.id == this.efo.id & chembl.id == this.chembl.id]) > 0, TRUE, FALSE)]
-            setcolorder(tmp, c("chembl.id", "chembl.name", "efo.id", "efo.term", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value", "existing.indication"))
-        }
-    }
+## Overlap Signifcance Calculation
+print("Drug2Disease Gene Set Overlap Signifcance Calculation")
+
+drugPdisease_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandling = "remove") %dopar% {
+  current_efo = efo_ids[i]
+  print(paste0("Calculating overlap significance for : ",current_efo))
+  # loop through drugs
+  foreach (j = seq(chembl_ids), .combine = rbind, .errorhandling = "remove") %do% {
+      current_chembl = chembl_ids[j]
+      degs = unique(L1000[chembl.id == current_chembl, ensembl.id])
+      gags = DisGen.list[[current_efo]]$commonGenes
+      if (length(degs) > 0 && length(gags) > 0) {
+          # test significance
+          tmp = as.data.table(SignificantOverlap(degs, gags, ensembl_ids))
+          # annotate
+          tmp = cbind(chembl.id = current_chembl, efo.id = current_efo, tmp)
+          tmp = merge(unique(drug2disease[, .(efo.id, efo.term)]), tmp, by = "efo.id")
+          tmp = merge(unique(L1000[, .(chembl.id, chembl.name)]), tmp, by = "chembl.id")
+          # add dummy variable
+          tmp[, existing.indication := ifelse(nrow(drug2disease[efo.id == current_efo & chembl.id == current_chembl]) > 0, TRUE, FALSE)]
+          setcolorder(tmp, c("chembl.id", "chembl.name", "efo.id", "efo.term", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value", "existing.indication"))
+      }
+  }
 }
 
-drugPdisease.genes = unique(drugPdisease.genes)
-drugPdisease.genes = drugPdisease.genes[overlap > 0]
-length(unique(drugPdisease.genes$chembl.id))
-length(unique(drugPdisease.genes$efo.id))
-save(drugPdisease.genes, file = file.path(dataFolder,"drugPdisease.genes50.RData"))
 
-#load(file.path(dataFolder,"drugPdisease.genes50.RData"))
+drugPdisease_genes = unique(drugPdisease_genes)
+drugPdisease_genes = drugPdisease_genes[overlap > 0]
+sprintf("Number of unique ChEMBL IDs: %d", length(unique(drugPdisease_genes$chembl.id)))
+sprintf("Number of unique EFO terms: %d", length(unique(drugPdisease_genes$efo.id)))
+save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.RData"))
+
+#load(file.path(dataFolder,"drugPdisease_genes50.RData"))
 # correct p-values
-drugPdisease.genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
-drugPdisease.genes = drugPdisease.genes[p.adjusted < 0.05]
-save(drugPdisease.genes, file = file.path(dataFolder,"drugPdisease.genes50.padj.RData"))
-drugPdisease.genes = drugPdisease.genes[p.adjusted < 1e-05]
-save(drugPdisease.genes, file = file.path(dataFolder,"drugPdisease.genes50.padj1e-5.RData"))
+drugPdisease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
+drugPdisease_genes = drugPdisease_genes[p.adjusted < 0.05]
+save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.padj.RData"))
+drugPdisease_genes = drugPdisease_genes[p.adjusted < 1e-05]
+save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.padj1e-5.RData"))
 #md2 = unique(min.drugs[,c(1,3,12)]) #filtering columns for merging indication area to our super drugs
-#drugPdisease.genes = merge(drugPdisease.genes,md2,by=c("chembl.id","efo.id"))
-drugPdisease.genes = drugPdisease.genes[order(p.adjusted),]
-
-
+#drugPdisease_genes = merge(drugPdisease_genes,md2,by=c("chembl.id","efo.id"))
+drugPdisease_genes = drugPdisease_genes[order(p.adjusted),]
 
 #______Following Part is optional filtering_______#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -299,55 +301,56 @@ drugPdisease.genes = drugPdisease.genes[order(p.adjusted),]
 # tmp2 = subset(tmp, n >= 10) #we are selecting drugs that alter expresiion of at least 10 genes
 # L1000 = merge(L1000, tmp2, by = "chembl.id")
 # L1000 = L1000[, c(1, 2, 3, 4, 5)]
-# #update chembl & efo.ids again
-# chembl.ids = unique(L1000[, chembl.id])
-# efo.ids = unique(GWASs$efo.id)
-# GWASs.list = split(GWASs, GWASs$efo.id)
+# #update chembl & efo_ids again
+# chembl_ids = unique(L1000[, chembl.id])
+# efo_ids = unique(GWASs$efo.id)
+# GWASs_list = split(GWASs, GWASs$efo.id)
 # # create gene universes for Fisher's test
-# ensembl.ids = unique(keys(EnsDb.Hsapiens.v86))
+# ensembl_ids = unique(keys(EnsDb.Hsapiens.v86))
 # 
 # ## Signifcant overlap calculation
-# drugGWAS.genes <- foreach (i = seq(efo.ids), .combine = rbind, .errorhandling = "remove") %dopar% {
-#     this.efo.id = efo.ids[i]
+# print("GWAS to Drug perturbed Gene Set Overlap Signifcance Calculation")
+# drugGWAS_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandling = "remove",.verbose = T) %dopar% {
+#     current_efo = efo_ids[i]
 #     # loop through drugs
-#     foreach (j = seq(chembl.ids), .combine = rbind, .errorhandling = "remove") %do% {
-#         this.chembl.id = chembl.ids[j]
-#         degs = unique(L1000[chembl.id == this.chembl.id, ensembl.id])
-#         gags = GWASs.list[[this.efo.id]]$ensembl.id
+#     foreach (j = seq(chembl_ids), .combine = rbind, .errorhandling = "remove",.verbose = T) %do% {
+#         current_chembl = chembl_ids[j]
+#         degs = unique(L1000[chembl.id == current_chembl, ensembl.id])
+#         gags = GWASs_list[[current_efo]]$ensembl.id
 #         if (length(degs) > 0 && length(gags) > 0) {
 #             # test significance
-#             tmp = SignificantOverlap(degs, gags, ensembl.ids)
+#             tmp = SignificantOverlap(degs, gags, ensembl_ids)
 #             # annotate
-#             tmp = cbind(chembl.id = this.chembl.id, efo.id = this.efo.id, tmp)
+#             tmp = cbind(chembl.id = current_chembl, efo.id = current_efo, tmp)
 #             tmp = merge(unique(GWASs[, .(efo.id, efo.term)]), tmp, by = "efo.id")
 #             tmp = merge(unique(L1000[, .(chembl.id, chembl.name)]), tmp, by = "chembl.id")
 #             # add dummy variable
-#             tmp[, existing.indication := ifelse(nrow(drug2disease[efo.id == this.efo.id & chembl.id == this.chembl.id]) > 0, TRUE, FALSE)]
+#             tmp[, existing.indication := ifelse(nrow(drug2disease[efo.id == current_efo & chembl.id == current_chembl]) > 0, TRUE, FALSE)]
 #             setcolorder(tmp, c("chembl.id", "chembl.name", "efo.id", "efo.term", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value", "existing.indication"))
 #         }
 #     }
 # }
 # 
-# drugGWAS.genes = unique(drugGWAS.genes)
+# drugGWAS_genes = unique(drugGWAS_genes)
 # 
 # # correct p-values
-# drugGWAS.genes[p.value == 0, p.value := 3e-324]
-# drugGWAS.genes = drugGWAS.genes[overlap > 0]
-# drugGWAS.genes = drugGWAS.genes[order(p.value),]
-# drugGWAS.genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
-# save(drugGWAS.genes, file = file.path(dataFolder,"drugGWAS.genes50.RData"))
+# drugGWAS_genes[p.value == 0, p.value := 3e-324]
+# drugGWAS_genes = drugGWAS_genes[overlap > 0]
+# drugGWAS_genes = drugGWAS_genes[order(p.value),]
+# drugGWAS_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
+# save(drugGWAS_genes, file = file.path(dataFolder,"drugGWAS_genes50.RData"))
 # 
-# drugGWAS.genes = drugGWAS.genes[p.adjusted < 1e-05]
-# save(drugGWAS.genes, file = file.path(dataFolder,"drugGWAS.genes50.padj1e-5.RData"))
+# drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-05]
+# save(drugGWAS_genes, file = file.path(dataFolder,"drugGWAS_genes50.padj1e-5.RData"))
 # 
-# drugGWAS.genes = drugGWAS.genes[p.adjusted < 1e-10]
-# save(drugGWAS.genes, file = file.path(dataFolder,"drugGWAS.genes50.padj1e-10.RData"))
+# drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-10]
+# save(drugGWAS_genes, file = file.path(dataFolder,"drugGWAS_genes50.padj1e-10.RData"))
 # 
 # 
-# load(file.path(dataFolder,"drugGWAS.genes50.padj1e-5.RData"))
-# load(file.path(dataFolder,"drugGWAS.genes50.padj1e-10.RData"))
-# length(unique(drugGWAS.genes$chembl.id))
-# length(unique(drugGWAS.genes$efo.id))
+# load(file.path(dataFolder,"drugGWAS_genes50.padj1e-5.RData"))
+# load(file.path(dataFolder,"drugGWAS_genes50.padj1e-10.RData"))
+# length(unique(drugGWAS_genes$chembl.id))
+# length(unique(drugGWAS_genes$efo.id))
 # 
-# load(file.path(dataFolder,"drugPdisease.genes.48D.padj1e-5.RData"))
-# length(unique(drugPdisease.genes$efo.id))
+# load(file.path(dataFolder,"drugPdisease_genes.48D.padj1e-5.RData"))
+# length(unique(drugPdisease_genes$efo.id))
