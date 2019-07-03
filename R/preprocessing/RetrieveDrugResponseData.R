@@ -11,11 +11,6 @@ suppressWarnings(suppressMessages(library(EnsDb.Hsapiens.v86)))
 suppressWarnings(suppressMessages(library(data.table)))
 suppressWarnings(suppressMessages(library(httr)))
 suppressWarnings(suppressMessages(library(jsonlite)))
-suppressWarnings(suppressMessages(library(foreach)))
-suppressWarnings(suppressMessages(library(doParallel)))
-
-registerDoParallel(parallel::detectCores() - 1)
-
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository
@@ -34,7 +29,6 @@ sprintf("Using results folder at %s", resultsFolder)
 dataFolder = file.path(resultsFolder)
 #####################################################################
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~get LINCS L1000 data from Harmonizome~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -51,9 +45,14 @@ if(!file.exists(file.path(dataFolder, "L1000_raw.RData"))){
   },
   error=function(e) 1)
   L1000_raw = data.table(unique(L1000_raw))
+  L1000_raw[, lincs_id := substr(`Perturbation.ID_Perturbagen_Cell.Line_Time_Time.Unit_Dose_Dose.Unit`, 1, 13)]
+  L1000_raw$Perturbation.ID_Perturbagen_Cell.Line_Time_Time.Unit_Dose_Dose.Unit = NULL
+  L1000_raw = data.table(unique(L1000_raw))
   save(L1000_raw,file = file.path(dataFolder, "L1000_raw.RData"))
 } else {cat(sprintf("~~ L1000_raw file already exists, not downloading again. ~~\n"))
   load(file.path(dataFolder, "L1000_raw.RData"))}
+
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~get LINCS to PubChem mappings~~~~~~~~~~~#
@@ -78,6 +77,8 @@ if(!file.exists(file.path(dataFolder, "lincs_pubchem.RData"))){
 } else {cat(sprintf("~~ lincs_pubchem file already exists, not downloading again. ~~\n"))
   load(file.path(dataFolder, "lincs_pubchem.RData"))}
 
+lincs_pubchem = merge(L1000_raw, lincs_pubchem, by.x= "lincs_id",by.y = "pert_id")
+lincs_pubchem = unique(lincs_pubchem[,.(lincs_id,pubchem_cid)])
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~map Entrez IDs to Ensembl~~~~~~~~~~~~#
@@ -98,7 +99,7 @@ if(!file.exists(file.path(dataFolder, "L1000.RData"))){
   unichem_map = data.table()
   tryCatch(for(i in 1:length(lincs_pubchem[, pubchem_cid])){
     Sys.sleep(0.1)
-    lincs_id = lincs_pubchem[i, pert_id]
+    lincs_id = lincs_pubchem[i, lincs_id]
     pubchem_id = lincs_pubchem[i, pubchem_cid]
     chembl_id = as.character(fromJSON(content(GET(paste0(unichem_url, lincs_pubchem[i, pubchem_cid], "/22/1")), as = "text", encoding = "UTF-8")))
     if (length(chembl_id > 0) && startsWith(chembl_id, "CHEMBL")) {
@@ -109,9 +110,9 @@ if(!file.exists(file.path(dataFolder, "L1000.RData"))){
   },
   error=function(e) 1)
   close(pb)
-  L1000[, lincs_id := substr(`Perturbation.ID_Perturbagen_Cell.Line_Time_Time.Unit_Dose_Dose.Unit`, 1, 13)]
+  
   L1000 = merge(L1000, unichem_map, by = "lincs_id")
-  L1000 = L1000[, .(ensembl.id = GENEID, gene.symbol = GeneSym, lincs.id=lincs_id, pubchem.id=pubchem_id, chembl.id=chembl_id, perturbation = `Perturbation.ID_Perturbagen_Cell.Line_Time_Time.Unit_Dose_Dose.Unit`, direction = weight)]
+  L1000 = L1000[, .(ensembl.id = GENEID, gene.symbol = GeneSym, lincs.id=lincs_id, pubchem.id=pubchem_id, chembl.id=chembl_id, direction = weight)]
   
   save(L1000, file=file.path(dataFolder, "L1000.RData"))
   
@@ -127,8 +128,7 @@ if(!file.exists(file.path(dataFolder, "L1000.RData"))){
 #' using chemblid2name.ipynb script
 
 L1000Drugs = unique(L1000[, 5])
-fwrite(L1000Drugs, file.path(dataFolder,"L1000Drugs.csv"), col.names = F)
+fwrite(L1000Drugs, file=file.path(dataFolder,"L1000Drugs.csv"), col.names = F)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
 
