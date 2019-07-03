@@ -17,11 +17,11 @@ echo $"\n1.2 Mapping MeSH to EFO\n"
 
 # See: https://github.com/ps4dr/ps4dr/blob/master/R/preprocessing/README.rst#download-open-targets-data
 echo $"\n1.3 Retrieving DEGs\n"
-Rscript R/preprocessing/RetrieveDEGs.R data/
+#Rscript R/preprocessing/RetrieveDEGs.R data/
 
 # See: https://github.com/ps4dr/ps4dr/blob/master/R/preprocessing/README.rst#download-and-preprocess-lincs
 echo $"\n1.4 Retreiving drug response data\n"
-#Rscript R/preprocessing/RetrieveDrugResponseData.R data/
+Rscript R/preprocessing/RetrieveDrugResponseData.R data/
 
 ###############
 # 2. Analysis #
