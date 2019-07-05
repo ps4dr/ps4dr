@@ -247,8 +247,6 @@ drugPdisease_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandlin
 }
 
 
-drugPdisease_genes = unique(drugPdisease_genes)
-drugPdisease_genes = drugPdisease_genes[overlap > 0]
 sprintf("Number of unique ChEMBL IDs: %d", length(unique(drugPdisease_genes$chembl.id)))
 sprintf("Number of unique EFO terms: %d", length(unique(drugPdisease_genes$efo.id)))
 save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.RData"))
@@ -332,7 +330,6 @@ drugPdisease_genes = drugPdisease_genes[order(p.adjusted),]
 #     }
 # }
 # 
-# drugGWAS_genes = unique(drugGWAS_genes)
 # 
 # # correct p-values
 # drugGWAS_genes[p.value == 0, p.value := 3e-324]
