@@ -88,15 +88,15 @@ DEGs_list = split(DEGs, DEGs$efo.id)
 ## Overlap Signifcance calculation
 print("GWAS to DEGs Gene Set Overlap Signifcance Calculation")
 disease_genes <- foreach (i = seq(DEGs_list), .combine = rbind, .errorhandling = "remove") %do% {
-    efo_id_DEGs = names(DEGs_list)[i]
-    cat(sprintf("'GWAS 2 DEGs' overlap significance calculation for : %s, index #%d of #%d\n", efo_id_DEGs, i ,length(DEGs_list)))
+    efo.id.DEGs = names(DEGs_list)[i]
+    cat(sprintf("'GWAS 2 DEGs' overlap significance calculation for : %s, index #%d of #%d\n", efo.id.DEGs, i ,length(DEGs_list)))
     foreach (j = seq(GWASs_list), .combine = rbind, .errorhandling = "remove") %dopar% {
-        efo_id_GWASs = names(GWASs_list)[j]
-        tmp = SignificantOverlap(DEGs_list[[efo_id_DEGs]]$ensembl.id, GWASs_list[[efo_id_GWASs]]$ensembl.id, ensembl_ids)
-        tmp = cbind(efo_id_DEGs, efo_id_GWASs, tmp)
-        tmp = merge(tmp, unique(GWASs[, .(efo.id, efo.term)]), by.x = "efo_id_GWASs", by.y = "efo.id", all.x = TRUE, all.y = FALSE)
-        tmp = merge(tmp, unique(DEGs[, .(efo.id, efo.term)]), by.x = "efo_id_DEGs", by.y = "efo.id", all.x = TRUE, all.y = FALSE, suffixes = c(".GWASs", ".DEGs"))
-        setcolorder(tmp, c("efo_id_DEGs", "efo.term.DEGs", "efo_id_GWASs", "efo.term.GWASs", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value"))
+        efo.id.GWASs = names(GWASs_list)[j]
+        tmp = SignificantOverlap(DEGs_list[[efo.id.DEGs]]$ensembl.id, GWASs_list[[efo.id.GWASs]]$ensembl.id, ensembl_ids)
+        tmp = cbind(efo.id.DEGs, efo.id.GWASs, tmp)
+        tmp = merge(tmp, unique(GWASs[, .(efo.id, efo.term)]), by.x = "efo.id.GWASs", by.y = "efo.id", all.x = TRUE, all.y = FALSE)
+        tmp = merge(tmp, unique(DEGs[, .(efo.id, efo.term)]), by.x = "efo.id.DEGs", by.y = "efo.id", all.x = TRUE, all.y = FALSE, suffixes = c(".GWASs", ".DEGs"))
+        setcolorder(tmp, c("efo.id.DEGs", "efo.term.DEGs", "efo.id.GWASs", "efo.term.GWASs", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value"))
     }
 }
 
@@ -105,7 +105,7 @@ disease_genes[p.value == 0, p.value := 3e-324]
 disease_genes = disease_genes[order(p.value),]
 disease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
 # add dummy variable
-disease_genes[, same.disease := ifelse(efo_id_DEGs == efo_id_GWASs, TRUE, FALSE)]
+disease_genes[, same.disease := ifelse(efo.id.DEGs == efo.id.GWASs, TRUE, FALSE)]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #'p-value comparison between same diseases and different diseases Gene sets
@@ -202,7 +202,7 @@ load(file.path(dataFolder,"disease_genes50.RData"))
 # considering all those gene sets where DEGs and GWAS came from same diseases.
 DisGen = disease_genes[same.disease == TRUE & overlap > 0]
 # remove duplicated rows, since sometimes a disease id is paired with same disease because of slight different names
-DisGen = DisGen[!duplicated(DisGen$efo_id_DEGs),] #remove duplicated rows based on one column
+DisGen = DisGen[!duplicated(DisGen$efo.id.DEGs),] #remove duplicated rows based on one column
 DisGenX = unique(DisGen %>%
     mutate(commonGenes = strsplit(as.character(commonGenes), ",")) %>%
     unnest(commonGenes))
@@ -213,10 +213,10 @@ DisGenX$commonGenes = gsub("\\)", "", DisGenX$commonGenes)
 DisGenX$commonGenes = gsub("\"", "", DisGenX$commonGenes)
 DisGenX$commonGenes = trimws(DisGenX$commonGenes, which = "both")
 
-DisGen.list = split(DisGenX, DisGenX$efo_id_DEGs)
+DisGen.list = split(DisGenX, DisGenX$efo.id.DEGs)
 
 # create vector with all disease, ensembl and chemical IDs
-efo_ids = unique(DisGen$efo_id_DEGs)
+efo_ids = unique(DisGen$efo.id.DEGs)
 ensembl_ids = unique(keys(EnsDb.Hsapiens.v86))
 chembl_ids = unique(L1000[, chembl.id])
 load(file.path(dataFolder,"drug2disease.RData"))
