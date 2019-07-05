@@ -57,7 +57,7 @@ Associations between SNPs and phenotypes in different disease conditions, curate
 
 - Web Page: https://grasp.nhlbi.nih.gov/Overview.aspx
 - Download: https://s3.amazonaws.com/NHLBI_Public/GRASP/GraspFullDataset2.zip
-- License: ???
+- License: Available for academic purposes under its Terms and Conditions.
 
 .. [1] Leslie R, *et al.* (2014) GRASP: analysis of genotype-phenotype results from 1,390
        genome-wide association studies and corresponding open access database. Bioinformatics 30(12), i185-94.
@@ -90,7 +90,7 @@ their comprehensive functional annotations, as well as disease classifications.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Web Page: https://phewascatalog.org/phewas
 - Download: https://phewascatalog.org/files/phewas-catalog.csv.zip
-- License:
+- License: The NHGRI-EBI GWAS Catalog and all its contents are available under the general Terms of Use for EMBL-EBI Services.
 
 .. [4] Denny JC, *et al.* (2013) Systematic comparison of phenome-wide association study of
        electronic medical record data and genome-wide association study data. Nat Biotechnol. Dec;31(12):1102-10.
