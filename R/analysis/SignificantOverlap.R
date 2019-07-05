@@ -87,9 +87,10 @@ DEGs_list = split(DEGs, DEGs$efo.id)
 
 ## Overlap Signifcance calculation
 print("GWAS to DEGs Gene Set Overlap Signifcance Calculation")
-disease_genes <- foreach (i = seq(DEGs_list), .combine = rbind, .errorhandling = "remove",.verbose = T) %do% {
+disease_genes <- foreach (i = seq(DEGs_list), .combine = rbind, .errorhandling = "remove") %do% {
     efo_id_DEGs = names(DEGs_list)[i]
-    foreach (j = seq(GWASs_list), .combine = rbind, .errorhandling = "remove",.verbose = T) %dopar% {
+    cat(sprintf("'GWAS 2 DEGs' overlap significance calculation for : %s, index #%d of #%d\n", efo_id_DEGs, i ,length(DEGs_list)))
+    foreach (j = seq(GWASs_list), .combine = rbind, .errorhandling = "remove") %dopar% {
         efo_id_GWASs = names(GWASs_list)[j]
         tmp = SignificantOverlap(DEGs_list[[efo_id_DEGs]]$ensembl.id, GWASs_list[[efo_id_GWASs]]$ensembl.id, ensembl_ids)
         tmp = cbind(efo_id_DEGs, efo_id_GWASs, tmp)
@@ -225,7 +226,7 @@ print("Drug2Disease Gene Set Overlap Signifcance Calculation")
 
 drugPdisease_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandling = "remove") %dopar% {
   current_efo = efo_ids[i]
-  print(paste0("Calculating overlap significance for : ",current_efo))
+  cat(sprintf("'Drug2Disease gene sets' overlap significance calculation for : %s, index #%d of #%d\n", current_efo, i ,length(efo_ids)))
   # loop through drugs
   foreach (j = seq(chembl_ids), .combine = rbind, .errorhandling = "remove") %do% {
       current_chembl = chembl_ids[j]
