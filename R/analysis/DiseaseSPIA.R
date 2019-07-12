@@ -9,6 +9,7 @@ suppressWarnings(suppressMessages(library(data.table)))
 suppressWarnings(suppressMessages(library(dplyr)))
 suppressWarnings(suppressMessages(library(tidyr)))
 suppressWarnings(suppressMessages(library(ggplot2)))
+suppressWarnings(suppressMessages(library(pROC)))
 suppressWarnings(suppressMessages(library(SPIA)))
 suppressWarnings(suppressMessages(library(graphite)))
 suppressWarnings(suppressMessages(library(org.Hs.eg.db)))
@@ -78,6 +79,7 @@ lfc_comb = lfc_comb[! duplicated(lfc_comb[, c('efo.id', 'ENTREZ')]),]
 
 # lfc_efo = split(lfc_comb, lfc_comb$efo.id)
 load(file.path(dataFolder,"disease_genes50.RData"))
+disease_genes = disease_genes[p.adjusted <= 0.05]
 DisGen = disease_genes[same.disease == TRUE &
     overlap > 0 &
     p.adjusted < 0.05]
@@ -180,7 +182,7 @@ load(file.path(dataFolder,"disease_genes50.lfc.namedVec.RData"))
 
 spia_kegg = list()
 for (i in 1 : length(lfc_entrez)) {
-  print(paste0("SPIA for Disease # ",(length(lfc_entrez) + 1) -i))
+  cat(sprintf("~~~~~SPIA for Disease #%d~~~~~\n", (length(lfc_entrez) + 1) -i))
   spia_kegg[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/real_kegg/"), organism = "hsa")
 }
 names(spia_kegg) = names(lfc_entrez)
@@ -247,9 +249,10 @@ rm(path.info,pseudo_path)
 
 spia_kegg_pseudo = list()
 for (i in 1 : length(lfc_entrez)) {
-  print(paste0("SPIA (pseudo) for Disease # ",(length(lfc_entrez) + 1) -i))
+  cat(sprintf("~~~~~SPIA (pseudo) for Disease #%d~~~~~\n", (length(lfc_entrez) + 1) -i))
   spia_kegg_pseudo[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/pseudo_kegg/"), organism = "hsa")
 }
+names(spia_kegg) = names(lfc_entrez)
 save(spia_kegg_pseudo, file = file.path(dataFolder,"spia_output/spia_kegg_diseaseGenes_pseudo.RData"))
 rm(list = ls())
 gc()
@@ -276,4 +279,71 @@ gc()
 # save(dmap, file = file.path(dataFolder,"drug2715details.RData"))
 # load(file.path(dataFolder,"drug2715details.RData"))
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
+# load("/home/memon/projects/msdrp/data/spia/spia_kegg_diseaseGenes_pseudo.RData")
+# load("/home/memon/projects/ps4dr/ps4dr/data/spia_output/spia_kegg_diseaseGenes50.RData")
+
+#'delete diseases which are not in both lists
+Dis2Delete=setdiff(names(spia_kegg),names(spia_kegg_pseudo))
+spia_kegg_tmp = spia_kegg
+
+for (i in 1:length(spia_kegg)) {
+  if(names(spia_kegg)[[i]] %in% Dis2Delete){
+    spia_kegg_tmp[[i]] = NULL
+  }
+}
+
+spia_kegg = spia_kegg_tmp
+rm(Dis2Delete,spia_kegg_tmp)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#' prepare SPIA datadrame
+
+spia_kegg = do.call(rbind, spia_kegg)
+spia1 = data.table(spia_kegg[,c(5)])
+names(spia1) = "pvalue"
+spia1$spia = "Real"
+
+spia_kegg_pseudo = do.call(rbind, spia_kegg_pseudo)
+spia2= data.table(spia_kegg_pseudo[,c(5)])
+names(spia2) = "pvalue"
+spia2$spia = "Pseudo"
+
+spia = data.table(rbind(spia1,spia2))
+rm(spia_kegg,spia_kegg_pseudo,spia1,spia2)
+spia$spia = as.factor(spia$spia)
+man_wtny <- wilcox.test(x = spia[spia == "Pseudo", pvalue], y = spia[spia == "Real", pvalue])
+print(man_wtny$p.value)
+png(file.path(dataFolder,"spia_real_pseudo.pvalues.boxplots.png", width = 6 * 200, height = 6 * 150, res = 150))
+print(ggplot(spia, aes(x = spia, y = pvalue,fill=spia)) +
+        geom_boxplot() +
+        coord_cartesian(ylim = quantile(spia[, pvalue], c(0.03, 0.97))) +
+        xlab("SPIA") +
+        ylab("p-value") +
+        theme_bw(18) +
+        scale_x_discrete(breaks = c("Pseudo", "Real")) +
+        ggtitle(paste("p-value =", sprintf("%.2e", man_wtny$p.value))))
+dev.off()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~ROC Curve~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# pred <- as.numeric(spia[, - log10(pvalue)])
+# resp <- as.numeric(spia[, spia])
+# 
+# roc.curve <- roc(response = as.numeric(resp), predictor = as.numeric(pred), algorithm = 2, ci = TRUE, ci.method = "bootstrap", smooth = TRUE, boot.n = 100, parallel = TRUE, progress = "none")
+# print(roc.curve)
+# sp_ci <- ci.sp(roc.curve, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
+# se_ci <- ci.se(roc.curve, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
+# png(file.path(dataFolder,"disease_genes.roc.png", width = 6 * 150, height = 6 * 150, res = 150))
+# par(pty = "s")
+# plot(roc.curve, main = paste("AUC =", round(roc.curve$auc, 2)), xlab = "False positive rate", ylab = "True positive rate", identity.lty = 2, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.5)
+# plot(se_ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
+# plot(sp_ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
+# plot(roc.curve, add = TRUE, col = "#0066ff", lwd = 3)
+# dev.off()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

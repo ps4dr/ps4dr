@@ -84,6 +84,7 @@ super_drugs = drugPdisease_genes[, c(2, 3, 4, 9)]
 
 #' to select only those diseases from disease_genes50
 load(file.path(dataFolder,"disease_genes50.RData"))
+disease_genes = disease_genes[p.adjusted <= 0.05]
 disease_genes = unique(disease_genes[, c(1, 2)])
 super_drugs = merge(super_drugs, disease_genes, by.x = "efo.id", by.y = "efo.id.DEGs")
 length(unique(super_drugs$efo.id))

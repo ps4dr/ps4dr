@@ -16,7 +16,6 @@ registerDoParallel(parallel::detectCores() - 1)
 suppressWarnings(suppressMessages(library(data.table)))
 suppressWarnings(suppressMessages(library(dplyr)))
 suppressWarnings(suppressMessages(library(tidyr)))
-suppressWarnings(suppressMessages(library(ggplot2)))
 suppressWarnings(suppressMessages(library(cowplot)))
 suppressWarnings(suppressMessages(library(pROC)))
 suppressWarnings(suppressMessages(library(biomaRt)))
@@ -106,46 +105,7 @@ disease_genes = disease_genes[order(p.value),]
 disease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
 # add dummy variable
 disease_genes[, same.disease := ifelse(efo.id.DEGs == efo.id.GWASs, TRUE, FALSE)]
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#'p-value comparison between same diseases and different diseases Gene sets
-
-# man.wtny <- wilcox.test(x = disease_genes[same.disease == FALSE, -log10(p.adjusted)], y = disease_genes[same.disease == TRUE, -log10(p.adjusted)])
-# print(man.wtny)
-# print(man.wtny$p.value)
-# png("./dat/disease_genes.pvalues.boxplots.png", width = 6 * 150, height = 6 * 150, res = 150)
-# print(ggplot(disease_genes, aes(x = same.disease, y = -log10(p.adjusted))) +
-#         geom_boxplot(fill = "#0066ff", outlier.shape = NA) +
-#         coord_cartesian(ylim = quantile(disease_genes[, -log10(p.adjusted)], c(0.03, 0.97))) +
-#         xlab("Same disease") +
-#         ylab("-log10(adjusted p-value)") +
-#         theme_bw(18) +
-#         scale_x_discrete(breaks = c(FALSE, TRUE), labels = c("No", "Yes")) +
-#         ggtitle(paste("p-value =", sprintf("%.2e", man.wtny$p.value))))
-# dev.off()
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~~~~~~~~~~~~ROC Curve~~~~~~~~~~~~~~#
-
-# pred <- as.numeric(disease_genes[, - log10(p.adjusted)])
-# resp <- as.numeric(disease_genes[, same.disease])
-#
-# roc.curve <- roc(response = as.numeric(resp), predictor = as.numeric(pred), algorithm = 2, ci = TRUE, ci.method = "bootstrap", smooth = TRUE, boot.n = 1000, parallel = TRUE, progress = "none")
-# print(roc.curve)
-# sp_ci <- ci.sp(roc.curve, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
-# se_ci <- ci.se(roc.curve, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
-# png(file.path(dataFolder,"disease_genes.roc.png", width = 6 * 150, height = 6 * 150, res = 150))
-# par(pty = "s")
-# plot(roc.curve, main = paste("AUC =", round(roc.curve$auc, 2)), xlab = "False positive rate", ylab = "True positive rate", identity.lty = 2, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.5)
-# plot(se_ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
-# plot(sp_ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
-# plot(roc.curve, add = TRUE, col = "#0066ff", lwd = 3)
-# dev.off()
-
-disease_genes = disease_genes[p.adjusted <= 0.05]
 save(disease_genes, file = file.path(dataFolder,"disease_genes50.RData"))
-# load(file.path(dataFolder,"disease_genes50.RData"))
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##___________Drugs to DISEASE Genes___________#####
@@ -352,3 +312,45 @@ drugPdisease_genes = drugPdisease_genes[order(p.adjusted),]
 # 
 # load(file.path(dataFolder,"drugPdisease_genes.48D.padj1e-5.RData"))
 # length(unique(drugPdisease_genes$efo.id))
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~p-value comparison between same diseases and different diseases Gene sets~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+man_wtny <- wilcox.test(x = disease_genes[same.disease == FALSE, -log10(p.adjusted)], y = disease_genes[same.disease == TRUE, -log10(p.adjusted)])
+print(man_wtny)
+print(man_wtny$p.value)
+png(file.path(dataFolder,"disease_genes.pvalues.boxplots.png", width = 6 * 200, height = 6 * 150, res = 150))
+print(ggplot(disease_genes, aes(x = same.disease, y = -log10(p.adjusted),fill=same.disease)) +
+        geom_boxplot() +
+        coord_cartesian(ylim = quantile(disease_genes[, -log10(p.adjusted)], c(0.03, 0.97))) +
+        xlab("Same disease") +
+        ylab("-log10(adjusted p-value") +
+        theme_bw(18) +
+        scale_x_discrete(breaks = c(FALSE, TRUE), labels = c("No", "Yes")) +
+        ggtitle(paste("p-value =", sprintf("%.2e", man_wtny$p.value))))
+dev.off()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~ROC Curve~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# pred <- as.numeric(disease_genes[, - log10(p.adjusted)])
+# resp <- as.numeric(disease_genes[, same.disease])
+# 
+# roc.curve <- roc(response = as.numeric(resp), predictor = as.numeric(pred), algorithm = 2, ci = TRUE, ci.method = "bootstrap", smooth = TRUE, boot.n = 1000, parallel = TRUE, progress = "none")
+# print(roc.curve)
+# sp_ci <- ci.sp(roc.curve, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
+# se_ci <- ci.se(roc.curve, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
+# png(file.path(dataFolder,"disease_genes.roc.png", width = 6 * 150, height = 6 * 150, res = 150))
+# par(pty = "s")
+# plot(roc.curve, main = paste("AUC =", round(roc.curve$auc, 2)), xlab = "False positive rate", ylab = "True positive rate", identity.lty = 2, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.5)
+# plot(se_ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
+# plot(sp_ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
+# plot(roc.curve, add = TRUE, col = "#0066ff", lwd = 3)
+# dev.off()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
