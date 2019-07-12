@@ -38,7 +38,7 @@ To run the entire pipeline:
 
 .. code-block:: sh
 
-   $ sh reproduction.sh
+   $ sh ps4dr.sh
 
 Alternatively, see the instructions to:
 
