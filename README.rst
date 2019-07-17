@@ -23,7 +23,7 @@ Alternatively, ``ps4dr`` can be cloned then installed from the source with:
 .. code-block:: sh
 
    $ R -e 'install.packages(c("cowplot", "BiocManager", "data.table", "doParallel", "doSNOW", "dplyr", "foreach", "gplots", "gridExtra", "httr", "jsonlite", "pROC", "RecordLinkage", "reshape", "riverplot", "tidyr", "tidyverse"))'
-   $ R -e 'BiocManager::install(c("BiocParallel", "EnsDb.Hsapiens.v86", "SPIA", "graphite"))'
+   $ R -e 'BiocManager::install(c("BiocParallel", "EnsDb.Hsapiens.v86", "graphite", "org.Hs.eg.db", "SPIA"))'
 
 Then
 
