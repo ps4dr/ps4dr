@@ -182,12 +182,12 @@ load(file.path(dataFolder,"disease_genes50.lfc.namedVec.RData"))
 
 spia_kegg = list()
 for (i in 1 : length(lfc_entrez)) {
-  cat(sprintf("~~~~~SPIA for Disease #%d~~~~~\n", (length(lfc_entrez) + 1) -i))
+  cat(sprintf("\n~~~~~SPIA for Disease #%d~~~~~\n", (length(lfc_entrez) + 1) -i))
   spia_kegg[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/real_kegg/"), organism = "hsa")
 }
 names(spia_kegg) = names(lfc_entrez)
 
-save(spia_kegg, file = file.path(dataFolder,"spia_output/spia_kegg_diseaseGenes.RData"))
+save(spia_kegg, file = file.path(dataFolder, "spia_output/spia_kegg_diseaseGenes.RData"))
 
 # spia_kegg = lapply(spia_kegg, function(x) x[x$pNDE <= 0.05,])
 # plotP(spia_kegg[[4]])
@@ -249,13 +249,11 @@ rm(path.info,pseudo_path)
 
 spia_kegg_pseudo = list()
 for (i in 1 : length(lfc_entrez)) {
-  cat(sprintf("~~~~~SPIA (pseudo) for Disease #%d~~~~~\n", (length(lfc_entrez) + 1) -i))
+  cat(sprintf("\n~~~~~SPIA (pseudo) for Disease #%d~~~~~\n", (length(lfc_entrez) + 1) -i))
   spia_kegg_pseudo[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/pseudo_kegg/"), organism = "hsa")
 }
 names(spia_kegg_pseudo) = names(lfc_entrez)
-save(spia_kegg_pseudo, file = file.path(dataFolder,"spia_output/spia_kegg_diseaseGenes_pseudo.RData"))
-rm(list = ls())
-gc()
+save(spia_kegg_pseudo, file = file.path(dataFolder, "spia_output/spia_kegg_diseaseGenes_pseudo.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -284,7 +282,7 @@ load(file.path(dataFolder,"spia_output/spia_kegg_diseaseGenes.RData"))
 load(file.path(dataFolder,"spia_output/spia_kegg_diseaseGenes_pseudo.RData"))
 
 #'delete diseases which are not in both lists
-Dis2Delete=setdiff(names(spia_kegg),names(spia_kegg_pseudo))
+Dis2Delete = setdiff(names(spia_kegg),names(spia_kegg_pseudo))
 spia_kegg_tmp = spia_kegg
 
 for (i in 1:length(spia_kegg)) {
@@ -324,7 +322,7 @@ print(ggplot(spia, aes(x = spia, y = pvalue,fill=spia)) +
         scale_x_discrete(breaks = c("Simulated", "Real"), labels = c("Simulated Pathways", "KEGG Pathways")) +
         ggtitle(paste("p-value =", sprintf("%.2e", man_wtny$p.value))))
 dev.off()
-theme(plot.title = element_text(face = "italic")
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

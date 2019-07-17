@@ -189,9 +189,6 @@ fwrite(drug_shortlist_df, file = file.path(dataFolder,"drug_shortlist.csv"))
 save(drug_path,dis_path,drug_dis_path,drug_correlation,drug_shortlist,file=file.path(dataFolder,"drugCorraltion.drugPdisease.RData"))
 # load(file.path(dataFolder,"drugCorraltion.drugPdisease.RData"))
 
-drug_correlation_df = do.call(rbind, drug_correlation)
-x = drug_correlation_df[drug_correlation_df$Correlation.Score >= 0.5 & drug_correlation_df$affectedPathway >= 80]
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##~~~~~~~~~~~~~~~~~~~~~Scatter Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -232,28 +229,6 @@ dev.off()
 #   geom_vline(aes(xintercept = 50))
 # dev.off()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-##~~~~~~~~~~~~~~~~~~~~~~~~~Q-Q Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
-jpeg(file = file.path(dataFolder,"qqPlots_DrugPDisease_CorrelationScore.jpeg"), width = 2800, height = 1980, res = 200)
-p = list()
-for (i in seq_along(drug_correlation)) {
-    p[[i]] = ggplot(drug_correlation[[i]], aes(sample = Correlation.Score, col = Disease)) +
-        stat_qq() +
-        stat_qq_line() +
-        labs(title = drug_correlation[[i]]$Disease) +
-        theme(legend.position = "none") +
-        theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-}
-
-grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], p[[5]], p[[6]], p[[7]], p[[8]], p[[9]], p[[10]], p[[11]], p[[12]], p[[13]], p[[14]], p[[15]], p[[16]], p[[17]], p[[18]], p[[19]], p[[20]], p[[21]], p[[22]], p[[23]], p[[24]], p[[25]], p[[26]], p[[27]], p[[28]], p[[29]], p[[30]], ncol = 5, nrow = 6)
-
-dev.off()
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##~~~~~~~~~~~~~~~~~~~~~Density Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
