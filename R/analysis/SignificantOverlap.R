@@ -86,7 +86,7 @@ GWASs_list = split(GWASs, GWASs$efo.id)
 DEGs_list = split(DEGs, DEGs$efo.id)
 
 ## Overlap Signifcance calculation
-print("GWAS to DEGs Gene Set Overlap Signifcance Calculation")
+cat(sprintf("GWAS to DEGs Gene Set Overlap Signifcance Calculation\n"))
 pb <- txtProgressBar(min=0, max=length(DEGs_list), style=3)
 
 disease_genes <- foreach (i = seq(DEGs_list), .combine = rbind, .errorhandling = "remove") %do% {
@@ -104,7 +104,7 @@ disease_genes <- foreach (i = seq(DEGs_list), .combine = rbind, .errorhandling =
     }
 }
 close(pb)
-
+cat(sprintf("\n"))
 # correct p-values
 disease_genes[p.value == 0, p.value := 3e-324]
 disease_genes = disease_genes[order(p.value),]
@@ -189,7 +189,7 @@ chembl_ids = unique(L1000[, chembl.id])
 load(file.path(dataFolder,"drug2disease.RData"))
 
 ## Overlap Signifcance Calculation
-print("Drug to Disease_Gene Set Overlap Signifcance Calculation")
+cat(sprintf("Drug to Disease_Gene Set Overlap Signifcance Calculation\n"))
 pb <- txtProgressBar(min=0, max=length(efo_ids), style=3)
 
 drugPdisease_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandling = "remove") %do% {
@@ -216,9 +216,8 @@ drugPdisease_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandlin
   setTxtProgressBar(pb, i)
 }
 close(pb)
+cat(sprintf("\n"))
 
-sprintf("Number of unique ChEMBL IDs: %d", length(unique(drugPdisease_genes$chembl.id)))
-sprintf("Number of unique EFO terms: %d", length(unique(drugPdisease_genes$efo.id)))
 save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.RData"))
 
 #load(file.path(dataFolder,"drugPdisease_genes50.RData"))
@@ -278,7 +277,7 @@ save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.padj1
 # ensembl_ids = unique(keys(EnsDb.Hsapiens.v86))
 # 
 # ## Signifcant overlap calculation
-# print("GWAS to Drug perturbed Gene Set Overlap Signifcance Calculation")
+# cat(sprintf("GWAS to Drug perturbed Gene Set Overlap Signifcance Calculation\n"))
 # pb <- txtProgressBar(min=0, max=length(efo_ids), style=3)
 # drugGWAS_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandling = "remove",.verbose = T) %dopar% {
 #     Sys.sleep(1)
@@ -325,7 +324,7 @@ save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.padj1
 # 
 # load(file.path(dataFolder,"drugPdisease_genes.48D.padj1e-5.RData"))
 # length(unique(drugPdisease_genes$efo.id))
-
+# cat(sprintf("\n"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
