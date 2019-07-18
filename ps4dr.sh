@@ -7,20 +7,16 @@ set -e
 # 1. Preprocessing #
 ####################
 
-# See: https://github.com/ps4dr/ps4dr/blob/master/R/preprocessing/README.rst#preprocess-gwas-with-stopgap2
-#echo $"\n1.1 Running STOPGAP\n"
-#Rscript R/preprocessing/STOPGAP2_run.R data/ R/preprocessing/STOPGAP2_functions.R
-
 # See: https://github.com/ps4dr/ps4dr/blob/master/R/preprocessing/README.rst#prepare-mesh-to-efo-mappings
-echo $"\n1.2 Mapping MeSH to EFO\n"
+echo $"\n1.1 Mapping MeSH to EFO\n"
 Rscript R/preprocessing/MeSH2EFO.R data/
 
 # See: https://github.com/ps4dr/ps4dr/blob/master/R/preprocessing/README.rst#download-open-targets-data
-echo $"\n1.3 Retrieving DEGs\n"
+echo $"\n1.2 Retrieving DEGs\n"
 Rscript R/preprocessing/RetrieveDEGs.R data/
 
 # See: https://github.com/ps4dr/ps4dr/blob/master/R/preprocessing/README.rst#download-and-preprocess-lincs
-echo $"\n1.4 Retreiving drug response data\n"
+echo $"\n1.3 Retreiving drug response data\n"
 Rscript R/preprocessing/RetrieveDrugResponseData.R data/
 
 ###############

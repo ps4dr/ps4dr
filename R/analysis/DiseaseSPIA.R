@@ -180,11 +180,17 @@ makeSPIAdata(kgml.path=file.path(dataFolder,"spia_input/kgml/"),organism="hsa",o
 
 load(file.path(dataFolder,"disease_genes50.lfc.namedVec.RData"))
 
+pb <- txtProgressBar(min=0, max=length(lfc_entrez), style=3)
+cat(sprintf("\n~~~~~SPIA calculation for Real KEGG Pathways~~~~~\n"))
+
 spia_kegg = list()
 for (i in 1 : length(lfc_entrez)) {
-  cat(sprintf("\n~~~~~SPIA for Disease #%d~~~~~\n", (length(lfc_entrez) + 1) -i))
-  spia_kegg[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/real_kegg/"), organism = "hsa")
+  Sys.sleep(1)
+  # cat(sprintf("\n~~~~~SPIA for Disease #%d~~~~~\n", (length(lfc_entrez) + 1) -i))
+  spia_kegg[[i]] = invisible(capture.output(spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/real_kegg/"), organism = "hsa")))
+  setTxtProgressBar(pb, i)
 }
+close(pb)
 names(spia_kegg) = names(lfc_entrez)
 
 save(spia_kegg, file = file.path(dataFolder, "spia_output/spia_kegg_diseaseGenes.RData"))
@@ -246,13 +252,19 @@ rm(path.info,pseudo_path)
 #_______________________________________________________##
 
 #~~~~~~~~~~~~~Pseudo KEGG SPIA~~~~~~~~~~~~~#
+pb <- txtProgressBar(min=0, max=length(lfc_entrez), style=3)
+cat(sprintf("\n~~~~~SPIA calculation for simulated KEGG Pathways~~~~~\n"))
 
 spia_kegg_pseudo = list()
 for (i in 1 : length(lfc_entrez)) {
-  cat(sprintf("\n~~~~~SPIA (pseudo) for Disease #%d~~~~~\n", (length(lfc_entrez) + 1) -i))
-  spia_kegg_pseudo[[i]] = spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/pseudo_kegg/"), organism = "hsa")
+  Sys.sleep(1)
+  # cat(sprintf("\n~~~~~SPIA (pseudo) for Disease #%d~~~~~\n", (length(lfc_entrez) + 1) -i))
+  spia_kegg_pseudo[[i]] = invisible(capture.output(spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/pseudo_kegg/"), organism = "hsa")))
+  setTxtProgressBar(pb, i)
 }
+close(pb)
 names(spia_kegg_pseudo) = names(lfc_entrez)
+
 save(spia_kegg_pseudo, file = file.path(dataFolder, "spia_output/spia_kegg_diseaseGenes_pseudo.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

@@ -11,7 +11,10 @@ suppressWarnings(suppressMessages(library(EnsDb.Hsapiens.v86)))
 suppressWarnings(suppressMessages(library(doSNOW)))
 suppressWarnings(suppressMessages(library(foreach)))
 suppressWarnings(suppressMessages(library(doParallel)))
-registerDoParallel(parallel::detectCores() - 1)
+# registerDoParallel(parallel::detectCores() - 1)
+cl <- makePSOCKcluster(parallel::detectCores() - 1, outfile="")
+registerDoParallel(cl)
+on.exit(stopCluster(cl))
 
 suppressWarnings(suppressMessages(library(data.table)))
 suppressWarnings(suppressMessages(library(dplyr)))
@@ -87,9 +90,12 @@ DEGs_list = split(DEGs, DEGs$efo.id)
 
 ## Overlap Signifcance calculation
 print("GWAS to DEGs Gene Set Overlap Signifcance Calculation")
+pb <- txtProgressBar(min=0, max=length(DEGs_list), style=3)
+
 disease_genes <- foreach (i = seq(DEGs_list), .combine = rbind, .errorhandling = "remove") %do% {
+    Sys.sleep(1)
     efo.id.DEGs = names(DEGs_list)[i]
-    cat(sprintf("'GWAS 2 DEGs' overlap significance calculation for : %s, index #%d of #%d\n", efo.id.DEGs, i ,length(DEGs_list)))
+    # cat(sprintf("'GWAS 2 DEGs' overlap significance calculation for : %s, index #%d of #%d\n", efo.id.DEGs, i ,length(DEGs_list)))
     foreach (j = seq(GWASs_list), .combine = rbind, .errorhandling = "remove") %dopar% {
         efo.id.GWASs = names(GWASs_list)[j]
         tmp = SignificantOverlap(DEGs_list[[efo.id.DEGs]]$ensembl.id, GWASs_list[[efo.id.GWASs]]$ensembl.id, ensembl_ids)
@@ -98,7 +104,9 @@ disease_genes <- foreach (i = seq(DEGs_list), .combine = rbind, .errorhandling =
         tmp = merge(tmp, unique(DEGs[, .(efo.id, efo.term)]), by.x = "efo.id.DEGs", by.y = "efo.id", all.x = TRUE, all.y = FALSE, suffixes = c(".GWASs", ".DEGs"))
         setcolorder(tmp, c("efo.id.DEGs", "efo.term.DEGs", "efo.id.GWASs", "efo.term.GWASs", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value"))
     }
+    setTxtProgressBar(pb, i)
 }
+close(pb)
 
 # correct p-values
 disease_genes[p.value == 0, p.value := 3e-324]
@@ -183,11 +191,13 @@ chembl_ids = unique(L1000[, chembl.id])
 load(file.path(dataFolder,"drug2disease.RData"))
 
 ## Overlap Signifcance Calculation
-print("Drug2Disease Gene Set Overlap Signifcance Calculation")
+print("Drug to Disease_Gene Set Overlap Signifcance Calculation")
+pb <- txtProgressBar(min=0, max=length(efo_ids), style=3)
 
 drugPdisease_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandling = "remove") %do% {
+  Sys.sleep(1)
   current_efo = efo_ids[i]
-  cat(sprintf("'Drug2Disease gene sets' overlap significance calculation for : %s, index #%d of #%d\n", current_efo, i ,length(efo_ids)))
+  # cat(sprintf("'Drug2Disease gene sets' overlap significance calculation for : %s, index #%d of #%d\n", current_efo, i ,length(efo_ids)))
   # loop through drugs
   foreach (j = seq(chembl_ids), .combine = rbind, .errorhandling = "remove") %dopar% {
       current_chembl = chembl_ids[j]
@@ -205,8 +215,9 @@ drugPdisease_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandlin
           setcolorder(tmp, c("chembl.id", "chembl.name", "efo.id", "efo.term", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value", "existing.indication"))
       }
   }
+  setTxtProgressBar(pb, i)
 }
-
+close(pb)
 
 sprintf("Number of unique ChEMBL IDs: %d", length(unique(drugPdisease_genes$chembl.id)))
 sprintf("Number of unique EFO terms: %d", length(unique(drugPdisease_genes$efo.id)))
@@ -270,7 +281,9 @@ drugPdisease_genes = drugPdisease_genes[order(p.adjusted),]
 # 
 # ## Signifcant overlap calculation
 # print("GWAS to Drug perturbed Gene Set Overlap Signifcance Calculation")
+# pb <- txtProgressBar(min=0, max=length(efo_ids), style=3)
 # drugGWAS_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandling = "remove",.verbose = T) %dopar% {
+#     Sys.sleep(1)
 #     current_efo = efo_ids[i]
 #     # loop through drugs
 #     foreach (j = seq(chembl_ids), .combine = rbind, .errorhandling = "remove",.verbose = T) %do% {
@@ -289,8 +302,9 @@ drugPdisease_genes = drugPdisease_genes[order(p.adjusted),]
 #             setcolorder(tmp, c("chembl.id", "chembl.name", "efo.id", "efo.term", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value", "existing.indication"))
 #         }
 #     }
+#     setTxtProgressBar(pb, i)
 # }
-# 
+# close(pb)
 # 
 # # correct p-values
 # drugGWAS_genes[p.value == 0, p.value := 3e-324]
