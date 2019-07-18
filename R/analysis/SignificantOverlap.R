@@ -124,14 +124,15 @@ save(disease_genes, file = file.path(dataFolder,"disease_genes50.RData"))
 #__map ensembl IDs to ENTREZ ID___#
 #-----get mapping among ENTREZ_HGNC_ENSEMBL_IDs---------#
 
-ensembl = useEnsembl(biomart="ensembl", version=92, dataset="hsapiens_gene_ensembl") # v92 has less id than v79
-val = c(1:23,"X","Y")
-gene_id = getBM(attributes=c('entrezgene','hgnc_symbol','ensembl_gene_id','chromosome_name','start_position','end_position'),
-                filters ='chromosome_name', values =val, mart = ensembl)
+# ensembl = useEnsembl(biomart="ensembl", version=92, dataset="hsapiens_gene_ensembl") # v92 has less id than v79
+# val = c(1:23,"X","Y")
+# gene_id = getBM(attributes=c('entrezgene','hgnc_symbol','ensembl_gene_id','chromosome_name','start_position','end_position'),
+#                 filters ='chromosome_name', values =val, mart = ensembl)
+# 
+# save(gene_id,file = file.path(dataFolder,"geneID.RData"))
+# rm(ensembl,val)
 
-save(gene_id,file = file.path(dataFolder,"geneID.RData"))
-rm(ensembl,val)
-
+load(file.path(dataFolder,"geneID.RData"))
 gene_id$entrezgene = gsub("^$", NA, gene_id$entrezgene)
 gene_id = gene_id[which(! is.na(gene_id$entrezgene)),]
 gene_id = data.table(gene_id)
@@ -229,7 +230,7 @@ drugPdisease_genes = drugPdisease_genes[p.adjusted < 1e-05]
 save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.padj1e-5.RData"))
 #md2 = unique(min.drugs[,c(1,3,12)]) #filtering columns for merging indication area to our super drugs
 #drugPdisease_genes = merge(drugPdisease_genes,md2,by=c("chembl.id","efo.id"))
-drugPdisease_genes = drugPdisease_genes[order(p.adjusted),]
+
 
 #______Following Part is optional filtering_______#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
