@@ -192,8 +192,9 @@ load(file.path(dataFolder,"drug2disease.RData"))
 cat(sprintf("Drug to Disease_Gene Set Overlap Signifcance Calculation\n"))
 pb <- txtProgressBar(min=0, max=length(efo_ids), style=3)
 
-drugPdisease_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandling = "remove") %do% {
+drugPdisease_genes <- foreach (i = seq(efo.ids), .combine = rbind, .errorhandling = "remove") %do% {
   Sys.sleep(1)
+  setTxtProgressBar(pb, i)
   current_efo = efo_ids[i]
   # cat(sprintf("'Drug2Disease gene sets' overlap significance calculation for : %s, index #%d of #%d\n", current_efo, i ,length(efo_ids)))
   # loop through drugs
@@ -213,7 +214,6 @@ drugPdisease_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandlin
           setcolorder(tmp, c("chembl.id", "chembl.name", "efo.id", "efo.term", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value", "existing.indication"))
       }
   }
-  setTxtProgressBar(pb, i)
 }
 close(pb)
 cat(sprintf("\n"))
@@ -281,6 +281,7 @@ save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.padj1
 # pb <- txtProgressBar(min=0, max=length(efo_ids), style=3)
 # drugGWAS_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandling = "remove",.verbose = T) %dopar% {
 #     Sys.sleep(1)
+#     setTxtProgressBar(pb, i)
 #     current_efo = efo_ids[i]
 #     # loop through drugs
 #     foreach (j = seq(chembl_ids), .combine = rbind, .errorhandling = "remove",.verbose = T) %do% {
@@ -299,7 +300,6 @@ save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.padj1
 #             setcolorder(tmp, c("chembl.id", "chembl.name", "efo.id", "efo.term", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value", "existing.indication"))
 #         }
 #     }
-#     setTxtProgressBar(pb, i)
 # }
 # close(pb)
 # 
