@@ -24,7 +24,7 @@ Rscript R/preprocessing/RetrieveDrugResponseData.R data/
 ###############
 
 echo $"\n2.1 Calculating significant overlaps\n"
-Rscript R/analysis/SignificantOverlap.R data/
+#Rscript R/analysis/SignificantOverlap.R data/
 
 echo $"\n2.2 Calculating Disease SPIAs\n"
 Rscript R/analysis/DiseaseSPIA.R data/
