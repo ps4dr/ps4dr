@@ -192,7 +192,7 @@ load(file.path(dataFolder,"drug2disease.RData"))
 cat(sprintf("Drug to Disease_Gene Set Overlap Signifcance Calculation\n"))
 pb <- txtProgressBar(min=0, max=length(efo_ids), style=3)
 
-drugPdisease_genes <- foreach (i = seq(efo.ids), .combine = rbind, .errorhandling = "remove") %do% {
+drugPdisease_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandling = "remove") %do% {
   Sys.sleep(1)
   setTxtProgressBar(pb, i)
   current_efo = efo_ids[i]
@@ -330,9 +330,9 @@ save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.padj1
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~p-value comparison between same diseases and different diseases Gene sets~#
+#~p-value comparison between same diseases and different diseases gene sets overlaps~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
+cat(sprintf("p-value comparison between same diseases and different diseases gene sets overlaps\n"))
 man_wtny <- wilcox.test(x = disease_genes[same.disease == FALSE, -log10(p.adjusted)], y = disease_genes[same.disease == TRUE, -log10(p.adjusted)])
 print(man_wtny)
 print(man_wtny$p.value)
