@@ -30,7 +30,7 @@ sprintf("Using results folder at %s", resultsFolder)
 
 dataFolder = file.path(resultsFolder)
 #####################################################################
-#' to hide text in the terminal
+#' Function to hide unnecessary outcome text in the terminal
 quiet <- function(x) { 
   sink(tempfile()) 
   on.exit(sink()) 
