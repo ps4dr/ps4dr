@@ -44,7 +44,7 @@ for (i in seq_along(spia_kegg_drug)) {
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-# remove empty drug frames
+# remove empty drug frames from each disease
 for (i in 1 : length(spia_kegg_drug)) {
     spia_kegg_drug[[i]] = spia_kegg_drug[[i]][lapply(spia_kegg_drug[[i]], length) > 1]
 }
@@ -107,7 +107,7 @@ for (i in 1 : length(drug_path_temp)) {
 }
 
 drug_path = discard(drug_path, ~ all(is.na(.x))) # remove empty diseases
-
+rm(drug_path_temp,spia_kegg,spia_kegg_drug)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~Calculate Correlation-Score~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -234,49 +234,36 @@ dev.off()
 ##~~~~~~~~~~~~~~~~~~~~~Density Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"drugCorraltion.drugPdisease.RData"))
-
-for (i in seq_along(drug_correlation)) {
-    for (j in seq_along(drug_correlation[[i]])) {
-        drug_correlation[[i]]$Dissimilarity.Score = NULL
-        drug_correlation[[i]]$DrugPathway = NULL
-        drug_correlation[[i]]$DiseasePathway = NULL
-        drug_correlation[[i]]$Disease = NULL
-        drug_correlation[[i]]$affectedPathway = NULL
-    }
-    names(drug_correlation[[i]])[[2]] = names(drug_correlation)[[i]]
-}
-
-# following drug(s) creates anomaly in the graph due to smaller density distribution in DrugGWAS data
-# drug_correlation$`chronic obstructive pulmonary disease` = NULL
+# load(file.path(dataFolder,"drugCorraltion.drugPdisease.RData"))
 # 
-# # following drug(s) creates anomaly in the graph due to smaller density distribution in DrugGWAS data
-# # drug_correlation$`HIV infection` = NULL
-# # drug_correlation$`celiac disease` = NULL
-# # drug_correlation$`mucocutaneous lymph node syndrome` = NULL
-# drug_correlation$`central nervous system cancer` = NULL
-# drug_correlation$`Pick disease` = NULL
-# drug_correlation$`Parkinson's disease` = NULL
-# drug_correlation$`mucocutaneous lymph node syndrome` = NULL
-# drug_correlation$`non-small cell lung carcinoma` = NULL
-# drug_correlation$`celiac disease` = NULL
-density.score = lapply(drug_correlation, melt)
-density.score = do.call(rbind, density.score)
-names(density.score) = c("Drug", "Diseases", "Correlation_Score")
-
-# jpeg(file=file.path(dataFolder,"densityPlots_allDiseases_DrugPdisease.jpeg"), width=2800, height=1980, res=200)
-ggplot(density.score, aes(x = Correlation_Score, fill = Diseases)) +
-    geom_density(alpha = 0.25) +
-    labs(title = "Distribution of Correlation Coefficient Scores of all Drugs for each Diseases") +
-    theme(legend.position = "bottom", legend.title = element_text(size = 10)) +
-    theme(plot.title = element_text(hjust = 0.5)) +
-    ylab("Density") +
-    xlab("Correlation Coefficient Scores")
-dev.off()
+# for (i in seq_along(drug_correlation)) {
+#     for (j in seq_along(drug_correlation[[i]])) {
+#         drug_correlation[[i]]$Dissimilarity.Score = NULL
+#         drug_correlation[[i]]$DrugPathway = NULL
+#         drug_correlation[[i]]$DiseasePathway = NULL
+#         drug_correlation[[i]]$Disease = NULL
+#         drug_correlation[[i]]$affectedPathway = NULL
+#     }
+#     names(drug_correlation[[i]])[[2]] = names(drug_correlation)[[i]]
+# }
+# 
+# density.score = lapply(drug_correlation, melt)
+# density.score = do.call(rbind, density.score)
+# names(density.score) = c("Drug", "Diseases", "Correlation_Score")
+# 
+# # jpeg(file=file.path(dataFolder,"densityPlots_allDiseases_DrugPdisease.jpeg"), width=2800, height=1980, res=200)
+# ggplot(density.score, aes(x = Correlation_Score, fill = Diseases)) +
+#     geom_density(alpha = 0.25) +
+#     labs(title = "Distribution of Correlation Coefficient Scores of all Drugs for each Diseases") +
+#     theme(legend.position = "bottom", legend.title = element_text(size = 10)) +
+#     theme(plot.title = element_text(hjust = 0.5)) +
+#     ylab("Density") +
+#     xlab("Correlation Coefficient Scores")
+# dev.off()
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~~~~~~~~~~~~~~~~~~~~~~~~Standization~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~With Standization~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 load(file.path(dataFolder,"drugCorraltion.drugPdisease.RData"))
 #' Standization with scale function (Z-score normalization)
@@ -317,14 +304,14 @@ drug_cor_scaled$Drug <- tolower(drug_cor_scaled$Drug)
 drug_cor_scaled$Drug = capitalize(drug_cor_scaled$Drug)
 drug_cor_scaled$Disease = tools::toTitleCase(drug_cor_scaled$Disease)
 
-jpeg(file=file.path(dataFolder,"densityPlots_DrugPdisease_CorrelationScore_scaled.jpeg"), width=2800, height=1980, res=200)
+jpeg(file=file.path(dataFolder,"densityPlots_DrugPdisease_CorrelationScore_scaled.jpeg"), width=3000, height=1980, res=200)
 ggplot(drug_cor_scaled, aes(x = Correlation.Score, fill = Disease)) +
     geom_density(alpha = 0.25) +
-    labs(title = "Distribution of Z-score Normalized Correlation Coefficient Scores of all Drugs for each Diseases") +
+    labs(title = "Distribution of Z-score Normalized Correlation Scores of all Drugs for each Diseases") +
     theme(plot.title = element_text(hjust = 0.5, size = 18)) +
     theme(legend.position = "bottom", legend.title = element_text(size = 12)) +
     ylab("Density") +
-    xlab("Normalized Correlation Coefficient Scores")
+    xlab("Normalized Correlation Scores")
 dev.off()
 
 
