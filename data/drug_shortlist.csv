@@ -1,4 +1,4 @@
-Disease,Drug,Correlation.Score,Dissimilarity.Score,DrugPathway,DiseasePathway,affectedPathway
+Disease,Drug,Correlation Coefficient Score,Dissimilarity Score,Drug Influenced Pathways,Disease Influenced Pathways,Affected Pathways (%)
 Alzheimer's Disease,Sirolimus,-0.57,80,20,29,68.97
 Alzheimer's Disease,Promazinehydrochloride,-0.57,78.95,19,29,65.52
 Alzheimer's Disease,Terfenadine,-0.57,82.35,17,29,58.62
@@ -27,48 +27,6 @@ Celiac Disease,Pazopanibhydrochloride,-0.46,69.23,13,22,59.09
 Celiac Disease,Quizartinib,-0.46,69.23,13,22,59.09
 Celiac Disease,Sertraline,-0.46,69.23,13,22,59.09
 Celiac Disease,Gsk-461364,-0.43,68.75,16,22,72.73
-Coronary Heart Disease,Sns-314,-0.81,90.91,11,20,55
-Coronary Heart Disease,Thioridazinehydrochloride,-0.6,75,12,20,60
-Coronary Heart Disease,Pimozide,-0.57,72.73,11,20,55
-Coronary Heart Disease,Piperacetazine,-0.56,72.73,11,20,55
-Coronary Heart Disease,Azd-1775,-0.55,71.43,14,20,70
-Coronary Heart Disease,Chloroquine,-0.53,69.23,13,20,65
-Coronary Heart Disease,Ethamivan,-0.53,69.23,13,20,65
-Coronary Heart Disease,Flunarizine,-0.53,69.23,13,20,65
-Coronary Heart Disease,Idebenone,-0.53,69.23,13,20,65
-Coronary Heart Disease,Lacidipine,-0.53,69.23,13,20,65
-Coronary Heart Disease,Letrozole,-0.53,69.23,13,20,65
-Coronary Heart Disease,Mianserin,-0.53,69.23,13,20,65
-Coronary Heart Disease,Azd-2014,-0.53,70,10,20,50
-Coronary Heart Disease,Chloroxine,-0.52,72.73,11,20,55
-Coronary Heart Disease,Mibefradil,-0.49,66.67,12,20,60
-Coronary Heart Disease,Canrenoate,-0.48,64.71,17,20,85
-Coronary Heart Disease,Momelotinib,-0.47,64.29,14,20,70
-Coronary Heart Disease,Bambuterol,-0.46,63.64,11,20,55
-Coronary Heart Disease,Chloroguanide,-0.46,63.64,11,20,55
-Coronary Heart Disease,Enzalutamide,-0.46,63.64,11,20,55
-Coronary Heart Disease,Gliquidone,-0.46,63.64,11,20,55
-Coronary Heart Disease,Glycopyrrolate,-0.46,63.64,11,20,55
-Coronary Heart Disease,Meclofenamatesodium,-0.46,63.64,11,20,55
-Coronary Heart Disease,Patupilone,-0.46,63.64,11,20,55
-Coronary Heart Disease,Pentobarbital,-0.46,63.64,11,20,55
-Coronary Heart Disease,Pipamperone,-0.46,63.64,11,20,55
-Coronary Heart Disease,Remoxipride,-0.46,63.64,11,20,55
-Coronary Heart Disease,Ritodrine,-0.46,63.64,11,20,55
-Coronary Heart Disease,Sertindole,-0.46,63.64,11,20,55
-Coronary Heart Disease,Thonzoniumbromide,-0.46,63.64,11,20,55
-Coronary Heart Disease,Tripelennaminehydrochloride,-0.46,63.64,11,20,55
-Coronary Heart Disease,Venlafaxine,-0.46,63.64,11,20,55
-Coronary Heart Disease,Bms-754807,-0.43,61.54,13,20,65
-Coronary Heart Disease,Haloprogin,-0.43,63.64,11,20,55
-Coronary Heart Disease,Azd-8330,-0.43,60,10,20,50
-Coronary Heart Disease,Menadione,-0.43,60,10,20,50
-Coronary Heart Disease,Sepantronium,-0.43,60,10,20,50
-Coronary Heart Disease,Carvedilol,-0.41,58.33,12,20,60
-Coronary Heart Disease,Vemurafenib,-0.41,58.33,12,20,60
-Coronary Heart Disease,Chlorpromazinehydrochloride,-0.41,60,10,20,50
-Coronary Heart Disease,Sertraline,-0.41,60,10,20,50
-Coronary Heart Disease,Buparlisib,-0.4,57.14,14,20,70
 Diabetes Mellitus,Palbociclib,-0.58,75,4,7,57.14
 Diabetes Mellitus,Ruxolitinib,-0.58,75,4,7,57.14
 Diabetes Mellitus,Atomoxetinehydrochloride,-0.41,60,5,7,71.43
