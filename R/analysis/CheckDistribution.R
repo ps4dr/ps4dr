@@ -208,13 +208,14 @@ drugCor$Drug = capitalize(drugCor$Drug)
 drugCor$Disease = toTitleCase(drugCor$Disease)
 
 
-jpeg(file = file.path(dataFolder,"ScatterPlots_DrugPDisease_CorrelationScore.jpeg"), width = 2800, height = 1980, res = 200)
+jpeg(file = file.path(dataFolder,"ScatterPlots_DrugPDisease_CorrelationScore.jpeg"), width = 3000, height = 1980, res = 200)
+jpeg(file = ".data/ScatterPlots_DrugPDisease_CorrelationScore.jpeg", width = 3000, height = 1980, res = 200)
 ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = Disease)) +
     geom_point(size = 2, shape = 1) +
-    labs(title = "Scatter Plots of Correlation Coefficient Scores and Affected Pathways (%)") +
+    labs(title = "Scatter Plots of Correlation Scores and Affected Pathways (%)") +
     theme(legend.position = "bottom", legend.title = element_text(size = 10)) +
     theme(plot.title = element_text(hjust = 0.5)) +
-    ylab("Correlation Coefficient Scores") +
+    ylab("Correlation Scores") +
     xlab("Affected Pathways (%)")
 dev.off()
 
