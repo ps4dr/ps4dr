@@ -4,12 +4,10 @@
 #' for downloading Differential Gene Expression Data from Open Targtets by EFO IDs
 #' EFO ontology (version 2.105) file has been used for these mapping purpose
 
-suppressWarnings(suppressMessages(library(EnsDb.Hsapiens.v86)))
 suppressWarnings(suppressMessages(library(data.table)))
 suppressWarnings(suppressMessages(library(dplyr)))
 suppressWarnings(suppressMessages(library(tidyr)))
-suppressWarnings(suppressMessages(library(httr)))
-suppressWarnings(suppressMessages(library(jsonlite)))
+suppressWarnings(suppressMessages(library(biomaRt)))
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository
@@ -28,7 +26,9 @@ sprintf("Using results folder at %s", resultsFolder)
 dataFolder = file.path(resultsFolder)
 #####################################################################
 
-# get GWASs Data from STOPGAP pipeline output 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~: get GWASs Data from STOPGAP pipeline output :~~~~~~~~~~~~~~~~~~#
+
 load(file.path(dataFolder, "stopgap.gene.mesh.RData"))
 GWASs = data.table(stopgap.gene.mesh)
 rm(stopgap.gene.mesh)
@@ -38,22 +38,41 @@ sprintf("Number of unique genes: %d", length(unique(GWASs$gene.v19)))
 sprintf("Number of unique SNPs: %d", length(unique(GWASs$snp.ld)))
 
 # keep relevant columns and remove redundant rows
-GWASs = unique(GWASs[, .(snp.ld, gene.v19, msh, pvalue, gene.score, gene.rank.min, source)])
+GWASs = unique(GWASs[, .(snp.ld, gene, msh, pvalue, gene.score, gene.rank.min, source)])
 
 sprintf("Number of p-values with underflow: %d", nrow(GWASs[pvalue == 0]))
 # replace p-values of zero with arbitrarily low p-value
 GWASs[pvalue == 0, pvalue := 3e-324]
 
-# map gene symbols to Ensembl
-GWASs.geneSymbols = unique(GWASs[, gene.v19])
-sprintf("Number of unique GWAS genes: %d", length(GWASs.geneSymbols))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~: get mapping among ENTREZ, HGNC & ENSEMBL_IDs using Biomart Package :~~~~~~#
 
-ensembleToGeneSymbolTable = ensembldb::select(EnsDb.Hsapiens.v86, keys = GWASs.geneSymbols, keytype = "SYMBOL", columns = c("GENEID", "SYMBOL"))
-ensembleToGeneSymbolTable = data.table(ensembleToGeneSymbolTable)
-sprintf("Number of Ensembl to HGNC Gene Symbol mappings: %d", nrow(ensembleToGeneSymbolTable))
+ensembl = useEnsembl(biomart="ensembl", version=97, dataset="hsapiens_gene_ensembl")
+val = c(1:23,"X","Y")
+gene_id = getBM(attributes=c('entrezgene_id','hgnc_symbol','ensembl_gene_id','chromosome_name','start_position','end_position'),
+                filters ='chromosome_name', values =val, mart = ensembl)
 
-# anno = as.data.table(ensembleToGeneSymbolTable)
-GWASs = merge(GWASs, ensembleToGeneSymbolTable, by.x = "gene.v19", by.y = "SYMBOL", all = FALSE)
+rm(ensembl,val)
+
+gene_id$entrezgene = gsub("^$", NA, gene_id$ensembl_gene_id)
+gene_id = gene_id[which(! is.na(gene_id$ensembl_gene_id)),]
+gene_id = data.table(gene_id)
+gene_id = unique(gene_id[, c('entrezgene_id', 'ensembl_gene_id', 'hgnc_symbol')])
+names(gene_id) = c("ENTREZ", "ensembl.id", "HGNC")
+gene_id = gene_id[! duplicated(gene_id$ensembl.id),]
+
+save(gene_id, file = file.path(dataFolder, "geneID_97.RData"))
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~: map Gene Symbols in GWAS Data to Ensembl Identifiers :~~~~~~~~~~~~~~~#
+
+sprintf("Number of unique GWAS genes before mapping: %d", length(unique(GWASs$gene)))
+
+GWASs = merge(GWASs, gene_id, by.x = "gene", by.y = "HGNC", all = FALSE)
+sprintf("Number of unique GWAS genes after mapping: %d", length(unique(GWASs$gene)))
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~: map MeSH terms in GWAS dataset to EFO IDs :~~~~~~~~~~~~~~~~~~~#
 
 #' read EFO ontolgy (version 2.105) files in csv format downloaded from bioportal on 11th March, 2019
 #' "http://data.bioontology.org/ontologies/EFO/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb&download_format=csv"
@@ -84,12 +103,9 @@ mesh2efo = mesh2efo[, c(2, 3, 4)]
 names(mesh2efo) = c("mesh", "efo.id", "efo.term")
 mesh2efo = mesh2efo[!duplicated(mesh2efo[,c('efo.id')]),]
 
-# merge GWASs with mesh2efo table
 GWASs = merge(GWASs, mesh2efo, by.x = "msh", by.y = "mesh", all = FALSE)
-GWASs = GWASs[, .(snp.ld, ensembl.id = GENEID, gene.symbol = gene.v19, efo.id, efo.term, GWASs.pvalue = pvalue, GWASs.gene.score = gene.score, GWASs.gene.rank = gene.rank.min, source)]
+GWASs = GWASs[, .(snp.ld, ensembl.id = ensembl.id, gene.symbol = gene, efo.id, efo.term, GWASs.pvalue = pvalue, GWASs.gene.score = gene.score, GWASs.gene.rank = gene.rank.min, source)]
+sprintf("Number of unique EFO IDs after final mapping: %d", length(unique(GWASs$efo.id)))
+sprintf("Number of unique Ensembl IDs after final mapping: %d", length(unique(GWASs$ensembl.id)))
 
 save(GWASs, file = file.path(dataFolder, "GWASs.RData"))
-length(unique(GWASs$efo.id))
-length(unique(GWASs$ensembl.id))
-
-
