@@ -1,4 +1,4 @@
-#' 4th script
+#' 2nd script
 #' summary:
 #' 01: Retrieve Gene expression data from the Open Targets by using their API service
 #'     for every diseases with the EFO IDs from gwas.data data

@@ -1,13 +1,10 @@
-#' 5th script
+#' 3rd script
 #' summary:
 #' 01: Download Drug Perturbed Gens Expression Profiles, LINCS L1000 dataset 
 #' 02: Map from LINCS IDs to Chembl IDs using to PubChem IDs as intermediate 
 #' unichem RESTful API was last accessed on 11 March, 2019. 
 
-# source("http://bioconductor.org/biocLite.R")
-# biocLite("EnsDb.Hsapiens.v86")
 
-suppressWarnings(suppressMessages(library(EnsDb.Hsapiens.v86)))
 suppressWarnings(suppressMessages(library(data.table)))
 suppressWarnings(suppressMessages(library(httr)))
 suppressWarnings(suppressMessages(library(jsonlite)))
@@ -83,16 +80,18 @@ lincs_pubchem = unique(lincs_pubchem[,.(lincs_id,pubchem_cid)])
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~map Entrez IDs to Ensembl~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+load(file.path(dataFolder, "geneID_97.RData"))
 
 L1000_genes = L1000_raw[, as.character(unique(GeneID))]
-anno = as.data.table(ensembldb::select(EnsDb.Hsapiens.v86, keys = L1000_genes, keytype = "ENTREZID", columns = c("GENEID", "ENTREZID")))
-L1000 = merge(anno[, ENTREZID := as.numeric(ENTREZID)], L1000_raw, by.x = "ENTREZID", by.y = "GeneID", allow.cartesian = TRUE)
+L1000 = merge(L1000_raw, gene_id, by.x = "GeneID", by.y = "ENTREZ")
+L1000 = L1000[,c(1,5,2,3,4)]
+names(L1000) = c("ENTREZID","GENEID","GeneSym","weight","lincs_id")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~map LINCS IDs to ChEMBL IDs~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-if(!file.exists(file.path(dataFolder, "L1000.RData"))){
+if(!file.exists(file.path(dataFolder, "L1000_v97.RData"))){
   cat(sprintf("~~ Mapping BROAD IDs to ChEMBL via PubChem IDs. ~~\n"))
   pb <- txtProgressBar(min = 0, max = length(lincs_pubchem[, pubchem_cid]), style = 3)
   unichem_url = "https://www.ebi.ac.uk/unichem/rest/src_compound_id/"
@@ -114,10 +113,10 @@ if(!file.exists(file.path(dataFolder, "L1000.RData"))){
   L1000 = merge(L1000, unichem_map, by = "lincs_id")
   L1000 = L1000[, .(ensembl.id = GENEID, gene.symbol = GeneSym, lincs.id=lincs_id, pubchem.id=pubchem_id, chembl.id=chembl_id, direction = weight)]
   
-  save(L1000, file=file.path(dataFolder, "L1000.RData"))
+  save(L1000, file=file.path(dataFolder, "L1000_v97.RData"))
   
 } else {cat(sprintf("~~ L1000 file already exists, not mapping again. ~~\n"))
-  load(file.path(dataFolder, "L1000.RData"))}
+  load(file.path(dataFolder, "L1000_v97.RData"))}
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~L1000 Drugs~~~~~~~~~~~~~~~~~~~#

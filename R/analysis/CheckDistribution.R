@@ -209,7 +209,6 @@ drugCor$Disease = toTitleCase(drugCor$Disease)
 
 
 jpeg(file = file.path(dataFolder,"ScatterPlots_DrugPDisease_CorrelationScore.jpeg"), width = 3000, height = 1980, res = 200)
-jpeg(file = ".data/ScatterPlots_DrugPDisease_CorrelationScore.jpeg", width = 3000, height = 1980, res = 200)
 ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = Disease)) +
     geom_point(size = 2, shape = 1) +
     labs(title = "Scatter Plots of Correlation Scores and Affected Pathways (%)") +
