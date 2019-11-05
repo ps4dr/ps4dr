@@ -6,8 +6,6 @@
 #' 02: Drug Perturbed Genes & DEGs & GWAS data :> drugPdisease_genes,
 #' 03: Drug Perturbed Genes & GWAS data :> drugGWAS_genes.
 
-suppressWarnings(suppressMessages(library(EnsDb.Hsapiens.v86)))
-
 suppressWarnings(suppressMessages(library(doSNOW)))
 suppressWarnings(suppressMessages(library(foreach)))
 suppressWarnings(suppressMessages(library(doParallel)))
@@ -79,7 +77,8 @@ DEGs = merge(DEGs, tmp2, by = "efo.id")
 #' and also recorded from GWAS.
 
 # create gene universes for Fisher's test
-ensembl_ids = unique(keys(EnsDb.Hsapiens.v86))
+load(file.path(dataFolder,"geneID_97.RData"))
+ensembl_ids = unique(gene_id$ensembl.id)
 
 # split data table by disease
 GWASs_list = split(GWASs, GWASs$efo.id)
@@ -111,7 +110,7 @@ disease_genes = disease_genes[order(p.value),]
 disease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
 # add dummy variable
 disease_genes[, same.disease := ifelse(efo.id.DEGs == efo.id.GWASs, TRUE, FALSE)]
-save(disease_genes, file = file.path(dataFolder,"disease_genes50.RData"))
+save(disease_genes, file = file.path(dataFolder,"disease_genes50_v97.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##___________Drugs to DISEASE Genes___________#####
@@ -121,29 +120,16 @@ save(disease_genes, file = file.path(dataFolder,"disease_genes50.RData"))
 #' from the above step (DEGs and GWAS genes overlap)
 #' Output would be the disease specific genes which are also perturbed by the drugs.
 
-#__map ensembl IDs to ENTREZ ID___#
+#__________map ensembl IDs to ENTREZ ID___________#
 #-----get mapping among ENTREZ_HGNC_ENSEMBL_IDs---------#
+load(file.path(dataFolder,"geneID_97.RData"))
+gene_id$ENTREZ = gsub("^$", NA, gene_id$ENTREZ)
+gene_id = gene_id[which(! is.na(gene_id$ENTREZ)),]
 
-# ensembl = useEnsembl(biomart="ensembl", version=92, dataset="hsapiens_gene_ensembl") # v92 has less id than v79
-# val = c(1:23,"X","Y")
-# gene_id = getBM(attributes=c('entrezgene','hgnc_symbol','ensembl_gene_id','chromosome_name','start_position','end_position'),
-#                 filters ='chromosome_name', values =val, mart = ensembl)
-# 
-# save(gene_id,file = file.path(dataFolder,"geneID.RData"))
-# rm(ensembl,val)
-
-load(file.path(dataFolder,"geneID.RData"))
-gene_id$entrezgene = gsub("^$", NA, gene_id$entrezgene)
-gene_id = gene_id[which(! is.na(gene_id$entrezgene)),]
-gene_id = data.table(gene_id)
-gene_id = unique(gene_id[, c('entrezgene', 'ensembl_gene_id', 'hgnc_symbol')])
-names(gene_id) = c("ENTREZ", "ensembl.id", "HGNC")
-gene_id = gene_id[! duplicated(gene_id$ensembl.id),]
-gene_id = gene_id[, c(1, 2)]
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 # get LINCS dataset
-load(file.path(dataFolder,"L1000.RData"))
+load(file.path(dataFolder,"L1000_v97.RData"))
 # harmonizome = unique(fread(file.path(dataFolder,"harmonizome.tsv")))
 L1000 = L1000[, c(5, 1, 6)]
 L1000 = L1000[order(ensembl.id, decreasing = TRUE),]
@@ -164,7 +150,7 @@ L1000 = merge(dmap[, c(1, 2)], L1000, by = "chembl.id")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 ##### create Disease-Genes list #####
-load(file.path(dataFolder,"disease_genes50.RData"))
+load(file.path(dataFolder,"disease_genes50_v97.RData"))
 
 # considering all those gene sets where DEGs and GWAS came from same diseases.
 DisGen = disease_genes[same.disease == TRUE & overlap > 0]
@@ -184,7 +170,8 @@ DisGen.list = split(DisGenX, DisGenX$efo.id.DEGs)
 
 # create vector with all disease, ensembl and chemical IDs
 efo_ids = unique(DisGen$efo.id.DEGs)
-ensembl_ids = unique(keys(EnsDb.Hsapiens.v86))
+load(file.path(dataFolder,"geneID_97.RData"))
+ensembl_ids = unique(gene_id$ensembl.id)
 chembl_ids = unique(L1000[, chembl.id])
 load(file.path(dataFolder,"drug2disease.RData"))
 
@@ -218,15 +205,15 @@ drugPdisease_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandlin
 close(pb)
 cat(sprintf("\n"))
 
-save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.RData"))
+save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50_v97.RData"))
 
 #load(file.path(dataFolder,"drugPdisease_genes50.RData"))
 # correct p-values
 drugPdisease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
 drugPdisease_genes = drugPdisease_genes[p.adjusted < 0.05]
-save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.padj.RData"))
+save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50_v97.padj.RData"))
 drugPdisease_genes = drugPdisease_genes[p.adjusted < 1e-05]
-save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.padj1e-5.RData"))
+save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50_v97.padj1e-5.RData"))
 #md2 = unique(min.drugs[,c(1,3,12)]) #filtering columns for merging indication area to our super drugs
 #drugPdisease_genes = merge(drugPdisease_genes,md2,by=c("chembl.id","efo.id"))
 
@@ -242,7 +229,7 @@ save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.padj1
 #' 
 
 # load(file.path(dataFolder,"drug2disease.RData"))
-# load(file.path(dataFolder,"GWASs.RData"))
+# load(file.path(dataFolder,"GWASs_v97.RData"))
 # GWASs = data.table(GWASs[, c(4, 5, 2, 3)])
 # tmp = dplyr::count(GWASs, efo.id)
 # 
@@ -274,7 +261,8 @@ save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.padj1
 # efo_ids = unique(GWASs$efo.id)
 # GWASs_list = split(GWASs, GWASs$efo.id)
 # # create gene universes for Fisher's test
-# ensembl_ids = unique(keys(EnsDb.Hsapiens.v86))
+# load("./data/geneID_97.RData")
+# ensembl_ids = unique(gene_id$ensembl.id)
 # 
 # ## Signifcant overlap calculation
 # cat(sprintf("GWAS to Drug perturbed Gene Set Overlap Signifcance Calculation\n"))
@@ -308,13 +296,13 @@ save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.padj1
 # drugGWAS_genes = drugGWAS_genes[overlap > 0]
 # drugGWAS_genes = drugGWAS_genes[order(p.value),]
 # drugGWAS_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
-# save(drugGWAS_genes, file = file.path(dataFolder,"drugGWAS_genes50.RData"))
+# save(drugGWAS_genes, file = file.path(dataFolder,"drugGWAS_genes50_v97.RData"))
 # 
 # drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-05]
-# save(drugGWAS_genes, file = file.path(dataFolder,"drugGWAS_genes50.padj1e-5.RData"))
+# save(drugGWAS_genes, file = file.path(dataFolder,"drugGWAS_genes50_v97.padj1e-5.RData"))
 # 
 # drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-10]
-# save(drugGWAS_genes, file = file.path(dataFolder,"drugGWAS_genes50.padj1e-10.RData"))
+# save(drugGWAS_genes, file = file.path(dataFolder,"drugGWAS_genes50_v97.padj1e-10.RData"))
 # 
 # 
 # load(file.path(dataFolder,"drugGWAS_genes50.padj1e-5.RData"))
@@ -332,20 +320,20 @@ save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50.padj1
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~p-value comparison between same diseases and different diseases gene sets overlaps~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-cat(sprintf("p-value comparison between same diseases and different diseases gene sets overlaps\n"))
-man_wtny <- wilcox.test(x = disease_genes[same.disease == FALSE, -log10(p.adjusted)], y = disease_genes[same.disease == TRUE, -log10(p.adjusted)])
-print(man_wtny)
-print(man_wtny$p.value)
-jpeg(file = file.path(dataFolder,"disease_genes.pvalues.boxplots.jpeg"), width = 6 * 200, height = 6 * 150, res = 150)
-print(ggplot(disease_genes, aes(x = same.disease, y = -log10(p.adjusted),fill=same.disease)) +
-        geom_boxplot() +
-        coord_cartesian(ylim = quantile(disease_genes[, -log10(p.adjusted)], c(0.03, 0.97))) +
-        xlab("Same disease") +
-        ylab("-log10(adjusted p-value") +
-        theme_bw(18) +
-        scale_x_discrete(breaks = c(FALSE, TRUE), labels = c("No", "Yes")) +
-        ggtitle(paste("p-value =", sprintf("%.2e", man_wtny$p.value))))
-dev.off()
+# cat(sprintf("p-value comparison between same diseases and different diseases gene sets overlaps\n"))
+# man_wtny <- wilcox.test(x = disease_genes[same.disease == FALSE, -log10(p.adjusted)], y = disease_genes[same.disease == TRUE, -log10(p.adjusted)])
+# print(man_wtny)
+# print(man_wtny$p.value)
+# jpeg(file = file.path(dataFolder,"disease_genes.pvalues.boxplots.jpeg"), width = 6 * 200, height = 6 * 150, res = 150)
+# print(ggplot(disease_genes, aes(x = same.disease, y = -log10(p.adjusted),fill=same.disease)) +
+#         geom_boxplot() +
+#         coord_cartesian(ylim = quantile(disease_genes[, -log10(p.adjusted)], c(0.03, 0.97))) +
+#         xlab("Same disease") +
+#         ylab("-log10(adjusted p-value") +
+#         theme_bw(18) +
+#         scale_x_discrete(breaks = c(FALSE, TRUE), labels = c("No", "Yes")) +
+#         ggtitle(paste("p-value =", sprintf("%.2e", man_wtny$p.value))))
+# dev.off()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~ROC Curve~~~~~~~~~~~~~~#
