@@ -80,7 +80,7 @@ lincs_pubchem = unique(lincs_pubchem[,.(lincs_id,pubchem_cid)])
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~map Entrez IDs to Ensembl~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-load(file.path(dataFolder, "geneID_97.RData"))
+load(file.path(dataFolder, "geneID_v97.RData"))
 
 L1000_genes = L1000_raw[, as.character(unique(GeneID))]
 L1000 = merge(L1000_raw, gene_id, by.x = "GeneID", by.y = "ENTREZ")

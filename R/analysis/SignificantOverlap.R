@@ -77,7 +77,7 @@ DEGs = merge(DEGs, tmp2, by = "efo.id")
 #' and also recorded from GWAS.
 
 # create gene universes for Fisher's test
-load(file.path(dataFolder,"geneID_97.RData"))
+load(file.path(dataFolder,"geneID_v97.RData"))
 ensembl_ids = unique(gene_id$ensembl.id)
 
 # split data table by disease
@@ -122,7 +122,7 @@ save(disease_genes, file = file.path(dataFolder,"disease_genes50_v97.RData"))
 
 #__________map ensembl IDs to ENTREZ ID___________#
 #-----get mapping among ENTREZ_HGNC_ENSEMBL_IDs---------#
-load(file.path(dataFolder,"geneID_97.RData"))
+load(file.path(dataFolder,"geneID_v97.RData"))
 gene_id$ENTREZ = gsub("^$", NA, gene_id$ENTREZ)
 gene_id = gene_id[which(! is.na(gene_id$ENTREZ)),]
 
@@ -170,7 +170,7 @@ DisGen.list = split(DisGenX, DisGenX$efo.id.DEGs)
 
 # create vector with all disease, ensembl and chemical IDs
 efo_ids = unique(DisGen$efo.id.DEGs)
-load(file.path(dataFolder,"geneID_97.RData"))
+load(file.path(dataFolder,"geneID_v97.RData"))
 ensembl_ids = unique(gene_id$ensembl.id)
 chembl_ids = unique(L1000[, chembl.id])
 load(file.path(dataFolder,"drug2disease.RData"))
@@ -261,7 +261,7 @@ save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50_v97.p
 # efo_ids = unique(GWASs$efo.id)
 # GWASs_list = split(GWASs, GWASs$efo.id)
 # # create gene universes for Fisher's test
-# load("./data/geneID_97.RData")
+# load("./data/geneID_v97.RData")
 # ensembl_ids = unique(gene_id$ensembl.id)
 # 
 # ## Signifcant overlap calculation

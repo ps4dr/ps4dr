@@ -258,7 +258,7 @@ save(spia_biocarta, file = file.path(dataFolder, "spia_output/spia_biocarta_dise
 ###___Create Pseudo (Random) Pathways____####
 
 #___create universe with ENTREZID:____#
-load(file.path(dataFolder,"geneID_97.RData"))
+load(file.path(dataFolder,"geneID_v97.RData"))
 universe = unique(na.omit(gene_id$ENTREZ)) # for kegg
 # universe = unique(na.omit(gsub("^","ENTREZID:",gene_id$ENTREZ))) # for reactome, biocarta
 

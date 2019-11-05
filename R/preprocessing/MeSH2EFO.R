@@ -63,7 +63,7 @@ gene_id = unique(gene_id[, c('entrezgene_id', 'ensembl_gene_id', 'hgnc_symbol')]
 names(gene_id) = c("ENTREZ", "ensembl.id", "HGNC")
 gene_id = gene_id[! duplicated(gene_id$ensembl.id),]
 
-save(gene_id, file = file.path(dataFolder, "geneID_97.RData"))
+save(gene_id, file = file.path(dataFolder, "geneID_v97.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~: map Gene Symbols in GWAS Data to Ensembl Identifiers :~~~~~~~~~~~~~~~#

@@ -60,7 +60,7 @@ name_fun = function(spia_kegg_drug){
 #~~~~~~~~~~~: Drug Data Preperation for SPIA :~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"geneID_97.RData"))
+load(file.path(dataFolder,"geneID_v97.RData"))
 gene_id$ENTREZ = gsub("^$", NA, gene_id$ENTREZ)
 gene_id = gene_id[which(! is.na(gene_id$ENTREZ)),]
 gene_id = gene_id[, c(1, 2)]
