@@ -1,4 +1,4 @@
-#' 3rd script
+#' 1st script
 #' summary:
 #' Mapping of MeSH terms to EFO IDs from GWASs Data processed by STOPGAP Pipeline
 #' for downloading Differential Gene Expression Data from Open Targtets by EFO IDs
@@ -12,6 +12,7 @@ suppressWarnings(suppressMessages(library(biomaRt)))
 #####################################################################
 #TODO: Change to the directory where you cloned this repository
 #~~~~~~~Using relative path~~~~~~~#
+
 ensureFolder = function(folder) {
     if (! file.exists(folder)) {
         dir.create(folder)
@@ -24,6 +25,7 @@ ensureFolder(resultsFolder)
 sprintf("Using results folder at %s", resultsFolder)
 
 dataFolder = file.path(resultsFolder)
+
 #####################################################################
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
