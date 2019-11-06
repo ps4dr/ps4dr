@@ -27,7 +27,7 @@ dataFolder = file.path(resultsFolder)
 #####################################################################
 
 #' load results from pervious script (4-CheckDistribution.R)
-load(file.path(dataFolder,"drugCorraltion.drugPdisease_v97.RData"))
+load(file.path(dataFolder,"results/drugCorraltion.drugPdisease_v97.RData"))
 
 #' filter out drugs from each disease with correlationscore greater than 0
 drug_shortlist = drug_correlation
@@ -49,7 +49,9 @@ for (i in seq_along(drug_shortlist)) {
 #~~~~~~~~~load KEGG Drug SPIA results~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"spia_output/spia_kegg_drugPdisease_42_v97.RData"))
+load(file.path(dataFolder,"results/spia_output/spia_kegg_drugPdisease_42_v97.RData"))
+spia_kegg_drug = spia_kegg_drug_42
+rm(spia_kegg_drug_42)
 
 spia_kegg_drug = Filter(function(x) ! is.null(x), spia_kegg_drug) #delete empty df from list
 
@@ -161,7 +163,7 @@ for (i in 1 : length(comb1)) {
 }
 
 # save(drug_comb_path,file=file.path(dataFolder,"drug_comb_path.drugGWAS.RData"))
-save(drug_comb_path, file = file.path(dataFolder,"drug_comb_path.drugPdisease.RData"))
+save(drug_comb_path, file = file.path(dataFolder,"results/drug_comb_path.drugPdisease_v97.RData"))
 rm(comb1, comb2)
 load(file.path(dataFolder,"drug_comb_path.drugPdisease_v97.RData"))
 # load(file.path(dataFolder,"drug_comb_path.drugGWAS.RData"))
@@ -209,22 +211,13 @@ for (i in seq_along(drug_correlation)) {
     drug_correlation[[i]] = drug_correlation[[i]][, c(7, 6, 1, 2, 3, 4, 5)]
 }
 
-save(drug_dis_path, drug_correlation, file = file.path(dataFolder,"drugCombination.correlationScore.drugPdisease_v97.RData"))
-
-# load(file.path(dataFolder,"drugCombination.correlationScore.drugPdisease_v97.RData"))
-# x = drug_correlation[["lung carcinoma"]][order(drug_correlation[["lung carcinoma"]]$Correlation.Score, - drug_correlation[["lung carcinoma"]]$affectedPathway),]
-# x = drug_correlation[[5]][order(- drug_correlation[[5]]$affectedPathway, drug_correlation[[5]]$Correlation.Score),]
-# x = data.table(x)
-# x$Correlation.Score = round(x$Correlation.Score, 2)
-# x = x[x$Correlation.Score <= - 0.5 & x$affectedPathway >= 80]
-# x = x[order(- x$affectedPathway, x$Correlation.Score),]
-# x = x[, c(1, 3, 7)]
-# fwrite(x, file = file.path(dataFolder,"drugComb.breastCancer.csv"))
-# x$Drug = tolower(x$Drug)
+save(drug_dis_path, drug_correlation, file = file.path(dataFolder,"results/drugCombination.correlationScore.drugPdisease_v97.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##~~~~~~~~~~~~~~~~~~~~~Scatter Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+load(file.path(dataFolder,"drugCombination.correlationScore.drugPdisease_v97.RData"))
 
 drugCor = do.call(rbind, drug_correlation)
 drugCor$Drug = as.factor(drugCor$Drug)
@@ -232,8 +225,7 @@ drugCor = data.table(drugCor %>% drop_na())
 #' remove few extreme correlation scores
 # drugCor = drugCor[Correlation.Score > -1 & Correlation.Score < 1]
 
-# jpeg(file=file.path(dataFolder,"ScatterPlots_combination_Diseases_DrugGWAS.jpeg", width=2800, height=1980, res=200))
-jpeg(file = file.path(dataFolder,"ScatterPlots_combination_Diseases_DrugPdisease_v97.jpeg"), width = 2800, height = 1980, res = 200)
+jpeg(file = file.path(dataFolder, "results/figures/ScatterPlots_combination_Diseases_DrugPdisease_v97.jpeg"), width = 2800, height = 1980, res = 200)
 ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = Disease)) +
     geom_point(size = 2, shape = 1) +
     labs(title = "Scatter Plots of Correlation Scores and affected pathways(%)") +
@@ -245,4 +237,12 @@ dev.off()
 # save(drugCor, file = file.path(dataFolder,"drugCombcorScoreDrugGWAS.RData"))
 length(unique(drugCor$Disease))
 save(drugCor, file = file.path(dataFolder,"drugCombcorScoreDrugPdisease_v97.RData"))
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+drugCor_Shortlist = drugCor[Correlation.Score <= -.5 & affectedPathway >= 80 ]
+drugCor_breastCancer_1 = drugCor[Disease == "breast carcinoma" & Correlation.Score <= -.4 & affectedPathway >= 50 ] # 464 Drug Combinations
+drugCor_breastCancer_2 = drugCor[Disease == "breast carcinoma" & Correlation.Score <= -.5 & affectedPathway >= 80 ] # 26 Drug Combinations
+fwrite(drugCor_breastCancer_2, file = file.path(dataFolder,"results/drugCombination_shortlist_breastCancer_v97.csv"))
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

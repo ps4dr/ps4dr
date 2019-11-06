@@ -83,20 +83,19 @@ L1000 = merge(dmap[, c(1, 2)], L1000, by = "chembl.id")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~01: Drug Perturbed GWAS Genes :~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-# load(file.path(dataFolder,"drugGWAS.genes50.padj1e-5.RData"))
+# load(file.path(dataFolder,"results/drugGWAS.genes50.padj1e-5.RData"))
 # super_drugs = drugGWAS.genes[,c(2,3,4,9)]
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~02: Drug Perturbed Disease Genes (DEGs_GWAS) :~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-# load(file.path(dataFolder,"drugPdisease_genes50.padj1e-5.RData"))
-load(file.path(dataFolder,"drugPdisease_genes50_v97.padj.RData"))
+load(file.path(dataFolder,"results/drugPdisease_genes50_v97.padj.RData"))
 super_drugs = drugPdisease_genes[, c(2, 3, 4, 9)]
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #' to select only those diseases from disease_genes50
-load(file.path(dataFolder,"disease_genes50_v97.RData"))
+load(file.path(dataFolder,"results/disease_genes50_v97.RData"))
 disease_genes = disease_genes[p.adjusted <= 0.05]
 disease_genes = unique(disease_genes[, c(1, 2)])
 super_drugs = merge(super_drugs, disease_genes, by.x = "efo.id", by.y = "efo.id.DEGs")
@@ -120,7 +119,7 @@ sprintf("Number of unique Genes: %d", length(unique(drug_genes$ensembl.id)))
 #' we will filter out all the entries from drug_genes which 
 #' do not match the EFO.ID from Disease SPIA
 #' 
-load(file.path(dataFolder,"disease_genes50_v97.lfc.RData"))
+load(file.path(dataFolder,"results/disease_genes50_v97.lfc.RData"))
 Diseases = as.data.frame(names(lfc_efo))
 names(Diseases) = "efo.term"
 drug_genes = merge(Diseases, drug_genes, by.x = "efo.term", by.y = "efo.term.DEGs")
@@ -150,14 +149,12 @@ for (element in 1 : length(topDiseases_drug)) {
     }
 }
 
-# save(topDiseases_drug,file = file.path(dataFolder,"drug_genes.list.drugGWAS.Diseases.genes50.padj1e-10.RData"))
-save(topDiseases_drug, file = file.path(dataFolder,"drug_genes.list.drugPdiseaseGenes50.padj.RData"))
+# save(topDiseases_drug, file = file.path(dataFolder,"spia_input/drug_genes.list.drugPdiseaseGenes50.padj.RData"))
 
 
 ####____Create named entity list for each drug_disease pairs___####
 
-# load(file.path(dataFolder,"drug_genes.list.drugGWAS.Diseases.genes50.padj1e-10.RData"))
-load(file.path(dataFolder,"drug_genes.list.drugPdiseaseGenes50.padj.RData"))
+# load(file.path(dataFolder,"spia_input/drug_genes.list.drugPdiseaseGenes50.padj.RData"))
 
 lfc_drug_ensembl = topDiseases_drug
 for (i in 1 : length(topDiseases_drug)) {
@@ -186,9 +183,9 @@ ensembl_all = unique(gene_id$ensembl.id)
 entrez_all = unique(gene_id$ENTREZ)
 entrezID_all = unique(gsub("^", "ENTREZID:", gene_id$ENTREZ)) ## with ENTREZID: in front of each id
 
-save(lfc_drug_ensembl, ensembl_all, file = file.path(dataFolder,"lfc.drug.drugPdisease.diseaseGenes50_v97.padj.ensembl.RData"))
-save(lfc_drug_entrez, entrez_all, file = file.path(dataFolder,"lfc.drug.drugPdisease.diseaseGenes50_v97.padj.entrez.RData"))
-save(lfc_drug_entrezID, entrezID_all, file = file.path(dataFolder,"lfc.drug.drugPdisease.diseaseGenes50_v97.padj.entrezID.RData"))
+save(lfc_drug_ensembl, ensembl_all, file = file.path(dataFolder,"spia_input/lfc_drugPdisease_v97_ensembl.RData"))
+save(lfc_drug_entrez, entrez_all, file = file.path(dataFolder,"spia_input/lfc_drugPdisease_v97_entrez.RData"))
+save(lfc_drug_entrezID, entrezID_all, file = file.path(dataFolder,"spia_input/lfc_drugPdisease_v97_entrezID.RData"))
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -197,36 +194,36 @@ save(lfc_drug_entrezID, entrezID_all, file = file.path(dataFolder,"lfc.drug.drug
 
 #~~~~~~~~~~~~~~~~~~~: Drug SPIA - KEGG :~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"lfc.drug.drugPdisease.diseaseGenes50_v97.padj.entrez.RData"))
+load(file.path(dataFolder,"spia_input/lfc_drugPdisease_v97_entrez.RData"))
 lfc_test = lfc_drug_entrez
 
 spia_kegg_drug = spia_fun(lfc_test)
 spia_kegg_drug = name_fun(spia_kegg_drug)
 
-save(spia_kegg_drug, file = file.path(dataFolder,"spia_output/spia_kegg_drugPdisease_v97.RData"))
+save(spia_kegg_drug, file = file.path(dataFolder,"results/spia_output/spia_kegg_drugPdisease_v97.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~~~~~~~: Drug SPIA - Reactome :~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"lfc.drug.drugPdisease.diseaseGenes50_v97.padj.entrezID.RData"))
+load(file.path(dataFolder,"spia_input/lfc_drugPdisease_v97_entrezID.RData"))
 lfc_test = lfc_drug_entrezID
 
-spia_react_drug = spia_fun(lfc_test)
-spia_react_drug = name_fun(spia_react_drug)
+spia_reactome_drug = spia_fun(lfc_test)
+spia_reactome_drug = name_fun(spia_reactome_drug)
 
-save(spia_react_drug, file = file.path(dataFolder,"spia_output/spia_react_drugPdisease_v97.RData"))
+save(spia_reactome_drug, file = file.path(dataFolder,"results/spia_output/spia_reactome_drugPdisease_v97.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~~~~~~~: Drug SPIA - Biocarta :~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"lfc.drug.drugPdisease.diseaseGenes50_v97.padj.entrezID.RData"))
+load(file.path(dataFolder,"spia_input/lfc_drugPdisease_v97_entrezID.RData"))
 lfc_test = lfc_drug_entrezID
 
 spia_biocarta_drug = spia_fun(lfc_test)
 spia_biocarta_drug = name_fun(spia_biocarta_drug)
 
-save(spia_biocarta_drug, file = file.path(dataFolder,"spia_output/spia_biocarta_drugPdisease_v97.RData"))
+save(spia_biocarta_drug, file = file.path(dataFolder,"results/spia_output/spia_biocarta_drugPdisease_v97.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

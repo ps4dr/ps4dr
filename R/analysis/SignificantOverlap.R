@@ -110,7 +110,7 @@ disease_genes = disease_genes[order(p.value),]
 disease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
 # add dummy variable
 disease_genes[, same.disease := ifelse(efo.id.DEGs == efo.id.GWASs, TRUE, FALSE)]
-save(disease_genes, file = file.path(dataFolder,"disease_genes50_v97.RData"))
+save(disease_genes, file = file.path(dataFolder,"results/disease_genes50_v97.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##___________Drugs to DISEASE Genes___________#####
@@ -150,7 +150,7 @@ L1000 = merge(dmap[, c(1, 2)], L1000, by = "chembl.id")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 ##### create Disease-Genes list #####
-load(file.path(dataFolder,"disease_genes50_v97.RData"))
+load(file.path(dataFolder,"results/disease_genes50_v97.RData"))
 
 # considering all those gene sets where DEGs and GWAS came from same diseases.
 DisGen = disease_genes[same.disease == TRUE & overlap > 0]
@@ -205,15 +205,15 @@ drugPdisease_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandlin
 close(pb)
 cat(sprintf("\n"))
 
-save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50_v97.RData"))
+save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes50_v97.RData"))
 
-#load(file.path(dataFolder,"drugPdisease_genes50.RData"))
+#load(file.path(dataFolder,"results/drugPdisease_genes50.RData"))
 # correct p-values
 drugPdisease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
 drugPdisease_genes = drugPdisease_genes[p.adjusted < 0.05]
-save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50_v97.padj.RData"))
+save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes50_v97.padj.RData"))
 drugPdisease_genes = drugPdisease_genes[p.adjusted < 1e-05]
-save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50_v97.padj1e-5.RData"))
+save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes50_v97.padj1e-5.RData"))
 #md2 = unique(min.drugs[,c(1,3,12)]) #filtering columns for merging indication area to our super drugs
 #drugPdisease_genes = merge(drugPdisease_genes,md2,by=c("chembl.id","efo.id"))
 
@@ -244,7 +244,7 @@ save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50_v97.p
 # tmp4 = subset(tmp, n >= 500)
 # # disgen_plot4 = ggplot(tmp4, aes(x=n)) + geom_freqpoly(color="darkred", bins = 30)+ ggtitle("Genes (>= 500) per Disease frequency plot")
 # # 
-# # jpeg(file=file.path(dataFolder,"frequency_plots_GWASs_diseaseGenes.jpeg", width=1800, height=1980, res=200))
+# # jpeg(file=file.path(dataFolder,"results/figures/frequency_plots_GWASs_diseaseGenes.jpeg", width=1800, height=1980, res=200))
 # # plot_grid(disgen_plot1,disgen_plot2, disgen_plot3,disgen_plot4,align = "h", ncol = 2,nrow =2, rel_heights = c(1/4, 1/4))
 # # dev.off()
 # 
@@ -296,21 +296,21 @@ save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50_v97.p
 # drugGWAS_genes = drugGWAS_genes[overlap > 0]
 # drugGWAS_genes = drugGWAS_genes[order(p.value),]
 # drugGWAS_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
-# save(drugGWAS_genes, file = file.path(dataFolder,"drugGWAS_genes50_v97.RData"))
+# save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes50_v97.RData"))
 # 
 # drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-05]
-# save(drugGWAS_genes, file = file.path(dataFolder,"drugGWAS_genes50_v97.padj1e-5.RData"))
+# save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes50_v97.padj1e-5.RData"))
 # 
 # drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-10]
-# save(drugGWAS_genes, file = file.path(dataFolder,"drugGWAS_genes50_v97.padj1e-10.RData"))
+# save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes50_v97.padj1e-10.RData"))
 # 
 # 
-# load(file.path(dataFolder,"drugGWAS_genes50.padj1e-5.RData"))
-# load(file.path(dataFolder,"drugGWAS_genes50.padj1e-10.RData"))
+# load(file.path(dataFolder,"results/drugGWAS_genes50.padj1e-5.RData"))
+# load(file.path(dataFolder,"results/drugGWAS_genes50.padj1e-10.RData"))
 # length(unique(drugGWAS_genes$chembl.id))
 # length(unique(drugGWAS_genes$efo.id))
 # 
-# load(file.path(dataFolder,"drugPdisease_genes.48D.padj1e-5.RData"))
+# load(file.path(dataFolder,"results/drugPdisease_genes.48D.padj1e-5.RData"))
 # length(unique(drugPdisease_genes$efo.id))
 # cat(sprintf("\n"))
 
@@ -324,7 +324,7 @@ save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50_v97.p
 # man_wtny <- wilcox.test(x = disease_genes[same.disease == FALSE, -log10(p.adjusted)], y = disease_genes[same.disease == TRUE, -log10(p.adjusted)])
 # print(man_wtny)
 # print(man_wtny$p.value)
-# jpeg(file = file.path(dataFolder,"disease_genes.pvalues.boxplots.jpeg"), width = 6 * 200, height = 6 * 150, res = 150)
+# jpeg(file = file.path(dataFolder,"results/figures/disease_genes.pvalues.boxplots.jpeg"), width = 6 * 200, height = 6 * 150, res = 150)
 # print(ggplot(disease_genes, aes(x = same.disease, y = -log10(p.adjusted),fill=same.disease)) +
 #         geom_boxplot() +
 #         coord_cartesian(ylim = quantile(disease_genes[, -log10(p.adjusted)], c(0.03, 0.97))) +
@@ -345,7 +345,7 @@ save(drugPdisease_genes, file = file.path(dataFolder,"drugPdisease_genes50_v97.p
 # print(roc.curve)
 # sp_ci <- ci.sp(roc.curve, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
 # se_ci <- ci.se(roc.curve, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
-# jpeg(file = file.path(dataFolder,"disease_genes.roc.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
+# jpeg(file = file.path(dataFolder,"results/figures/disease_genes.roc.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
 # par(pty = "s")
 # plot(roc.curve, main = paste("AUC =", round(roc.curve$auc, 2)), xlab = "False positive rate", ylab = "True positive rate", identity.lty = 2, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.5)
 # plot(se_ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)

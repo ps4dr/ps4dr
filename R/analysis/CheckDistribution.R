@@ -13,6 +13,8 @@ suppressWarnings(suppressMessages(library(gridExtra)))
 suppressWarnings(suppressMessages(library(Hmisc)))
 suppressWarnings(suppressMessages(library(purrr)))
 suppressWarnings(suppressMessages(library(tools)))
+suppressWarnings(suppressMessages(library(plotly)))
+suppressWarnings(suppressMessages(library(cowplot)))
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository
@@ -32,31 +34,32 @@ dataFolder = file.path(resultsFolder)
 #####################################################################
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~~~~~~~~~~~: load KEGG Drug SPIA results :~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~: load Drug SPIA results :~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"spia_output/spia_kegg_drugPdisease_42_v97.RData"))
-spia_kegg_drug = spia_kegg_drug_42
-rm(spia_kegg_drug_42)
+#' load Kegg Drug SPIA file
+load(file.path(dataFolder,"results/spia_output/spia_kegg_drugPdisease_42_v97.RData"))
+spia_drug = spia_kegg_drug
+rm(spia_kegg_drug)
 
-spia_kegg_drug = Filter(function(x) ! is.null(x), spia_kegg_drug) #delete empty df from list
+spia_drug = Filter(function(x) ! is.null(x), spia_drug) #delete empty df from list
 
 #~~~~Remove any drug pathway with p.value (pNDE) >= 0.05 ~~~#
 
-for (i in seq_along(spia_kegg_drug)) {
-  spia_kegg_drug[[i]] = lapply(spia_kegg_drug[[i]], function(x) x[x$pNDE <= 0.05,])
-  spia_kegg_drug[[i]] = spia_kegg_drug[[i]][lapply(spia_kegg_drug[[i]], length) > 1]
-  spia_kegg_drug[[i]] = Filter(function(x) ! dim(x)[1] == 0, spia_kegg_drug[[i]])
+for (i in seq_along(spia_drug)) {
+  spia_drug[[i]] = lapply(spia_drug[[i]], function(x) x[x$pNDE <= 0.05,])
+  spia_drug[[i]] = spia_drug[[i]][lapply(spia_drug[[i]], length) > 1]
+  spia_drug[[i]] = Filter(function(x) ! dim(x)[1] == 0, spia_drug[[i]])
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-drug_path_temp = vector('list', length(spia_kegg_drug)) # create list of lists
-names(drug_path_temp) = names(spia_kegg_drug)
-for (i in seq_along(spia_kegg_drug)) {
-    for (j in seq_along(spia_kegg_drug[[i]])) {
-        drug_path_temp[[i]][[j]] = spia_kegg_drug[[i]][[j]][, c(1, 11)] # use 2 for ID
-        names(drug_path_temp[[i]])[[j]] = names(spia_kegg_drug[[i]])[[j]]
+drug_path_temp = vector('list', length(spia_drug)) # create list of lists
+names(drug_path_temp) = names(spia_drug)
+for (i in seq_along(spia_drug)) {
+    for (j in seq_along(spia_drug[[i]])) {
+        drug_path_temp[[i]][[j]] = spia_drug[[i]][[j]][, c(1, 11)] # use 2 for ID
+        names(drug_path_temp[[i]])[[j]] = names(spia_drug[[i]])[[j]]
     }
 }
 
@@ -64,11 +67,14 @@ for (i in seq_along(spia_kegg_drug)) {
 #~~~~~~~~~~~: load KEGG Disease SPIA results :~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"spia_output/spia_kegg_diseaseGenes_v97.RData"))
+#' load Kegg Disease SPIA file
+load(file.path(dataFolder,"results/spia_output/spia_kegg_diseaseGenes_v97.RData"))
+spia_disease = spia_kegg
+rm(spia_kegg)
 
 #' Remove any disease pathway with p.value (pNDE) >= 0.05
-spia_kegg = lapply(spia_kegg, function(x) x[x$pNDE <= 0.05,])
-spia_kegg = discard(spia_kegg, ~ all(is.na(.x))) # remove empty diseases
+spia_disease = lapply(spia_disease, function(x) x[x$pNDE <= 0.05,])
+spia_disease = discard(spia_disease, ~ all(is.na(.x))) # remove empty diseases
 
 
 #' Create disiase paths with only pathway name and their activity status
@@ -79,9 +85,9 @@ dis_path = vector('list', length(drug_path_temp)) # create list of lists
 names(dis_path) = names(drug_path_temp)
 
 for (i in seq_along(drug_path_temp)) {
-    for (j in seq_along(spia_kegg)) {
-        if (names(drug_path_temp)[[i]] == names(spia_kegg)[j]) {
-            dis_path[[i]] = spia_kegg[[j]][, c(1, 11)]
+    for (j in seq_along(spia_disease)) {
+        if (names(drug_path_temp)[[i]] == names(spia_disease)[j]) {
+            dis_path[[i]] = spia_disease[[j]][, c(1, 11)]
         }
     }
 }
@@ -96,14 +102,14 @@ drug_path = vector('list', length(dis_path)) # create list of lists
 names(drug_path) = names(dis_path)
 
 for (i in 1 : length(drug_path_temp)) {
-  if (names(drug_path_temp)[[i]] %in% names(spia_kegg)) {
+  if (names(drug_path_temp)[[i]] %in% names(spia_disease)) {
     drug_path[[i]] = drug_path_temp[[i]]
     names(drug_path)[[i]] = names(drug_path_temp)[[i]]
   }
 }
 
 drug_path = discard(drug_path, ~ all(is.na(.x))) # remove empty diseases
-rm(drug_path_temp,spia_kegg,spia_kegg_drug)
+rm(drug_path_temp,spia_disease,spia_drug)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~: Calculate Correlation-Score :~~~~~~~~~~~~#
@@ -182,10 +188,8 @@ drug_shortlist_df$Drug = toTitleCase(drug_shortlist_df$Drug)
 drug_shortlist_df$Disease = toTitleCase(drug_shortlist_df$Disease)
 drug_shortlist_df = drug_shortlist_df[,c(2,1,3,4,5,6,7)]
 
-fwrite(drug_shortlist_df, file = file.path(dataFolder,"drug_shortlist_v97.csv"))
-
-save(drug_path,dis_path,drug_dis_path,drug_correlation,drug_shortlist,file=file.path(dataFolder,"drugCorraltion.drugPdisease_v97.RData"))
-# load(file.path(dataFolder,"drugCorraltion.drugPdisease.RData"))
+save(drug_path,dis_path,drug_dis_path,drug_correlation,drug_shortlist,file=file.path(dataFolder,"results/drugCorraltion.drugPdisease_v97.RData"))
+# fwrite(drug_shortlist_df, file = file.path(dataFolder,"results/drug_shortlist_v97.csv"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~: Scatter Plot :~~~~~~~~~~~~~~~~~~~~~#
@@ -204,7 +208,7 @@ drugCor$Drug = capitalize(drugCor$Drug)
 drugCor$Disease = toTitleCase(drugCor$Disease)
 
 
-jpeg(file = file.path(dataFolder,"ScatterPlots_DrugPDisease_CorrelationScore.jpeg"), width = 3000, height = 1980, res = 200)
+jpeg(file = file.path(dataFolder, "results/figures/ScatterPlots_DrugPDisease_CorrelationScore.jpeg"), width = 3000, height = 1980, res = 200)
 ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = Disease)) +
     geom_point(size = 2, shape = 1) +
     labs(title = "Combined Scatter Plots of Drug's Correlation Scores and Affected Pathways (%) in each Disease") +
@@ -226,7 +230,7 @@ splot <- ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = D
   ylab("Correlation Scores") +
   xlab("Affected Pathways (%)")
 splot_int = ggplotly(splot,tooltip =c("Disease","Drug","Correlation.Score"))
-htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder,"ScatterPlots_DrugPDisease_CorrelationScore.html"))
+htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder, "results/figures/ScatterPlots_DrugPDisease_CorrelationScore.html"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -251,7 +255,7 @@ htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder,"ScatterPlots
 # density.score = do.call(rbind, density.score)
 # names(density.score) = c("Drug", "Diseases", "Correlation_Score")
 # 
-# # jpeg(file=file.path(dataFolder,"densityPlots_allDiseases_DrugPdisease.jpeg"), width=2800, height=1980, res=200)
+# # jpeg(file=file.path(dataFolder, "results/figures/densityPlots_allDiseases_DrugPdisease.jpeg"), width=2800, height=1980, res=200)
 # ggplot(density.score, aes(x = Correlation_Score, fill = Diseases)) +
 #     geom_density(alpha = 0.25) +
 #     labs(title = "Distribution of Correlation Coefficient Scores of all Drugs for each Diseases") +
@@ -265,7 +269,7 @@ htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder,"ScatterPlots
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~: Density Plot With Standization :~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-load(file.path(dataFolder,"drugCorraltion.drugPdisease_v97.RData"))
+load(file.path(dataFolder,"results/drugCorraltion.drugPdisease_v97.RData"))
 
 #' Standization with scale function (Z-score normalization)
 drug_correlation = lapply(drug_correlation, function(x) na.omit(x))
@@ -303,7 +307,7 @@ drug_cor_scaled$Drug <- tolower(drug_cor_scaled$Drug)
 drug_cor_scaled$Drug = capitalize(drug_cor_scaled$Drug)
 drug_cor_scaled$Disease = tools::toTitleCase(drug_cor_scaled$Disease)
 
-jpeg(file=file.path(dataFolder,"densityPlots_DrugPdisease_CorrelationScore_scaled.jpeg"), width=3000, height=1980, res=200)
+jpeg(file=file.path(dataFolder, "results/figures/densityPlots_DrugPdisease_CorrelationScore_scaled.jpeg"), width=3000, height=1980, res=200)
 ggplot(drug_cor_scaled, aes(x = Correlation.Score, fill = Disease)) +
     geom_density(alpha = 0.25) +
     labs(title = "Distribution of Z-score Normalized Correlation Scores of all Drugs for each Diseases") +
@@ -322,7 +326,7 @@ DisUseCase = c("Alzheimer's Disease","Breast Carcinoma","Melanoma","Pancreatic C
 case = as.data.frame(DisUseCase)
 case = merge(drug_cor_scaled,case, by.x="Disease", by.y="DisUseCase")
 
-jpeg(file=file.path(dataFolder,"densityPlots_DrugPdisease_CorrelationScore_scaled_useCase.jpeg"), width=3000, height=1980, res=200)
+jpeg(file=file.path(dataFolder, "results/figures/densityPlots_DrugPdisease_CorrelationScore_scaled_useCase.jpeg"), width=3000, height=1980, res=200)
 p1 <- ggplot(case, aes(x = Correlation.Score, fill = Disease)) +
   labs(title = "Distribution of Z-score normalized correlation scores of drugs\nfor 4 use case scenario diseases") +
   geom_density(alpha = 0.25) +
@@ -341,7 +345,7 @@ DisnoShortlst = c("Asthma","Mucocutaneous Lymph Node Syndrome","Psoriasis","Ulce
 xcase = as.data.frame(DisnoShortlst)
 xcase = merge(drug_cor_scaled,xcase, by.x="Disease", by.y="DisnoShortlst")
 
-jpeg(file=file.path(dataFolder,"densityPlots_DrugPdisease_CorrelationScore_scaled_noshortlist.jpeg"), width=3000, height=1980, res=200)
+jpeg(file=file.path(dataFolder, "results/figures/densityPlots_DrugPdisease_CorrelationScore_scaled_noshortlist.jpeg"), width=3000, height=1980, res=200)
 p2 <- ggplot(xcase, aes(x = Correlation.Score, fill = Disease)) +
   labs(title = "Distribution of Z-score normalized correlation scores of drugs\nfor 4 diseases which have no shortlisted drugs") +
   geom_density(alpha = 0.25) +
@@ -360,7 +364,7 @@ twoDiseases = c("Melanoma","Psoriasis")
 casexcase = as.data.frame(twoDiseases)
 casexcase = merge(drug_cor_scaled,casexcase, by.x="Disease", by.y="twoDiseases")
 
-jpeg(file=file.path(dataFolder,"densityPlots_DrugPdisease_CorrelationScore_scaled_Melanoma_Psoriasis.jpeg"), width=3000, height=1980, res=200)
+jpeg(file=file.path(dataFolder, "results/figures/densityPlots_DrugPdisease_CorrelationScore_scaled_Melanoma_Psoriasis.jpeg"), width=3000, height=1980, res=200)
 ggplot(casexcase, aes(x = Correlation.Score, fill = Disease)) +
   geom_density(alpha = 0.25) +
   labs(title = "Distribution of Z-score Normalized Correlation Scores of all Drugs for Melanoma and Psoriasis") +

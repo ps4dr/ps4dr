@@ -69,7 +69,7 @@ rm(lfc_neg, lfc_pos, DEGs)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"geneID.RData"))
+load(file.path(dataFolder,"geneID_v97.RData"))
 gene_id$ENTREZ = gsub("^$", NA, gene_id$ENTREZ)
 gene_id = gene_id[which(! is.na(gene_id$ENTREZ)),]
 
@@ -79,7 +79,7 @@ lfc_comb = merge(lfc_comb, gene_id, by = "ensembl.id")
 lfc_comb = lfc_comb[! duplicated(lfc_comb[, c('efo.id', 'ENTREZ')]),]
 
 # lfc_efo = split(lfc_comb, lfc_comb$efo.id)
-load(file.path(dataFolder,"disease_genes50.RData"))
+load(file.path(dataFolder,"results/disease_genes50_v97.RData"))
 disease_genes = disease_genes[p.adjusted <= 0.05]
 DisGen = disease_genes[same.disease == TRUE &
     overlap > 0 &
@@ -101,12 +101,12 @@ DisGen = merge(DisGen, lfc_comb, by = c('ensembl.id', 'efo.id')) # merge with ha
 lfc_efo = split(DisGen, DisGen$efo.term)
 lfc_efo = Filter(function(x) dim(x)[1] > 10, lfc_efo) # remove diseases with very few (less than 10) genes to test
 
-save(lfc_efo, file = file.path(dataFolder,"disease_genes50_v97.lfc.RData"))
+save(lfc_efo, file = file.path(dataFolder,"spia_input/disease_genes50_v97.lfc.RData"))
 rm(lfc_comb)
 
 #~~~~~~~~~~Create Named Vector for log fold changes in each disease~~~~~~~~~~#
 
-load(file.path(dataFolder,"disease_genes50_v97.lfc.RData")) ###--get log fold change for all genes for each diseases-##
+# load(file.path(dataFolder,"spia_input/disease_genes50_v97.lfc.RData")) ###--get log fold change for all genes for each diseases-##
 
 lfc_ensembl = list()
 for (i in 1 : length(lfc_efo)) {
@@ -138,7 +138,7 @@ ensembl_all = unique(gene_id$ensembl.id)
 entrez_all = unique(gene_id$ENTREZ)
 entrezID_all = unique(gsub("^", "ENTREZID:", gene_id$ENTREZ)) ## with ENTREZID: in front of each id
 
-save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, entrez_all, entrezID_all, file = file.path(dataFolder,"disease_genes50_v97.lfc.namedVec.RData"))
+save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, entrez_all, entrezID_all, file = file.path(dataFolder,"spia_input/lfc_disease_v97_namedVector.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -149,8 +149,9 @@ save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, ent
 #' Here we assume that the user obtained the KGML (xml) files from
 #' KEGG ftp site (or downloaded them one by one from the KEGG website).
 #' We will not keep KEGG pathway data since the access to the KEGG ftp server requires a license
+#' However, KEGG license is open to use for academic purposes.
 
-makeSPIAdata(kgml.path=file.path(dataFolder,"spia_input/kgml/"),organism="hsa",out.path=file.path(dataFolder,"spia_input/real_kegg/"))
+# makeSPIAdata(kgml.path=file.path(dataFolder,"spia_input/kgml/"),organism="hsa",out.path=file.path(dataFolder,"spia_input/real_kegg/"))
 
 #~~~Prepare Reactome SPIA pathway file with graphite package~~~#
 
@@ -180,7 +181,7 @@ makeSPIAdata(kgml.path=file.path(dataFolder,"spia_input/kgml/"),organism="hsa",o
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~ KEGG SPIA ~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"disease_genes50_v97.lfc.namedVec.RData"))
+load(file.path(dataFolder,"spia_input/lfc_disease_v97_namedVector.RData"))
 rm(lfc_entrezID,lfc_hgnc,lfc_ensembl,ensembl_all,entrezID_all,hgnc_all)
 
 pb <- txtProgressBar(min=0, max=length(lfc_entrez), style=3)
@@ -195,7 +196,7 @@ for (i in 1 : length(lfc_entrez)) {
 close(pb)
 names(spia_kegg) = names(lfc_entrez)
 
-save(spia_kegg, file = file.path(dataFolder, "spia_output/spia_kegg_diseaseGenes_v97.RData"))
+save(spia_kegg, file = file.path(dataFolder, "results/spia_output/spia_kegg_diseaseGenes_v97.RData"))
 
 # spia_kegg = lapply(spia_kegg, function(x) x[x$pNDE <= 0.05,])
 # plotP(spia_kegg[[4]])
@@ -205,7 +206,7 @@ save(spia_kegg, file = file.path(dataFolder, "spia_output/spia_kegg_diseaseGenes
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~ Reactome SPIA ~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"disease_genes50_v97.lfc.namedVec.RData"))
+load(file.path(dataFolder,"spia_input/lfc_disease_v97_namedVector.RData"))
 rm(lfc_entrez,lfc_hgnc,lfc_ensembl,ensembl_all,entrez_all,hgnc_all)
 
 pb <- txtProgressBar(min=0, max=length(lfc_entrezID), style=3)
@@ -216,19 +217,19 @@ for (i in 1 : length(lfc_entrezID)) {
   Sys.sleep(1)
   setTxtProgressBar(pb, i)
   # cat(sprintf("\n~~~~~SPIA for Disease #%d~~~~~\n", (length(lfc_entrez) + 1) -i))
-  spia_reactome[[i]] = quiet(spia(de = lfc_entrezID[[i]], all = entrezID_all, data.dir = file.path(dataFolder,"spia_input/real_react/"), organism = "hsa")
+  spia_reactome[[i]] = quiet(spia(de = lfc_entrezID[[i]], all = entrezID_all, data.dir = file.path(dataFolder,"spia_input/real_react/"), organism = "hsa"))
 }
 
 close(pb)
 names(spia_reactome) = names(lfc_entrezID)
 
-save(spia_reactome, file = file.path(dataFolder, "spia_output/spia_reactome_diseaseGenes_v97.RData"))
+save(spia_reactome, file = file.path(dataFolder, "results/spia_output/spia_reactome_diseaseGenes_v97.RData"))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~ Biocarta SPIA ~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"disease_genes50_v97.lfc.namedVec.RData"))
+load(file.path(dataFolder,"spia_input/lfc_disease_v97_namedVector.RData"))
 rm(lfc_entrez,lfc_hgnc,lfc_ensembl,ensembl_all,entrez_all,hgnc_all)
 
 pb <- txtProgressBar(min=0, max=length(lfc_entrezID), style=3)
@@ -239,13 +240,14 @@ for (i in 1 : length(lfc_entrezID)) {
   Sys.sleep(1)
   setTxtProgressBar(pb, i)
   # cat(sprintf("\n~~~~~SPIA for Disease #%d~~~~~\n", (length(lfc_entrez) + 1) -i))
-  spia_biocarta[[i]] = quiet(spia(de = lfc_entrezID[[i]], all = entrezID_all, data.dir = file.path(dataFolder,"spia_input/real_biocarta/"), organism = "hsa")
+  spia_biocarta[[i]] = quiet(spia(de = lfc_entrezID[[i]], all = entrezID_all, data.dir = file.path(dataFolder,"spia_input/real_biocarta/"), organism = "hsa"))
 }
 
 close(pb)
 names(spia_biocarta) = names(lfc_entrezID)
 
-save(spia_biocarta, file = file.path(dataFolder, "spia_output/spia_biocarta_diseaseGenes_v97.RData"))
+save(spia_biocarta, file = file.path(dataFolder, "results/spia_output/spia_biocarta_diseaseGenes_v97.RData"))
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~Simulated SPIA~~~~~~~~~~~#
@@ -302,7 +304,7 @@ rm(path.info,pseudo_path)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~ Pseudo KEGG SPIA ~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"disease_genes50_v97.lfc.namedVec.RData"))
+load(file.path(dataFolder,"spia_input/lfc_disease_v97_namedVector.RData"))
 rm(lfc_entrezID,lfc_hgnc,lfc_ensembl,ensembl_all,entrezID_all,hgnc_all)
 
 pb <- txtProgressBar(min=0, max=length(lfc_entrez), style=3)
@@ -312,19 +314,19 @@ spia_kegg_pseudo = list()
 for (i in 1 : length(lfc_entrez)) {
   Sys.sleep(1)
   setTxtProgressBar(pb, i)
-  spia_kegg_pseudo[[i]] = quiet(spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/pseudo_kegg/"), organism = "hsa")
+  spia_kegg_pseudo[[i]] = quiet(spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/pseudo_kegg/"), organism = "hsa"))
 }
 close(pb)
 names(spia_kegg_pseudo) = names(lfc_entrez)
 
-save(spia_kegg_pseudo, file = file.path(dataFolder, "spia_output/spia_kegg_diseaseGenes_v97_pseudo.RData"))
+save(spia_kegg_pseudo, file = file.path(dataFolder, "results/spia_output/spia_kegg_diseaseGenes_v97_pseudo.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~ Pseudo Reactome SPIA ~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"disease_genes50_v97.lfc.namedVec.RData"))
+load(file.path(dataFolder,"spia_input/lfc_disease_v97_namedVector.RData"))
 rm(lfc_entrez,lfc_hgnc,lfc_ensembl,ensembl_all,entrez_all,hgnc_all)
 
 pb <- txtProgressBar(min=0, max=length(lfc_entrezID), style=3)
@@ -334,19 +336,19 @@ spia_reactome_pseudo = list()
 for (i in 1 : length(lfc_entrezID)) {
   Sys.sleep(1)
   setTxtProgressBar(pb, i)
-  spia_reactome_pseudo[[i]] = quiet(spia(de = lfc_entrezID[[i]], all = entrezID_all, data.dir = file.path(dataFolder,"spia_input/pseudo_react/"), organism = "hsa")
+  spia_reactome_pseudo[[i]] = quiet(spia(de = lfc_entrezID[[i]], all = entrezID_all, data.dir = file.path(dataFolder,"spia_input/pseudo_react/"), organism = "hsa"))
 }
 close(pb)
 names(spia_reactome_pseudo) = names(lfc_entrezID)
 
-save(spia_reactome_pseudo, file = file.path(dataFolder, "spia_output/spia_reactome_diseaseGenes_v97_pseudo.RData"))
+save(spia_reactome_pseudo, file = file.path(dataFolder, "results/spia_output/spia_reactome_diseaseGenes_v97_pseudo.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~ Pseudo Biocarta SPIA ~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"disease_genes50_v97.lfc.namedVec.RData"))
+load(file.path(dataFolder,"spia_input/lfc_disease_v97_namedVector.RData"))
 rm(lfc_entrez,lfc_hgnc,lfc_ensembl,ensembl_all,entrez_all,hgnc_all)
 
 pb <- txtProgressBar(min=0, max=length(lfc_entrezID), style=3)
@@ -356,12 +358,12 @@ spia_biocarta_pseudo = list()
 for (i in 1 : length(lfc_entrezID)) {
   Sys.sleep(1)
   setTxtProgressBar(pb, i)
-  spia_biocarta_pseudo[[i]] = quiet(spia(de = lfc_entrezID[[i]], all = entrezID_all, data.dir = file.path(dataFolder,"spia_input/pseudo_biocarta/"), organism = "hsa")
+  spia_biocarta_pseudo[[i]] = quiet(spia(de = lfc_entrezID[[i]], all = entrezID_all, data.dir = file.path(dataFolder,"spia_input/pseudo_biocarta/"), organism = "hsa"))
 }
 close(pb)
 names(spia_biocarta_pseudo) = names(lfc_entrezID)
 
-save(spia_biocarta_pseudo, file = file.path(dataFolder, "spia_output/spia_biocarta_diseaseGenes_v97_pseudo.RData"))
+save(spia_biocarta_pseudo, file = file.path(dataFolder, "results/spia_output/spia_biocarta_diseaseGenes_v97_pseudo.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -370,24 +372,24 @@ save(spia_biocarta_pseudo, file = file.path(dataFolder, "spia_output/spia_biocar
 #~~~~~ Real_Vs_Simulated Pathway SPIA Boxplot Comparison ~~~~~#
 
 #'~~~ Data for KEGG SPIA ~~~'#
-load(file.path(dataFolder,"spia_output/spia_kegg_diseaseGenes_v97.RData"))
-load(file.path(dataFolder,"spia_output/spia_kegg_diseaseGenes_v97_pseudo.RData"))
+load(file.path(dataFolder,"results/spia_output/spia_kegg_diseaseGenes_v97.RData"))
+load(file.path(dataFolder,"results/spia_output/spia_kegg_diseaseGenes_v97_pseudo.RData"))
 spia = spia_kegg
 spia_pseudo = spia_kegg_pseudo
 rm(spia_kegg,spia_kegg_pseudo)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #'~~~ Data for Reactome SPIA ~~~'#
-# load(file.path(dataFolder,"spia_output/spia_reactome_diseaseGenes_v97.RData"))
-# load(file.path(dataFolder,"spia_output/spia_reactome_diseaseGenes_v97_pseudo.RData"))
+# load(file.path(dataFolder,"results/spia_output/spia_reactome_diseaseGenes_v97.RData"))
+# load(file.path(dataFolder,"results/spia_output/spia_reactome_diseaseGenes_v97_pseudo.RData"))
 # spia = spia_reactome
 # spia_pseudo = spia_reactome_pseudo
 # rm(spia_reactome,spia_reactome_pseudo)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #'~~~ Data for Biocarta SPIA ~~~'#
-# load(file.path(dataFolder,"spia_output/spia_biocarta_diseaseGenes_v97.RData"))
-# load(file.path(dataFolder,"spia_output/spia_biocarta_diseaseGenes_v97_pseudo.RData"))
+# load(file.path(dataFolder,"results/spia_output/spia_biocarta_diseaseGenes_v97.RData"))
+# load(file.path(dataFolder,"results/spia_output/spia_biocarta_diseaseGenes_v97_pseudo.RData"))
 # spia = spia_biocarta
 # spia_pseudo = spia_biocarta_pseudo
 # rm(spia_biocarta,spia_biocarta_pseudo)
@@ -422,9 +424,9 @@ rm(spia,spia_pseudo,spia1,spia2)
 spia_full$spia = as.factor(spia_full$spia)
 man_wtny <- wilcox.test(x = spia_full[spia == "Simulated", pvalue], y = spia_full[spia == "Real", pvalue])
 print(man_wtny$p.value)
-jpeg(file = file.path(dataFolder, "spia_real_pseudo_pvalues_boxplots_kegg.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
-# jpeg(file = file.path(dataFolder, "spia_real_pseudo_pvalues_boxplots_reactome.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
-# jpeg(file = file.path(dataFolder, "spia_real_pseudo_pvalues_boxplots_biocarta.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
+jpeg(file = file.path(dataFolder, "results/figures/spia_real_pseudo_pvalues_boxplots_kegg.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
+# jpeg(file = file.path(dataFolder, "results/figures/spia_real_pseudo_pvalues_boxplots_reactome.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
+# jpeg(file = file.path(dataFolder, "results/figures/spia_real_pseudo_pvalues_boxplots_biocarta.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
 print(ggplot(spia_full, aes(x = spia, y = pvalue,fill=spia)) +
         geom_boxplot() +
         coord_cartesian(ylim = quantile(spia_full[, pvalue], c(0.03, 0.97))) +
@@ -437,22 +439,5 @@ print(ggplot(spia_full, aes(x = spia, y = pvalue,fill=spia)) +
         ggtitle(paste("p-value =", sprintf("%.2e", man_wtny$p.value))))
 dev.off()
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~~~~~~~~~~~~ROC Curve~~~~~~~~~~~~~~#
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-# pred <- as.numeric(spia[, - log10(pvalue)])
-# resp <- as.numeric(spia[, spia])
-# 
-# roc.curve <- roc(response = as.numeric(resp), predictor = as.numeric(pred), algorithm = 2, ci = TRUE, ci.method = "bootstrap", smooth = TRUE, boot.n = 100, parallel = TRUE, progress = "none")
-# print(roc.curve)
-# sp_ci <- ci.sp(roc.curve, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
-# se_ci <- ci.se(roc.curve, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
-# jpeg(file = file.path(dataFolder,"disease_genes.roc.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
-# par(pty = "s")
-# plot(roc.curve, main = paste("AUC =", round(roc.curve$auc, 2)), xlab = "False positive rate", ylab = "True positive rate", identity.lty = 2, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.5)
-# plot(se_ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
-# plot(sp_ci, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
-# plot(roc.curve, add = TRUE, col = "#0066ff", lwd = 3)
-# dev.off()
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
