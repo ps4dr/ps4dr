@@ -162,7 +162,6 @@ for (i in seq_along(drug_correlation)) {
 
 drug_correlation = Filter(function(x) dim(x)[1] >= 1, drug_correlation) # remove empty disease lists
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #' filter out drugs from each disease with correlationscore greater than -0.1
@@ -178,7 +177,6 @@ for (i in seq_along(drug_shortlist)) {
 for (i in seq_along(drug_shortlist)) {
   drug_shortlist[[i]] = drug_shortlist[[i]][order(drug_shortlist[[i]][['Correlation.Score']],-drug_shortlist[[i]][['affectedPathway']]),]
 }
-
 
 #' filter out diseases which has less than 5 drugs
 drug_shortlist = Filter(function(x) dim(x)[1] >= 1, drug_shortlist)
