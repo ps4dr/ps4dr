@@ -210,7 +210,7 @@ jpeg(file = file.path(dataFolder, "results/figures/ScatterPlots_CorrelationScore
 ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = Disease)) +
     geom_point(size = 2, shape = 1) +
     labs(title = "Combined Scatter Plots of Drug's Correlation Scores and Affected Pathways (%) in each Disease") +
-    theme(legend.position = "bottom", legend.title = element_text(size = 10)) +
+    theme(legend.position = "bottom", legend.title = element_text(size = 10)) + theme(legend.title=element_blank()) +
     theme(plot.title = element_text(hjust = 0.5)) +
     ylab("Correlation Scores") +
     xlab("Affected Pathways (%)")
@@ -224,7 +224,7 @@ splot <- ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = D
   geom_point(size = 2, shape = 1) +
   labs(title = "Combined Scatter Plots of Drug's Correlation Scores and Affected Pathways (%) in each Disease") +
   theme(legend.position = "bottom", legend.title = element_text(size = 10)) +
-  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(plot.title = element_text(hjust = 0.5)) +theme(legend.title=element_blank()) +
   ylab("Correlation Scores") +
   xlab("Affected Pathways (%)")
 splot_int = ggplotly(splot,tooltip =c("Disease","Drug","Correlation.Score"))
@@ -258,7 +258,7 @@ htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder, "results/fig
 #     geom_density(alpha = 0.25) +
 #     labs(title = "Distribution of Correlation Coefficient Scores of all Drugs for each Diseases") +
 #     theme(legend.position = "bottom", legend.title = element_text(size = 10)) +
-#     theme(plot.title = element_text(hjust = 0.5)) +
+#     theme(plot.title = element_text(hjust = 0.5)) +theme(legend.title=element_blank()) +
 #     ylab("Density") +
 #     xlab("Correlation Coefficient Scores")
 # dev.off()
@@ -305,12 +305,13 @@ drug_cor_scaled$Drug <- tolower(drug_cor_scaled$Drug)
 drug_cor_scaled$Drug = capitalize(drug_cor_scaled$Drug)
 drug_cor_scaled$Disease = tools::toTitleCase(drug_cor_scaled$Disease)
 
-jpeg(file=file.path(dataFolder, "results/figures/densityPlots_CorrelationScore_scaled.jpeg"), width=3000, height=1980, res=200)
+jpeg(file=file.path(dataFolder, "results/figures/densityPlots_CorrelationScore_scaled.jpeg"), width=3000, height=1980, res=190)
 ggplot(drug_cor_scaled, aes(x = Correlation.Score, fill = Disease)) +
     geom_density(alpha = 0.25) +
     labs(title = "Distribution of Z-score Normalized Correlation Scores of all Drugs for each Diseases") +
     theme(plot.title = element_text(hjust = 0.5, size = 18)) +
-    theme(legend.position = "bottom", legend.title = element_text(size = 12)) +
+    theme(legend.position = "bottom", legend.title = element_text(size = 10)) +
+    theme(legend.title=element_blank()) +
     ylab("Density") +
     xlab("Normalized Correlation Scores")
 dev.off()
@@ -328,8 +329,8 @@ p1 <- ggplot(case, aes(x = Correlation.Score, fill = Disease)) +
   labs(title = "Distribution of Z-score normalized correlation scores of drugs\nfor 4 use case scenario diseases") +
   geom_density(alpha = 0.25) +
   theme(plot.title = element_text(hjust = 0.5, size = 18)) +
-  theme(legend.position = "bottom", legend.title = element_text(size = 12)) +
-  ylab("Density") +
+  theme(legend.position = "bottom", legend.title = element_text(size = 10)) +
+  theme(legend.title=element_blank()) + ylab("Density") +
   xlab("Normalized Correlation Scores")
 # dev.off()
 
@@ -345,10 +346,10 @@ xcase = merge(drug_cor_scaled,xcase, by.x="Disease", by.y="DisnoShortlst")
 # jpeg(file=file.path(dataFolder, "results/figures/densityPlots_CorrelationScore_scaled_noshortlist.jpeg"), width=3000, height=1980, res=200)
 p2 <- ggplot(xcase, aes(x = Correlation.Score, fill = Disease)) +
   labs(title = "Distribution of Z-score normalized correlation scores of drugs\nfor 4 diseases which have no shortlisted drugs") +
-  geom_density(alpha = 0.25) +
+  geom_density(alpha = 0.25) + 
   theme(plot.title = element_text(hjust = 0.5, size = 18)) +
-  theme(legend.position = "bottom", legend.title = element_text(size = 12)) +
-  ylab("Density") +
+  theme(legend.position = "bottom", legend.title = element_text(size = 10)) +
+  theme(legend.title=element_blank()) + ylab("Density") +
   xlab("Normalized Correlation Scores")
 # dev.off()
 
@@ -363,11 +364,11 @@ casexcase = merge(drug_cor_scaled,casexcase, by.x="Disease", by.y="twoDiseases")
 
 jpeg(file=file.path(dataFolder, "results/figures/densityPlots_CorrelationScore_scaled_Melanoma_Psoriasis.jpeg"), width=3000, height=1980, res=200)
 ggplot(casexcase, aes(x = Correlation.Score, fill = Disease)) +
-  geom_density(alpha = 0.25) +
+  geom_density(alpha = 0.25) + 
   labs(title = "Distribution of Z-score Normalized Correlation Scores of all Drugs for Melanoma and Psoriasis") +
   theme(plot.title = element_text(hjust = 0.5, size = 18)) +
-  theme(legend.position = "bottom", legend.title = element_text(size = 12)) +
-  ylab("Density") +
+  theme(legend.position = "bottom", legend.title = element_text(size = 10)) +
+  theme(legend.title=element_blank()) + ylab("Density") +
   xlab("Normalized Correlation Scores")
 dev.off()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

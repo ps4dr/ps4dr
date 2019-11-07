@@ -320,20 +320,21 @@ save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~p-value comparison between same diseases and different diseases gene sets overlaps~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-# cat(sprintf("p-value comparison between same diseases and different diseases gene sets overlaps\n"))
-# man_wtny <- wilcox.test(x = disease_genes[same.disease == FALSE, -log10(p.adjusted)], y = disease_genes[same.disease == TRUE, -log10(p.adjusted)])
-# print(man_wtny)
-# print(man_wtny$p.value)
-# jpeg(file = file.path(dataFolder,"results/figures/disease_genes.pvalues.boxplots.jpeg"), width = 6 * 200, height = 6 * 150, res = 150)
-# print(ggplot(disease_genes, aes(x = same.disease, y = -log10(p.adjusted),fill=same.disease)) +
-#         geom_boxplot() +
-#         coord_cartesian(ylim = quantile(disease_genes[, -log10(p.adjusted)], c(0.03, 0.97))) +
-#         xlab("Same disease") +
-#         ylab("-log10(adjusted p-value") +
-#         theme_bw(18) +
-#         scale_x_discrete(breaks = c(FALSE, TRUE), labels = c("No", "Yes")) +
-#         ggtitle(paste("p-value =", sprintf("%.2e", man_wtny$p.value))))
-# dev.off()
+
+cat(sprintf("p-value comparison between same diseases and different diseases gene sets overlaps\n"))
+man_wtny <- wilcox.test(x = disease_genes[same.disease == FALSE, -log10(p.adjusted)], y = disease_genes[same.disease == TRUE, -log10(p.adjusted)])
+print(man_wtny)
+print(man_wtny$p.value)
+jpeg(file = file.path(dataFolder,"results/figures/disease_genes.pvalues.boxplots.jpeg"), width = 6 * 200, height = 6 * 150, res = 150)
+print(ggplot(disease_genes, aes(x = same.disease, y = -log10(p.adjusted),fill=same.disease)) +
+        geom_boxplot() +
+        coord_cartesian(ylim = quantile(disease_genes[, -log10(p.adjusted)], c(0.03, 0.97))) +
+        xlab("Same disease") +
+        ylab("-log10(adjusted p-value") +
+        theme_bw(18) +
+        scale_x_discrete(breaks = c(FALSE, TRUE), labels = c("No", "Yes")) +
+        ggtitle(paste("p-value =", sprintf("%.2e", man_wtny$p.value))))
+dev.off()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~ROC Curve~~~~~~~~~~~~~~#

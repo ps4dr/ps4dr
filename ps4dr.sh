@@ -13,27 +13,27 @@ echo $"\n1.1 Mapping MeSH to EFO\n"
 
 # See: https://github.com/ps4dr/ps4dr/blob/master/R/preprocessing/README.rst#download-open-targets-data
 echo $"\n1.2 Retrieving DEGs\n"
-Rscript R/preprocessing/RetrieveDEGs.R data/
+#Rscript R/preprocessing/RetrieveDEGs.R data/
 
 # See: https://github.com/ps4dr/ps4dr/blob/master/R/preprocessing/README.rst#download-and-preprocess-lincs
 echo $"\n1.3 Retreiving drug response data\n"
-Rscript R/preprocessing/RetrieveDrugResponseData.R data/
+#Rscript R/preprocessing/RetrieveDrugResponseData.R data/
 
 ###############
 # 2. Analysis #
 ###############
 
 echo $"\n2.1 Calculating significant overlaps\n"
-# Rscript R/analysis/SignificantOverlap.R data/
+#Rscript R/analysis/SignificantOverlap.R data/
 
 echo $"\n2.2 Calculating Disease SPIAs\n"
-Rscript R/analysis/DiseaseSPIA.R data/
+#Rscript R/analysis/DiseaseSPIA.R data/
 
 echo $"\n2.3 Calculating Drug SPIAs\n"
 #Rscript R/analysis/DrugSPIA.R data/
 
 echo $"\n2.4 Checking Distributions\n"
-#Rscript R/analysis/CheckDistribution.R data/
+Rscript R/analysis/CheckDistribution.R data/
 
 echo $"\n2.5 Checking Drug Combinations\n"
 #Rscript R/analysis/DrugCombination.R data/
