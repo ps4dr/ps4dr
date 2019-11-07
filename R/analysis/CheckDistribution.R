@@ -189,7 +189,7 @@ drug_shortlist_df$Disease = toTitleCase(drug_shortlist_df$Disease)
 drug_shortlist_df = drug_shortlist_df[,c(2,1,3,4,5,6,7)]
 
 save(drug_path,dis_path,drug_dis_path,drug_correlation,drug_shortlist,file=file.path(dataFolder,"results/drugCorraltion_drugPdisease.RData"))
-# fwrite(drug_shortlist_df, file = file.path(dataFolder,"results/drug_shortlist_v97.csv"))
+fwrite(drug_shortlist_df, file = file.path(dataFolder,"results/drug_shortlist.csv"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~: Scatter Plot :~~~~~~~~~~~~~~~~~~~~~#
