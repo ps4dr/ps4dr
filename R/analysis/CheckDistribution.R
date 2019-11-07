@@ -186,7 +186,7 @@ drug_shortlist_df$Drug = toTitleCase(drug_shortlist_df$Drug)
 drug_shortlist_df$Disease = toTitleCase(drug_shortlist_df$Disease)
 drug_shortlist_df = drug_shortlist_df[,c(2,1,3,4,5,6,7)]
 
-save(drug_path,dis_path,drug_dis_path,drug_correlation,drug_shortlist,file=file.path(dataFolder,"results/drugCorraltion_drugPdisease.RData"))
+save(drug_path,dis_path,drug_dis_path,drug_correlation,drug_shortlist,file=file.path(dataFolder,"results/drugCorrelation_result.RData"))
 fwrite(drug_shortlist_df, file = file.path(dataFolder,"results/drug_shortlist.csv"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -206,7 +206,7 @@ drugCor$Drug = capitalize(drugCor$Drug)
 drugCor$Disease = toTitleCase(drugCor$Disease)
 
 
-jpeg(file = file.path(dataFolder, "results/figures/ScatterPlots_DrugPDisease_CorrelationScore.jpeg"), width = 3000, height = 1980, res = 200)
+jpeg(file = file.path(dataFolder, "results/figures/ScatterPlots_CorrelationScore.jpeg"), width = 3000, height = 1980, res = 200)
 ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = Disease)) +
     geom_point(size = 2, shape = 1) +
     labs(title = "Combined Scatter Plots of Drug's Correlation Scores and Affected Pathways (%) in each Disease") +
@@ -228,7 +228,7 @@ splot <- ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = D
   ylab("Correlation Scores") +
   xlab("Affected Pathways (%)")
 splot_int = ggplotly(splot,tooltip =c("Disease","Drug","Correlation.Score"))
-htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder, "results/figures/ScatterPlots_DrugPDisease_CorrelationScore.html"))
+htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder, "results/figures/ScatterPlots_CorrelationScore.html"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -236,7 +236,7 @@ htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder, "results/fig
 #~~~~~~~~~~~~~~~~~~~: Density Plot :~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-# load(file.path(dataFolder,"drugCorraltion_drugPdisease.RData"))
+# load(file.path(dataFolder,"drugCorrelation_result.RData"))
 # 
 # for (i in seq_along(drug_correlation)) {
 #     for (j in seq_along(drug_correlation[[i]])) {
@@ -253,7 +253,7 @@ htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder, "results/fig
 # density.score = do.call(rbind, density.score)
 # names(density.score) = c("Drug", "Diseases", "Correlation_Score")
 # 
-# # jpeg(file=file.path(dataFolder, "results/figures/densityPlots_allDiseases_DrugPdisease.jpeg"), width=2800, height=1980, res=200)
+# # jpeg(file=file.path(dataFolder, "results/figures/densityPlots_allDiseases.jpeg"), width=2800, height=1980, res=200)
 # ggplot(density.score, aes(x = Correlation_Score, fill = Diseases)) +
 #     geom_density(alpha = 0.25) +
 #     labs(title = "Distribution of Correlation Coefficient Scores of all Drugs for each Diseases") +
@@ -267,7 +267,7 @@ htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder, "results/fig
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~: Density Plot With Standization :~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-load(file.path(dataFolder,"results/drugCorraltion_drugPdisease.RData"))
+load(file.path(dataFolder,"results/drugCorrelation_result.RData"))
 
 #' Standization with scale function (Z-score normalization)
 drug_correlation = lapply(drug_correlation, function(x) na.omit(x))
@@ -305,7 +305,7 @@ drug_cor_scaled$Drug <- tolower(drug_cor_scaled$Drug)
 drug_cor_scaled$Drug = capitalize(drug_cor_scaled$Drug)
 drug_cor_scaled$Disease = tools::toTitleCase(drug_cor_scaled$Disease)
 
-jpeg(file=file.path(dataFolder, "results/figures/densityPlots_DrugPdisease_CorrelationScore_scaled.jpeg"), width=3000, height=1980, res=200)
+jpeg(file=file.path(dataFolder, "results/figures/densityPlots_CorrelationScore_scaled.jpeg"), width=3000, height=1980, res=200)
 ggplot(drug_cor_scaled, aes(x = Correlation.Score, fill = Disease)) +
     geom_density(alpha = 0.25) +
     labs(title = "Distribution of Z-score Normalized Correlation Scores of all Drugs for each Diseases") +
@@ -323,7 +323,7 @@ DisUseCase = c("Alzheimer's Disease","Breast Carcinoma","Melanoma","Pancreatic C
 case = as.data.frame(DisUseCase)
 case = merge(drug_cor_scaled,case, by.x="Disease", by.y="DisUseCase")
 
-# jpeg(file=file.path(dataFolder, "results/figures/densityPlots_DrugPdisease_CorrelationScore_scaled_useCase.jpeg"), width=3000, height=1980, res=200)
+# jpeg(file=file.path(dataFolder, "results/figures/densityPlots_CorrelationScore_scaled_useCase.jpeg"), width=3000, height=1980, res=200)
 p1 <- ggplot(case, aes(x = Correlation.Score, fill = Disease)) +
   labs(title = "Distribution of Z-score normalized correlation scores of drugs\nfor 4 use case scenario diseases") +
   geom_density(alpha = 0.25) +
@@ -342,7 +342,7 @@ DisnoShortlst = c("Asthma","Mucocutaneous Lymph Node Syndrome","Psoriasis","Ulce
 xcase = as.data.frame(DisnoShortlst)
 xcase = merge(drug_cor_scaled,xcase, by.x="Disease", by.y="DisnoShortlst")
 
-# jpeg(file=file.path(dataFolder, "results/figures/densityPlots_DrugPdisease_CorrelationScore_scaled_noshortlist.jpeg"), width=3000, height=1980, res=200)
+# jpeg(file=file.path(dataFolder, "results/figures/densityPlots_CorrelationScore_scaled_noshortlist.jpeg"), width=3000, height=1980, res=200)
 p2 <- ggplot(xcase, aes(x = Correlation.Score, fill = Disease)) +
   labs(title = "Distribution of Z-score normalized correlation scores of drugs\nfor 4 diseases which have no shortlisted drugs") +
   geom_density(alpha = 0.25) +
@@ -352,7 +352,7 @@ p2 <- ggplot(xcase, aes(x = Correlation.Score, fill = Disease)) +
   xlab("Normalized Correlation Scores")
 # dev.off()
 
-jpeg(file=file.path(dataFolder, "results/figures/densityPlots_DrugPdisease_CorrelationScore_scaled_usecaseVsnoshortlist.jpeg"), width=3200, height=1280, res=180)
+jpeg(file=file.path(dataFolder, "results/figures/densityPlots_CorrelationScore_scaled_usecaseVsnoshortlist.jpeg"), width=3200, height=1280, res=180)
 plot_grid(p1,p2)
 dev.off()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -361,7 +361,7 @@ twoDiseases = c("Melanoma","Psoriasis")
 casexcase = as.data.frame(twoDiseases)
 casexcase = merge(drug_cor_scaled,casexcase, by.x="Disease", by.y="twoDiseases")
 
-jpeg(file=file.path(dataFolder, "results/figures/densityPlots_DrugPdisease_CorrelationScore_scaled_Melanoma_Psoriasis.jpeg"), width=3000, height=1980, res=200)
+jpeg(file=file.path(dataFolder, "results/figures/densityPlots_CorrelationScore_scaled_Melanoma_Psoriasis.jpeg"), width=3000, height=1980, res=200)
 ggplot(casexcase, aes(x = Correlation.Score, fill = Disease)) +
   geom_density(alpha = 0.25) +
   labs(title = "Distribution of Z-score Normalized Correlation Scores of all Drugs for Melanoma and Psoriasis") +

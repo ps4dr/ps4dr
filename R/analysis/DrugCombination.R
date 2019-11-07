@@ -27,7 +27,7 @@ dataFolder = file.path(resultsFolder)
 #####################################################################
 
 #' load results from pervious script (4-CheckDistribution.R)
-load(file.path(dataFolder,"results/drugCorraltion_drugPdisease.RData"))
+load(file.path(dataFolder,"results/drugCorrelation_result.RData"))
 
 #' filter out drugs from each disease with correlationscore greater than 0
 drug_shortlist = drug_correlation
@@ -212,13 +212,13 @@ for (i in seq_along(drug_correlation)) {
     drug_correlation[[i]] = drug_correlation[[i]][, c(7, 6, 1, 2, 3, 4, 5)]
 }
 
-save(drug_dis_path, drug_correlation, file = file.path(dataFolder,"results/drugCombination_correlationScore_drugPdisease.RData"))
+save(drug_dis_path, drug_correlation, file = file.path(dataFolder,"results/drugCombination_result_drugPdisease.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##~~~~~~~~~~~~~~~~~~~~~Scatter Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"results/drugCombination_correlationScore_drugPdisease.RData"))
+load(file.path(dataFolder,"results/drugCombination_result_drugPdisease.RData"))
 
 drugCor = do.call(rbind, drug_correlation)
 drugCor$Drug = as.factor(drugCor$Drug)
@@ -226,7 +226,7 @@ drugCor = data.table(drugCor %>% drop_na())
 #' remove few extreme correlation scores
 # drugCor = drugCor[Correlation.Score > -1 & Correlation.Score < 1]
 
-jpeg(file = file.path(dataFolder, "results/figures/ScatterPlots_combination_Diseases_DrugPdisease_v97.jpeg"), width = 2800, height = 1980, res = 200)
+jpeg(file = file.path(dataFolder, "results/figures/ScatterPlots_combination_Diseases.jpeg"), width = 2800, height = 1980, res = 200)
 ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = Disease)) +
     geom_point(size = 2, shape = 1) +
     labs(title = "Scatter Plots of Correlation Scores and affected pathways(%)") +
@@ -237,13 +237,13 @@ ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = Disease)) 
 dev.off()
 # save(drugCor, file = file.path(dataFolder,"drugCombcorScoreDrugGWAS.RData"))
 length(unique(drugCor$Disease))
-save(drugCor, file = file.path(dataFolder,"results/drugCombcorScoreDrugPdisease_v97.RData"))
+save(drugCor, file = file.path(dataFolder,"results/drugCombination_CorrelationScore.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 drugCor_Shortlist = drugCor[Correlation.Score <= -.5 & affectedPathway >= 80 ]
 drugCor_breastCancer_1 = drugCor[Disease == "breast carcinoma" & Correlation.Score <= -.4 & affectedPathway >= 50 ] # 464 Drug Combinations
 drugCor_breastCancer_2 = drugCor[Disease == "breast carcinoma" & Correlation.Score <= -.5 & affectedPathway >= 80 ] # 26 Drug Combinations
-fwrite(drugCor_breastCancer_2, file = file.path(dataFolder,"results/drugCombination_shortlist_breastCancer_v97.csv"))
+fwrite(drugCor_breastCancer_2, file = file.path(dataFolder,"results/drugCombination_shortlist_breastCancer.csv"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
