@@ -1,0 +1,123 @@
+Disease,Drug,Correlation.Score,Dissimilarity.Score,DrugPathway,DiseasePathway,affectedPathway
+Alzheimer's Disease,Fluspirilene,-0.83,94.12,17,33,51.52
+Alzheimer's Disease,Pevonedistat,-0.66,85,20,33,60.61
+Alzheimer's Disease,Nilotinib,-0.64,85,20,33,60.61
+Alzheimer's Disease,Sirolimus,-0.58,81.82,22,33,66.67
+Alzheimer's Disease,Terfenadine,-0.57,84.21,19,33,57.58
+Alzheimer's Disease,Doxylaminesuccinate,-0.57,83.33,18,33,54.55
+Alzheimer's Disease,Halcinonide,-0.57,82.35,17,33,51.52
+Alzheimer's Disease,Promazinehydrochloride,-0.53,77.27,22,33,66.67
+Alzheimer's Disease,Amlodipine,-0.49,80,20,33,60.61
+Alzheimer's Disease,Mosapride,-0.45,75,20,33,60.61
+Alzheimer's Disease,Pimozide,-0.45,73.68,19,33,57.58
+Alzheimer's Disease,Ritanserin,-0.45,73.68,19,33,57.58
+Alzheimer's Disease,Betamethasone,-0.44,77.27,22,33,66.67
+Alzheimer's Disease,Cinacalcethydrochloride,-0.43,75,24,33,72.73
+Alzheimer's Disease,Methapyrilenehydrochloride,-0.43,75,24,33,72.73
+Alzheimer's Disease,Trametinib,-0.4,80,20,33,60.61
+Breast Carcinoma,Omacetaxinemepesuccinate,-0.48,73.97,73,86,84.88
+Breast Carcinoma,Rigosertib,-0.44,73.85,65,86,75.58
+Breast Carcinoma,At-7519,-0.4,72.97,74,86,86.05
+Celiac Disease,Acitretin,-0.46,69.23,13,22,59.09
+Celiac Disease,Albendazole,-0.46,69.23,13,22,59.09
+Celiac Disease,Bms-777607,-0.46,69.23,13,22,59.09
+Celiac Disease,Celecoxib,-0.46,69.23,13,22,59.09
+Celiac Disease,Dequalinium,-0.46,69.23,13,22,59.09
+Celiac Disease,Donepezilhydrochloride,-0.46,69.23,13,22,59.09
+Celiac Disease,Lexibulin,-0.46,69.23,13,22,59.09
+Celiac Disease,Linifanib,-0.46,69.23,13,22,59.09
+Celiac Disease,Lovastatin,-0.46,69.23,13,22,59.09
+Celiac Disease,Maprotiline,-0.46,69.23,13,22,59.09
+Celiac Disease,Mebendazole,-0.46,69.23,13,22,59.09
+Celiac Disease,Panobinostat,-0.46,69.23,13,22,59.09
+Celiac Disease,Pazopanibhydrochloride,-0.46,69.23,13,22,59.09
+Celiac Disease,Podofilox,-0.46,69.23,13,22,59.09
+Celiac Disease,Tenofovir,-0.46,69.23,13,22,59.09
+Celiac Disease,Gsk-461364,-0.43,68.75,16,22,72.73
+Celiac Disease,Canertinib,-0.41,64.29,14,22,63.64
+Celiac Disease,Fluticasonepropionate,-0.41,64.29,14,22,63.64
+Chronic Obstructive Pulmonary Disease,Doxorubicinhydrochloride,-0.5,70,10,14,71.43
+Crohn's Disease,Pimasertib,-0.45,90.48,21,40,52.5
+Crohn's Disease,Topotecanhydrochloride,-0.42,82.61,23,40,57.5
+Diabetes Mellitus,Palbociclib,-0.58,75,4,8,50
+Diabetes Mellitus,Ruxolitinib,-0.58,75,4,8,50
+Diabetes Mellitus,Atomoxetinehydrochloride,-0.41,60,5,8,62.5
+Diabetes Mellitus,Nonoxynol9,-0.41,60,5,8,62.5
+Diabetes Mellitus,Promazinehydrochloride,-0.41,60,5,8,62.5
+Glioblastoma Multiforme,Aminosalicylicacid,-0.84,95.24,21,29,72.41
+Glioblastoma Multiforme,Etazolate,-0.84,95.24,21,29,72.41
+Glioblastoma Multiforme,Hydroxychloroquine,-0.46,85,20,29,68.97
+Glioblastoma Multiforme,Ropinirole,-0.46,85,20,29,68.97
+Lung Carcinoma,Fedratinib,-0.53,70,10,15,66.67
+Lung Carcinoma,Bi-2536,-0.41,60,10,15,66.67
+Lung Carcinoma,Dasatinib,-0.41,60,10,15,66.67
+Melanoma,Crizotinib,-0.64,80,20,27,74.07
+Melanoma,Olmesartan,-0.58,73.33,15,27,55.56
+Melanoma,Sepantronium,-0.52,70,20,27,74.07
+Melanoma,Bortezomib,-0.52,70.59,17,27,62.96
+Melanoma,Fluspirilene,-0.5,66.67,15,27,55.56
+Melanoma,Azd-2014,-0.44,61.11,18,27,66.67
+Melanoma,Olaparib,-0.44,61.11,18,27,66.67
+Melanoma,Tivozanib,-0.44,61.11,18,27,66.67
+Melanoma,Belinostat,-0.43,60,15,27,55.56
+Multiple Sclerosis,Methylprednisolone,-0.57,78.26,23,28,82.14
+Multiple Sclerosis,Diflorasonediacetate,-0.56,76.19,21,28,75
+Multiple Sclerosis,Bendroflumethiazide,-0.5,72.22,18,28,64.29
+Multiple Sclerosis,Pitavastatincalcium,-0.49,76.47,17,28,60.71
+Multiple Sclerosis,Lestaurtinib,-0.49,75,16,28,57.14
+Multiple Sclerosis,Desoximetasone,-0.48,73.33,15,28,53.57
+Multiple Sclerosis,Alvespimycin,-0.47,73.33,15,28,53.57
+Multiple Sclerosis,Fluconazole,-0.44,80,15,28,53.57
+Multiple Sclerosis,Clocortolonepivalate,-0.43,73.33,15,28,53.57
+Osteoarthritis,Canertinib,-1,100,3,5,60
+Osteoarthritis,Cytarabine,-1,100,3,5,60
+Osteoarthritis,Fedratinib,-1,100,3,5,60
+Osteoarthritis,Neratinib,-1,100,3,5,60
+Osteoarthritis,Pimasertib,-1,100,3,5,60
+Pancreatic Carcinoma,Fenofibrate,-0.58,75,4,7,57.14
+Pancreatic Carcinoma,Flufenamicacid,-0.58,75,4,7,57.14
+Pancreatic Carcinoma,Fluoxetine,-0.58,75,4,7,57.14
+Pancreatic Carcinoma,Menadione,-0.58,75,4,7,57.14
+Pancreatic Carcinoma,Methyldopa,-0.58,75,4,7,57.14
+Pancreatic Carcinoma,Nomegestrolacetate,-0.58,75,4,7,57.14
+Pancreatic Carcinoma,Praziquantel,-0.58,75,4,7,57.14
+Pancreatic Carcinoma,Thiabendazole,-0.58,75,4,7,57.14
+Pancreatic Carcinoma,Tosedostat,-0.58,75,4,7,57.14
+Pancreatic Carcinoma,Venlafaxine,-0.58,75,4,7,57.14
+Pancreatic Carcinoma,Azd-6482,-0.41,60,5,7,71.43
+Pancreatic Carcinoma,Flumazenil,-0.41,60,5,7,71.43
+Pancreatic Carcinoma,Ranolazine,-0.41,60,5,7,71.43
+Parkinson's Disease,Amlodipine,-0.47,71.43,7,13,53.85
+Parkinson's Disease,Decitabine,-0.47,71.43,7,13,53.85
+Parkinson's Disease,Paroxetinehydrochloride,-0.47,71.43,7,13,53.85
+Parkinson's Disease,Sulconazolenitrate,-0.47,71.43,7,13,53.85
+Prostate Adenocarcinoma,Alprostadil,-1,100,2,4,50
+Prostate Adenocarcinoma,Alvocidib,-1,100,2,4,50
+Prostate Adenocarcinoma,Azd-5438,-1,100,2,4,50
+Prostate Adenocarcinoma,Azd-8055,-1,100,2,4,50
+Prostate Adenocarcinoma,Dasatinib,-1,100,2,4,50
+Prostate Adenocarcinoma,Gamolenicacid,-1,100,2,4,50
+Prostate Adenocarcinoma,Halcinonide,-1,100,2,4,50
+Prostate Adenocarcinoma,Linifanib,-1,100,2,4,50
+Prostate Adenocarcinoma,Mibefradil,-1,100,2,4,50
+Prostate Adenocarcinoma,Niclosamide,-1,100,2,4,50
+Prostate Adenocarcinoma,Prednicarbate,-1,100,2,4,50
+Rheumatoid Arthritis,Enclomiphenecitrate,-0.5,70,30,51,58.82
+Squamous Cell Carcinoma,Gsk-1070916,-1,100,2,3,66.67
+Squamous Cell Carcinoma,Tozasertib,-1,100,2,3,66.67
+Systemic Lupus Erythematosus,Rigosertib,-0.86,94.44,18,19,94.74
+Systemic Lupus Erythematosus,Tivozanib,-0.77,90.91,11,19,57.89
+Systemic Lupus Erythematosus,Diflorasonediacetate,-0.76,88.89,18,19,94.74
+Systemic Lupus Erythematosus,Atomoxetinehydrochloride,-0.68,89.47,19,19,100
+Systemic Lupus Erythematosus,Triclosan,-0.68,88.89,18,19,94.74
+Systemic Lupus Erythematosus,Mibefradil,-0.58,86.67,15,19,78.95
+Systemic Lupus Erythematosus,Metergoline,-0.56,83.33,18,19,94.74
+Systemic Lupus Erythematosus,Oxfendazole,-0.56,83.33,18,19,94.74
+Systemic Lupus Erythematosus,Epirubicinhydrochloride,-0.52,81.82,11,19,57.89
+Type I Diabetes Mellitus,Dasatinib,-0.45,62.5,8,12,66.67
+Type I Diabetes Mellitus,Tinidazole,-0.45,66.67,6,12,50
+Type II Diabetes Mellitus,Ci-1040,-1,100,3,4,75
+Type II Diabetes Mellitus,Brinzolamide,-0.5,66.67,3,4,75
+Type II Diabetes Mellitus,Canertinib,-0.5,66.67,3,4,75
+Type II Diabetes Mellitus,Gsk-461364,-0.5,66.67,3,4,75
+Type II Diabetes Mellitus,Lidoflazine,-0.5,66.67,3,4,75
