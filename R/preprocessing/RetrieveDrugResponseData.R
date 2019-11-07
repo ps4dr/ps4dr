@@ -91,7 +91,7 @@ names(L1000) = c("ENTREZID","GENEID","GeneSym","weight","lincs_id")
 #~~~~~~~~~~~map LINCS IDs to ChEMBL IDs~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-if(!file.exists(file.path(dataFolder, "L1000_v97.RData"))){
+if(!file.exists(file.path(dataFolder, "L1000.RData"))){
   cat(sprintf("~~ Mapping BROAD IDs to ChEMBL via PubChem IDs. ~~\n"))
   pb <- txtProgressBar(min = 0, max = length(lincs_pubchem[, pubchem_cid]), style = 3)
   unichem_url = "https://www.ebi.ac.uk/unichem/rest/src_compound_id/"
@@ -113,10 +113,10 @@ if(!file.exists(file.path(dataFolder, "L1000_v97.RData"))){
   L1000 = merge(L1000, unichem_map, by = "lincs_id")
   L1000 = L1000[, .(ensembl.id = GENEID, gene.symbol = GeneSym, lincs.id=lincs_id, pubchem.id=pubchem_id, chembl.id=chembl_id, direction = weight)]
   
-  save(L1000, file=file.path(dataFolder, "L1000_v97.RData"))
+  save(L1000, file=file.path(dataFolder, "L1000.RData"))
   
 } else {cat(sprintf("~~ L1000 file already exists, not mapping again. ~~\n"))
-  load(file.path(dataFolder, "L1000_v97.RData"))}
+  load(file.path(dataFolder, "L1000.RData"))}
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~L1000 Drugs~~~~~~~~~~~~~~~~~~~#

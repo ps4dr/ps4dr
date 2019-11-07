@@ -79,7 +79,7 @@ lfc_comb = merge(lfc_comb, gene_id, by = "ensembl.id")
 lfc_comb = lfc_comb[! duplicated(lfc_comb[, c('efo.id', 'ENTREZ')]),]
 
 # lfc_efo = split(lfc_comb, lfc_comb$efo.id)
-load(file.path(dataFolder,"results/disease_genes50_v97.RData"))
+load(file.path(dataFolder,"results/disease_genes.RData"))
 disease_genes = disease_genes[p.adjusted <= 0.05]
 DisGen = disease_genes[same.disease == TRUE &
     overlap > 0 &
@@ -101,12 +101,12 @@ DisGen = merge(DisGen, lfc_comb, by = c('ensembl.id', 'efo.id')) # merge with ha
 lfc_efo = split(DisGen, DisGen$efo.term)
 lfc_efo = Filter(function(x) dim(x)[1] > 10, lfc_efo) # remove diseases with very few (less than 10) genes to test
 
-save(lfc_efo, file = file.path(dataFolder,"spia_input/disease_genes50_v97.lfc.RData"))
+save(lfc_efo, file = file.path(dataFolder,"spia_input/lfc_disease_genes.RData"))
 rm(lfc_comb)
 
 #~~~~~~~~~~Create Named Vector for log fold changes in each disease~~~~~~~~~~#
 
-# load(file.path(dataFolder,"spia_input/disease_genes50_v97.lfc.RData")) ###--get log fold change for all genes for each diseases-##
+# load(file.path(dataFolder,"spia_input/lfc_disease_genes.RData")) ###--get log fold change for all genes for each diseases-##
 
 lfc_ensembl = list()
 for (i in 1 : length(lfc_efo)) {
@@ -138,7 +138,7 @@ ensembl_all = unique(gene_id$ensembl.id)
 entrez_all = unique(gene_id$ENTREZ)
 entrezID_all = unique(gsub("^", "ENTREZID:", gene_id$ENTREZ)) ## with ENTREZID: in front of each id
 
-save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, entrez_all, entrezID_all, file = file.path(dataFolder,"spia_input/lfc_disease_v97_namedVector.RData"))
+# save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, entrez_all, entrezID_all, file = file.path(dataFolder,"spia_input/lfc_disease_genes_namedVector.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -181,7 +181,7 @@ save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, ent
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~ KEGG SPIA ~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"spia_input/lfc_disease_v97_namedVector.RData"))
+load(file.path(dataFolder,"spia_input/lfc_disease_genes_namedVector.RData"))
 rm(lfc_entrezID,lfc_hgnc,lfc_ensembl,ensembl_all,entrezID_all,hgnc_all)
 
 pb <- txtProgressBar(min=0, max=length(lfc_entrez), style=3)
@@ -196,7 +196,7 @@ for (i in 1 : length(lfc_entrez)) {
 close(pb)
 names(spia_kegg) = names(lfc_entrez)
 
-save(spia_kegg, file = file.path(dataFolder, "results/spia_output/spia_kegg_diseaseGenes_v97.RData"))
+save(spia_kegg, file = file.path(dataFolder, "results/spia_output/spia_kegg_disease.RData"))
 
 # spia_kegg = lapply(spia_kegg, function(x) x[x$pNDE <= 0.05,])
 # plotP(spia_kegg[[4]])
@@ -206,7 +206,7 @@ save(spia_kegg, file = file.path(dataFolder, "results/spia_output/spia_kegg_dise
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~ Reactome SPIA ~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"spia_input/lfc_disease_v97_namedVector.RData"))
+load(file.path(dataFolder,"spia_input/lfc_disease_genes_namedVector.RData"))
 rm(lfc_entrez,lfc_hgnc,lfc_ensembl,ensembl_all,entrez_all,hgnc_all)
 
 pb <- txtProgressBar(min=0, max=length(lfc_entrezID), style=3)
@@ -223,13 +223,14 @@ for (i in 1 : length(lfc_entrezID)) {
 close(pb)
 names(spia_reactome) = names(lfc_entrezID)
 
-save(spia_reactome, file = file.path(dataFolder, "results/spia_output/spia_reactome_diseaseGenes_v97.RData"))
+save(spia_reactome, file = file.path(dataFolder, "results/spia_output/spia_reactome_disease.RData"))
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~ Biocarta SPIA ~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"spia_input/lfc_disease_v97_namedVector.RData"))
+load(file.path(dataFolder,"spia_input/lfc_disease_genes_namedVector.RData"))
 rm(lfc_entrez,lfc_hgnc,lfc_ensembl,ensembl_all,entrez_all,hgnc_all)
 
 pb <- txtProgressBar(min=0, max=length(lfc_entrezID), style=3)
@@ -246,18 +247,18 @@ for (i in 1 : length(lfc_entrezID)) {
 close(pb)
 names(spia_biocarta) = names(lfc_entrezID)
 
-save(spia_biocarta, file = file.path(dataFolder, "results/spia_output/spia_biocarta_diseaseGenes_v97.RData"))
+save(spia_biocarta, file = file.path(dataFolder, "results/spia_output/spia_biocarta_disease.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~Simulated SPIA~~~~~~~~~~~#
 
-#' we create pseudo SPIA data sets for all three pathways
+#' we create simulated SPIA data sets for all three pathways
 #' with random gene sets to see whether our results are by
 #' random chance or meaningful indeed.
 
 
-###___Create Pseudo (Random) Pathways____####
+###___Create Simulated (Random) Pathways____####
 
 #___create universe with ENTREZID:____#
 load(file.path(dataFolder,"geneID_v97.RData"))
@@ -268,102 +269,103 @@ load(file.path(dataFolder,"spia_input/real_kegg/hsaSPIA.RData"))
 # load(file.path(dataFolder,"spia_input/real_react/hsaSPIA.RData"))
 # load(file.path(dataFolder,"spia_input/real_biocarta/hsaSPIA.RData"))
 
-pseudo_path = path.info
+simulated_path = path.info
 rm(path.info)
 
-#_____Shuffle first 25 matrices in pseudo_path______#
-for (mylist in 1:length(pseudo_path)) {
-  for (mymat in 1:(length(pseudo_path[[mylist]])-3)) { #not looping for last 3 indices since they are not matrices
-    pseudo_path[[mylist]][[mymat]][] = pseudo_path[[mylist]][[mymat]][sample(length(pseudo_path[[mylist]][[mymat]]))]
+#_____Shuffle first 25 matrices in simulated_path______#
+for (mylist in 1:length(simulated_path)) {
+  for (mymat in 1:(length(simulated_path[[mylist]])-3)) { #not looping for last 3 indices since they are not matrices
+    simulated_path[[mylist]][[mymat]][] = simulated_path[[mylist]][[mymat]][sample(length(simulated_path[[mylist]][[mymat]]))]
   }
 }
 
 #___Replace ENTREZ ID with ENTREZ ID from Universe_____#
-for (mylist in 1:length(pseudo_path)) {
-  for (mymat in length(pseudo_path[[mylist]])-2) { #need to change index number to '1' for reactome and biocarta, and to '2' for kegg
-    pseudo_path[[mylist]][[mymat]] = as.character(sample(universe,size = length(pseudo_path[[mylist]][[mymat]]),replace = TRUE))
+for (mylist in 1:length(simulated_path)) {
+  for (mymat in length(simulated_path[[mylist]])-2) { #need to change index number to '1' for reactome and biocarta, and to '2' for kegg
+    simulated_path[[mylist]][[mymat]] = as.character(sample(universe,size = length(simulated_path[[mylist]][[mymat]]),replace = TRUE))
   }
 }
 
 #_____change row & column names of (25) matrices______#
-for (mylist in 1:length(pseudo_path)) {
-  for (mymat in 1:(length(pseudo_path[[mylist]])-3)) { #not looping for last 3 indices since they are not matrices
-    colnames(pseudo_path[[mylist]][[mymat]]) = pseudo_path[[mylist]][[26]] #change index to '27' for reactome and biocarta, and to '26' for kegg
-    rownames(pseudo_path[[mylist]][[mymat]]) = pseudo_path[[mylist]][[26]] #change index to '27' for reactome and biocarta, and to '26' for kegg
+for (mylist in 1:length(simulated_path)) {
+  for (mymat in 1:(length(simulated_path[[mylist]])-3)) { #not looping for last 3 indices since they are not matrices
+    colnames(simulated_path[[mylist]][[mymat]]) = simulated_path[[mylist]][[26]] #change index to '27' for reactome and biocarta, and to '26' for kegg
+    rownames(simulated_path[[mylist]][[mymat]]) = simulated_path[[mylist]][[26]] #change index to '27' for reactome and biocarta, and to '26' for kegg
   }
 }
 
-path.info <- pseudo_path
+path.info <- simulated_path
 
-save(path.info,file = file.path(dataFolder,"spia_input/pseudo_kegg/hsaSPIA.RData"))
-# save(path.info,file = file.path(dataFolder,"spia_input/pseudo_react/hsaSPIA.RData"))
-# save(path.info,file = file.path(dataFolder,"spia_input/pseudo_biocarta/hsaSPIA.RData"))
-rm(path.info,pseudo_path)
+save(path.info,file = file.path(dataFolder,"spia_input/simulated_kegg/hsaSPIA.RData"))
+# save(path.info,file = file.path(dataFolder,"spia_input/simulated_react/hsaSPIA.RData"))
+# save(path.info,file = file.path(dataFolder,"spia_input/simulated_biocarta/hsaSPIA.RData"))
+rm(path.info,simulated_path)
+
 #_______________________________________________________##
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~~~~~~~~~~~~~~~~~ Pseudo KEGG SPIA ~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~ Simulated KEGG SPIA ~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"spia_input/lfc_disease_v97_namedVector.RData"))
+load(file.path(dataFolder,"spia_input/lfc_disease_genes_namedVector.RData"))
 rm(lfc_entrezID,lfc_hgnc,lfc_ensembl,ensembl_all,entrezID_all,hgnc_all)
 
 pb <- txtProgressBar(min=0, max=length(lfc_entrez), style=3)
 cat(sprintf("\n~~~~~SPIA calculation for simulated KEGG Pathways~~~~~\n"))
 
-spia_kegg_pseudo = list()
+spia_kegg_simulated = list()
 for (i in 1 : length(lfc_entrez)) {
   Sys.sleep(1)
   setTxtProgressBar(pb, i)
-  spia_kegg_pseudo[[i]] = quiet(spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/pseudo_kegg/"), organism = "hsa"))
+  spia_kegg_simulated[[i]] = quiet(spia(de = lfc_entrez[[i]], all = entrez_all, data.dir = file.path(dataFolder,"spia_input/simulated_kegg/"), organism = "hsa"))
 }
 close(pb)
-names(spia_kegg_pseudo) = names(lfc_entrez)
+names(spia_kegg_simulated) = names(lfc_entrez)
 
-save(spia_kegg_pseudo, file = file.path(dataFolder, "results/spia_output/spia_kegg_diseaseGenes_v97_pseudo.RData"))
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+save(spia_kegg_simulated, file = file.path(dataFolder, "results/spia_output/spia_kegg_disease_simulated.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~~~~~~~~~~~~~~~ Pseudo Reactome SPIA ~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"spia_input/lfc_disease_v97_namedVector.RData"))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~ Simulated Reactome SPIA ~~~~~~~~~~~~~~~~~~~~~~#
+
+load(file.path(dataFolder,"spia_input/lfc_disease_genes_namedVector.RData"))
 rm(lfc_entrez,lfc_hgnc,lfc_ensembl,ensembl_all,entrez_all,hgnc_all)
 
 pb <- txtProgressBar(min=0, max=length(lfc_entrezID), style=3)
 cat(sprintf("\n~~~~~SPIA calculation for simulated Reactome Pathways~~~~~\n"))
 
-spia_reactome_pseudo = list()
+spia_reactome_simulated = list()
 for (i in 1 : length(lfc_entrezID)) {
   Sys.sleep(1)
   setTxtProgressBar(pb, i)
-  spia_reactome_pseudo[[i]] = quiet(spia(de = lfc_entrezID[[i]], all = entrezID_all, data.dir = file.path(dataFolder,"spia_input/pseudo_react/"), organism = "hsa"))
+  spia_reactome_simulated[[i]] = quiet(spia(de = lfc_entrezID[[i]], all = entrezID_all, data.dir = file.path(dataFolder,"spia_input/simulated_react/"), organism = "hsa"))
 }
 close(pb)
-names(spia_reactome_pseudo) = names(lfc_entrezID)
+names(spia_reactome_simulated) = names(lfc_entrezID)
 
-save(spia_reactome_pseudo, file = file.path(dataFolder, "results/spia_output/spia_reactome_diseaseGenes_v97_pseudo.RData"))
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+save(spia_reactome_simulated, file = file.path(dataFolder, "results/spia_output/spia_reactome_disease_simulated.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~~~~~~~~~~~~~~ Pseudo Biocarta SPIA ~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"spia_input/lfc_disease_v97_namedVector.RData"))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~ Simulated Biocarta SPIA ~~~~~~~~~~~~~~~~~~~~~~~#
+
+load(file.path(dataFolder,"spia_input/lfc_disease_genes_namedVector.RData"))
 rm(lfc_entrez,lfc_hgnc,lfc_ensembl,ensembl_all,entrez_all,hgnc_all)
 
 pb <- txtProgressBar(min=0, max=length(lfc_entrezID), style=3)
 cat(sprintf("\n~~~~~SPIA calculation for simulated Biocarta Pathways~~~~~\n"))
 
-spia_biocarta_pseudo = list()
+spia_biocarta_simulated = list()
 for (i in 1 : length(lfc_entrezID)) {
   Sys.sleep(1)
   setTxtProgressBar(pb, i)
-  spia_biocarta_pseudo[[i]] = quiet(spia(de = lfc_entrezID[[i]], all = entrezID_all, data.dir = file.path(dataFolder,"spia_input/pseudo_biocarta/"), organism = "hsa"))
+  spia_biocarta_simulated[[i]] = quiet(spia(de = lfc_entrezID[[i]], all = entrezID_all, data.dir = file.path(dataFolder,"spia_input/simulated_biocarta/"), organism = "hsa"))
 }
 close(pb)
-names(spia_biocarta_pseudo) = names(lfc_entrezID)
+names(spia_biocarta_simulated) = names(lfc_entrezID)
 
-save(spia_biocarta_pseudo, file = file.path(dataFolder, "results/spia_output/spia_biocarta_diseaseGenes_v97_pseudo.RData"))
+save(spia_biocarta_simulated, file = file.path(dataFolder, "results/spia_output/spia_biocarta_disease_simulated.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -372,31 +374,31 @@ save(spia_biocarta_pseudo, file = file.path(dataFolder, "results/spia_output/spi
 #~~~~~ Real_Vs_Simulated Pathway SPIA Boxplot Comparison ~~~~~#
 
 #'~~~ Data for KEGG SPIA ~~~'#
-load(file.path(dataFolder,"results/spia_output/spia_kegg_diseaseGenes_v97.RData"))
-load(file.path(dataFolder,"results/spia_output/spia_kegg_diseaseGenes_v97_pseudo.RData"))
+load(file.path(dataFolder,"results/spia_output/spia_kegg_disease.RData"))
+load(file.path(dataFolder,"results/spia_output/spia_kegg_disease_simulated.RData"))
 spia = spia_kegg
-spia_pseudo = spia_kegg_pseudo
-rm(spia_kegg,spia_kegg_pseudo)
+spia_simulated = spia_kegg_simulated
+rm(spia_kegg,spia_kegg_simulated)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #'~~~ Data for Reactome SPIA ~~~'#
-# load(file.path(dataFolder,"results/spia_output/spia_reactome_diseaseGenes_v97.RData"))
-# load(file.path(dataFolder,"results/spia_output/spia_reactome_diseaseGenes_v97_pseudo.RData"))
+# load(file.path(dataFolder,"results/spia_output/spia_reactome_disease.RData"))
+# load(file.path(dataFolder,"results/spia_output/spia_reactome_disease_simulated.RData"))
 # spia = spia_reactome
-# spia_pseudo = spia_reactome_pseudo
-# rm(spia_reactome,spia_reactome_pseudo)
+# spia_simulated = spia_reactome_simulated
+# rm(spia_reactome,spia_reactome_simulated)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #'~~~ Data for Biocarta SPIA ~~~'#
-# load(file.path(dataFolder,"results/spia_output/spia_biocarta_diseaseGenes_v97.RData"))
-# load(file.path(dataFolder,"results/spia_output/spia_biocarta_diseaseGenes_v97_pseudo.RData"))
+# load(file.path(dataFolder,"results/spia_output/spia_biocarta_disease.RData"))
+# load(file.path(dataFolder,"results/spia_output/spia_biocarta_disease_simulated.RData"))
 # spia = spia_biocarta
-# spia_pseudo = spia_biocarta_pseudo
-# rm(spia_biocarta,spia_biocarta_pseudo)
+# spia_simulated = spia_biocarta_simulated
+# rm(spia_biocarta,spia_biocarta_simulated)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #'delete diseases which are not in both lists
-Dis2Delete = setdiff(names(spia),names(spia_pseudo))
+Dis2Delete = setdiff(names(spia),names(spia_simulated))
 spia_tmp = spia
 
 for (i in 1:length(spia)) {
@@ -414,19 +416,19 @@ spia1 = data.table(spia[,c(5)])
 names(spia1) = "pvalue"
 spia1$spia = "Real"
 
-spia_pseudo = do.call(rbind, spia_pseudo)
-spia2= data.table(spia_pseudo[,c(5)])
+spia_simulated = do.call(rbind, spia_simulated)
+spia2= data.table(spia_simulated[,c(5)])
 names(spia2) = "pvalue"
 spia2$spia = "Simulated"
 
 spia_full = data.table(rbind(spia1,spia2))
-rm(spia,spia_pseudo,spia1,spia2)
+rm(spia,spia_simulated,spia1,spia2)
 spia_full$spia = as.factor(spia_full$spia)
 man_wtny <- wilcox.test(x = spia_full[spia == "Simulated", pvalue], y = spia_full[spia == "Real", pvalue])
 print(man_wtny$p.value)
-jpeg(file = file.path(dataFolder, "results/figures/spia_real_pseudo_pvalues_boxplots_kegg.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
-# jpeg(file = file.path(dataFolder, "results/figures/spia_real_pseudo_pvalues_boxplots_reactome.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
-# jpeg(file = file.path(dataFolder, "results/figures/spia_real_pseudo_pvalues_boxplots_biocarta.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
+jpeg(file = file.path(dataFolder, "results/figures/spia_real_simulated_pvalues_boxplots_kegg.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
+# jpeg(file = file.path(dataFolder, "results/figures/spia_real_simulated_pvalues_boxplots_reactome.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
+# jpeg(file = file.path(dataFolder, "results/figures/spia_real_simulated_pvalues_boxplots_biocarta.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
 print(ggplot(spia_full, aes(x = spia, y = pvalue,fill=spia)) +
         geom_boxplot() +
         coord_cartesian(ylim = quantile(spia_full[, pvalue], c(0.03, 0.97))) +

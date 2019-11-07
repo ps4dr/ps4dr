@@ -38,7 +38,7 @@ dataFolder = file.path(resultsFolder)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #' load Kegg Drug SPIA file
-load(file.path(dataFolder,"results/spia_output/spia_kegg_drugPdisease_42_v97.RData"))
+load(file.path(dataFolder,"results/spia_output/spia_kegg_drug.RData"))
 spia_drug = spia_kegg_drug
 rm(spia_kegg_drug)
 
@@ -68,7 +68,7 @@ for (i in seq_along(spia_drug)) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #' load Kegg Disease SPIA file
-load(file.path(dataFolder,"results/spia_output/spia_kegg_diseaseGenes_v97.RData"))
+load(file.path(dataFolder,"results/spia_output/spia_kegg_disease.RData"))
 spia_disease = spia_kegg
 rm(spia_kegg)
 
@@ -188,7 +188,7 @@ drug_shortlist_df$Drug = toTitleCase(drug_shortlist_df$Drug)
 drug_shortlist_df$Disease = toTitleCase(drug_shortlist_df$Disease)
 drug_shortlist_df = drug_shortlist_df[,c(2,1,3,4,5,6,7)]
 
-save(drug_path,dis_path,drug_dis_path,drug_correlation,drug_shortlist,file=file.path(dataFolder,"results/drugCorraltion.drugPdisease_v97.RData"))
+save(drug_path,dis_path,drug_dis_path,drug_correlation,drug_shortlist,file=file.path(dataFolder,"results/drugCorraltion_drugPdisease.RData"))
 # fwrite(drug_shortlist_df, file = file.path(dataFolder,"results/drug_shortlist_v97.csv"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -238,7 +238,7 @@ htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder, "results/fig
 #~~~~~~~~~~~~~~~~~~~: Density Plot :~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-# load(file.path(dataFolder,"drugCorraltion.drugPdisease_v97.RData"))
+# load(file.path(dataFolder,"drugCorraltion_drugPdisease.RData"))
 # 
 # for (i in seq_along(drug_correlation)) {
 #     for (j in seq_along(drug_correlation[[i]])) {
@@ -269,7 +269,7 @@ htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder, "results/fig
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~: Density Plot With Standization :~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-load(file.path(dataFolder,"results/drugCorraltion.drugPdisease_v97.RData"))
+load(file.path(dataFolder,"results/drugCorraltion_drugPdisease.RData"))
 
 #' Standization with scale function (Z-score normalization)
 drug_correlation = lapply(drug_correlation, function(x) na.omit(x))
@@ -317,7 +317,6 @@ ggplot(drug_cor_scaled, aes(x = Correlation.Score, fill = Disease)) +
     xlab("Normalized Correlation Scores")
 dev.off()
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~ Density Plots for use case scenario Diseases ~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -326,7 +325,7 @@ DisUseCase = c("Alzheimer's Disease","Breast Carcinoma","Melanoma","Pancreatic C
 case = as.data.frame(DisUseCase)
 case = merge(drug_cor_scaled,case, by.x="Disease", by.y="DisUseCase")
 
-jpeg(file=file.path(dataFolder, "results/figures/densityPlots_DrugPdisease_CorrelationScore_scaled_useCase.jpeg"), width=3000, height=1980, res=200)
+# jpeg(file=file.path(dataFolder, "results/figures/densityPlots_DrugPdisease_CorrelationScore_scaled_useCase.jpeg"), width=3000, height=1980, res=200)
 p1 <- ggplot(case, aes(x = Correlation.Score, fill = Disease)) +
   labs(title = "Distribution of Z-score normalized correlation scores of drugs\nfor 4 use case scenario diseases") +
   geom_density(alpha = 0.25) +
@@ -334,7 +333,7 @@ p1 <- ggplot(case, aes(x = Correlation.Score, fill = Disease)) +
   theme(legend.position = "bottom", legend.title = element_text(size = 12)) +
   ylab("Density") +
   xlab("Normalized Correlation Scores")
-dev.off()
+# dev.off()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~ Density Plots for 4 Diseases have no drugs in shortlist ~~~~#
@@ -345,7 +344,7 @@ DisnoShortlst = c("Asthma","Mucocutaneous Lymph Node Syndrome","Psoriasis","Ulce
 xcase = as.data.frame(DisnoShortlst)
 xcase = merge(drug_cor_scaled,xcase, by.x="Disease", by.y="DisnoShortlst")
 
-jpeg(file=file.path(dataFolder, "results/figures/densityPlots_DrugPdisease_CorrelationScore_scaled_noshortlist.jpeg"), width=3000, height=1980, res=200)
+# jpeg(file=file.path(dataFolder, "results/figures/densityPlots_DrugPdisease_CorrelationScore_scaled_noshortlist.jpeg"), width=3000, height=1980, res=200)
 p2 <- ggplot(xcase, aes(x = Correlation.Score, fill = Disease)) +
   labs(title = "Distribution of Z-score normalized correlation scores of drugs\nfor 4 diseases which have no shortlisted drugs") +
   geom_density(alpha = 0.25) +
@@ -353,9 +352,9 @@ p2 <- ggplot(xcase, aes(x = Correlation.Score, fill = Disease)) +
   theme(legend.position = "bottom", legend.title = element_text(size = 12)) +
   ylab("Density") +
   xlab("Normalized Correlation Scores")
-dev.off()
+# dev.off()
 
-jpeg(file="./data/densityPlots_DrugPdisease_CorrelationScore_scaled_usecaseVsnoshortlist.jpeg", width=3200, height=1280, res=180)
+jpeg(file=file.path(dataFolder, "results/figures/densityPlots_DrugPdisease_CorrelationScore_scaled_usecaseVsnoshortlist.jpeg"), width=3200, height=1280, res=180)
 plot_grid(p1,p2)
 dev.off()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

@@ -110,7 +110,7 @@ disease_genes = disease_genes[order(p.value),]
 disease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
 # add dummy variable
 disease_genes[, same.disease := ifelse(efo.id.DEGs == efo.id.GWASs, TRUE, FALSE)]
-save(disease_genes, file = file.path(dataFolder,"results/disease_genes50_v97.RData"))
+save(disease_genes, file = file.path(dataFolder,"results/disease_genes.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##___________Drugs to DISEASE Genes___________#####
@@ -150,7 +150,7 @@ L1000 = merge(dmap[, c(1, 2)], L1000, by = "chembl.id")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 ##### create Disease-Genes list #####
-load(file.path(dataFolder,"results/disease_genes50_v97.RData"))
+load(file.path(dataFolder,"results/disease_genes.RData"))
 
 # considering all those gene sets where DEGs and GWAS came from same diseases.
 DisGen = disease_genes[same.disease == TRUE & overlap > 0]
@@ -205,15 +205,15 @@ drugPdisease_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandlin
 close(pb)
 cat(sprintf("\n"))
 
-save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes50_v97.RData"))
+save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes.RData"))
 
 #load(file.path(dataFolder,"results/drugPdisease_genes50.RData"))
 # correct p-values
 drugPdisease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
 drugPdisease_genes = drugPdisease_genes[p.adjusted < 0.05]
-save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes50_v97.padj.RData"))
+save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes.padj.RData"))
 drugPdisease_genes = drugPdisease_genes[p.adjusted < 1e-05]
-save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes50_v97.padj1e-5.RData"))
+save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes.padj1e-5.RData"))
 #md2 = unique(min.drugs[,c(1,3,12)]) #filtering columns for merging indication area to our super drugs
 #drugPdisease_genes = merge(drugPdisease_genes,md2,by=c("chembl.id","efo.id"))
 
@@ -296,13 +296,13 @@ save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes
 # drugGWAS_genes = drugGWAS_genes[overlap > 0]
 # drugGWAS_genes = drugGWAS_genes[order(p.value),]
 # drugGWAS_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
-# save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes50_v97.RData"))
+# save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.RData"))
 # 
 # drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-05]
-# save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes50_v97.padj1e-5.RData"))
+# save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.padj1e-5.RData"))
 # 
 # drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-10]
-# save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes50_v97.padj1e-10.RData"))
+# save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.padj1e-10.RData"))
 # 
 # 
 # load(file.path(dataFolder,"results/drugGWAS_genes50.padj1e-5.RData"))

@@ -27,7 +27,7 @@ dataFolder = file.path(resultsFolder)
 #####################################################################
 
 #' load results from pervious script (4-CheckDistribution.R)
-load(file.path(dataFolder,"results/drugCorraltion.drugPdisease_v97.RData"))
+load(file.path(dataFolder,"results/drugCorraltion_drugPdisease.RData"))
 
 #' filter out drugs from each disease with correlationscore greater than 0
 drug_shortlist = drug_correlation
@@ -49,9 +49,7 @@ for (i in seq_along(drug_shortlist)) {
 #~~~~~~~~~load KEGG Drug SPIA results~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"results/spia_output/spia_kegg_drugPdisease_42_v97.RData"))
-spia_kegg_drug = spia_kegg_drug_42
-rm(spia_kegg_drug_42)
+load(file.path(dataFolder,"results/spia_output/spia_kegg_drug.RData"))
 
 spia_kegg_drug = Filter(function(x) ! is.null(x), spia_kegg_drug) #delete empty df from list
 
@@ -163,12 +161,15 @@ for (i in 1 : length(comb1)) {
 }
 
 # save(drug_comb_path,file=file.path(dataFolder,"drug_comb_path.drugGWAS.RData"))
-save(drug_comb_path, file = file.path(dataFolder,"results/drug_comb_path.drugPdisease_v97.RData"))
+save(drug_comb_path, file = file.path(dataFolder,"results/drug_comb_path_drugPdisease.RData"))
 rm(comb1, comb2)
-load(file.path(dataFolder,"drug_comb_path.drugPdisease_v97.RData"))
-# load(file.path(dataFolder,"drug_comb_path.drugGWAS.RData"))
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #' discard diseases from dis_path which are not in drug_comb_path
+
+load(file.path(dataFolder,"results/drug_comb_path_drugPdisease.RData"))
+
 a = setdiff(names(dis_path), names(drug_comb_path))
 for (i in seq_along(dis_path)) {
     if (names(dis_path)[i] %in% a) {
@@ -211,13 +212,13 @@ for (i in seq_along(drug_correlation)) {
     drug_correlation[[i]] = drug_correlation[[i]][, c(7, 6, 1, 2, 3, 4, 5)]
 }
 
-save(drug_dis_path, drug_correlation, file = file.path(dataFolder,"results/drugCombination.correlationScore.drugPdisease_v97.RData"))
+save(drug_dis_path, drug_correlation, file = file.path(dataFolder,"results/drugCombination_correlationScore_drugPdisease.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##~~~~~~~~~~~~~~~~~~~~~Scatter Plot~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load(file.path(dataFolder,"drugCombination.correlationScore.drugPdisease_v97.RData"))
+load(file.path(dataFolder,"results/drugCombination_correlationScore_drugPdisease.RData"))
 
 drugCor = do.call(rbind, drug_correlation)
 drugCor$Drug = as.factor(drugCor$Drug)
@@ -236,7 +237,7 @@ ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = Disease)) 
 dev.off()
 # save(drugCor, file = file.path(dataFolder,"drugCombcorScoreDrugGWAS.RData"))
 length(unique(drugCor$Disease))
-save(drugCor, file = file.path(dataFolder,"drugCombcorScoreDrugPdisease_v97.RData"))
+save(drugCor, file = file.path(dataFolder,"results/drugCombcorScoreDrugPdisease_v97.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
