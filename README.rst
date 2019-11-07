@@ -9,7 +9,7 @@ A schematic figure of the workflow is presented below. The R scripts necessary t
 .. image:: https://github.com/ps4dr/ps4dr/blob/master/data/img/workflow.jpg
     :width: 500px
 
-**Figure** 1. Design of the MSDRP workflow. Differentially expressed genes/proteins (i.e., DEG/DEP) from disease and
+**Figure 1**. Design of the MSDRP workflow. Differentially expressed genes/proteins (i.e., DEG/DEP) from disease and
 drug perturbed profiles are passed as input together with GWAS data. Once the data is correctly formatted, users can
 define a custom pipeline, or series of steps in the workflow that will then be applied to the datasets. The steps
 performed in this pipeline constitute the optional portion of the workflow and involve filtering the *-omics* features
