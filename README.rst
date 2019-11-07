@@ -3,6 +3,22 @@ PS4DR (Pathway Signatures for Drug Repositioning)
 This package comprises a modular workflow designed to identify drug repositioning candidates using multi-omics data
 sets.
 
+A schematic figure of the workflow is presented below. The R scripts necessary to run the MSDRP pipeline are located
+`in the R directory <https://github.com/ps4dr/ps4dr/tree/master/R>`_.
+
+.. image:: https://github.com/ps4dr/ps4dr/blob/master/data/img/workflow.jpg
+    :width: 500px
+
+**Figure** 1. Design of the MSDRP workflow. Differentially expressed genes/proteins (i.e., DEG/DEP) from disease and
+drug perturbed profiles are passed as input together with GWAS data. Once the data is correctly formatted, users can
+define a custom pipeline, or series of steps in the workflow that will then be applied to the datasets. The steps
+performed in this pipeline constitute the optional portion of the workflow and involve filtering the *-omics* features
+coming from the dataset in order to reduce dimensionality by exclusively analyzing genes that have been associated with
+GWAS studies. Next, a previously selected pathway enrichment method is applied to DEG/DEP datasets deriving from both
+the disease and drug perturbed profiles to evaluate the direction of dysregulation for each affected pathway in each of
+these contexts. Finally, the workflow prioritizes drugs by finding the drugs that are predicted to invert the pathway
+signatures observed in the pathophysiology context.
+
 Installation
 ------------
 If ``devtools`` is not installed, do:
@@ -46,25 +62,7 @@ Alternatively, see the instructions to:
    https://github.com/ps4dr/ps4dr/tree/master/R/preprocessing
 2. Run all analysis scripts using the instructions at
    https://github.com/ps4dr/ps4dr/tree/master/R/analysis
-
-Results
--------
-A schematic figure of the workflow is presented below. The R scripts necessary to run the MSDRP pipeline are located
-`in the R directory <https://github.com/ps4dr/ps4dr/tree/master/R>`_.
-
-.. image:: https://github.com/ps4dr/ps4dr/blob/master/data/img/workflow.jpg
-    :width: 500px
-
-**Figure** 1. Design of the MSDRP workflow. Differentially expressed genes/proteins (i.e., DEG/DEP) from disease and
-drug perturbed profiles are passed as input together with GWAS data. Once the data is correctly formatted, users can
-define a custom pipeline, or series of steps in the workflow that will then be applied to the datasets. The steps
-performed in this pipeline constitute the optional portion of the workflow and involve filtering the *-omics* features
-coming from the dataset in order to reduce dimensionality by exclusively analyzing genes that have been associated with
-GWAS studies. Next, a previously selected pathway enrichment method is applied to DEG/DEP datasets deriving from both
-the disease and drug perturbed profiles to evaluate the direction of dysregulation for each affected pathway in each of
-these contexts. Finally, the workflow prioritizes drugs by finding the drugs that are predicted to invert the pathway
-signatures observed in the pathophysiology context.
-
+   
 How to Modify the Workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 Notes how to change parts of the workflow:
