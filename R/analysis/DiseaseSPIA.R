@@ -138,7 +138,7 @@ ensembl_all = unique(gene_id$ensembl.id)
 entrez_all = unique(gene_id$ENTREZ)
 entrezID_all = unique(gsub("^", "ENTREZID:", gene_id$ENTREZ)) ## with ENTREZID: in front of each id
 
-# save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, entrez_all, entrezID_all, file = file.path(dataFolder,"spia_input/lfc_disease_genes_namedVector.RData"))
+save(lfc_hgnc, lfc_ensembl, lfc_entrez, lfc_entrezID, hgnc_all, ensembl_all, entrez_all, entrezID_all, file = file.path(dataFolder,"spia_input/lfc_disease_genes_namedVector.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -435,8 +435,8 @@ print(ggplot(spia_full, aes(x = spia, y = pvalue,fill=spia)) +
         xlab("Distributions of the p-values from SPIA calculations") +
         ylab("p-value") +
         theme_bw(16) + theme(legend.position = "none")+
-        # scale_x_discrete(breaks = c("Simulated", "Real"), labels = c("Simulated KEGG Pathways", "KEGG Pathways")) +
-        scale_x_discrete(breaks = c("Simulated", "Real"), labels = c("Simulated Reactome Pathways", "Reactome Pathways")) +
+        scale_x_discrete(breaks = c("Simulated", "Real"), labels = c("Simulated KEGG Pathways", "KEGG Pathways")) +
+        # scale_x_discrete(breaks = c("Simulated", "Real"), labels = c("Simulated Reactome Pathways", "Reactome Pathways")) +
         # scale_x_discrete(breaks = c("Simulated", "Real"), labels = c("Simulated Biocarta Pathways", "Biocarta Pathways")) +
         ggtitle(paste("p-value =", sprintf("%.2e", man_wtny$p.value))))
 dev.off()
