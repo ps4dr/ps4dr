@@ -1,13 +1,11 @@
 Disease,Drug,Correlation.Score,Dissimilarity.Score,DrugPathway,DiseasePathway,affectedPathway
-Alzheimer's Disease,Fluspirilene,-0.83,94.12,17,33,51.52
+Alzheimer's Disease,Sirolimus,-0.69,86.36,22,33,66.67
 Alzheimer's Disease,Pevonedistat,-0.66,85,20,33,60.61
 Alzheimer's Disease,Nilotinib,-0.64,85,20,33,60.61
-Alzheimer's Disease,Sirolimus,-0.58,81.82,22,33,66.67
 Alzheimer's Disease,Terfenadine,-0.57,84.21,19,33,57.58
 Alzheimer's Disease,Doxylaminesuccinate,-0.57,83.33,18,33,54.55
 Alzheimer's Disease,Halcinonide,-0.57,82.35,17,33,51.52
 Alzheimer's Disease,Promazinehydrochloride,-0.53,77.27,22,33,66.67
-Alzheimer's Disease,Amlodipine,-0.49,80,20,33,60.61
 Alzheimer's Disease,Mosapride,-0.45,75,20,33,60.61
 Alzheimer's Disease,Pimozide,-0.45,73.68,19,33,57.58
 Alzheimer's Disease,Ritanserin,-0.45,73.68,19,33,57.58
@@ -75,18 +73,13 @@ Osteoarthritis,Fedratinib,-1,100,3,5,60
 Osteoarthritis,Neratinib,-1,100,3,5,60
 Osteoarthritis,Pimasertib,-1,100,3,5,60
 Pancreatic Carcinoma,Fenofibrate,-0.58,75,4,7,57.14
-Pancreatic Carcinoma,Flufenamicacid,-0.58,75,4,7,57.14
 Pancreatic Carcinoma,Fluoxetine,-0.58,75,4,7,57.14
 Pancreatic Carcinoma,Menadione,-0.58,75,4,7,57.14
 Pancreatic Carcinoma,Methyldopa,-0.58,75,4,7,57.14
-Pancreatic Carcinoma,Nomegestrolacetate,-0.58,75,4,7,57.14
 Pancreatic Carcinoma,Praziquantel,-0.58,75,4,7,57.14
-Pancreatic Carcinoma,Thiabendazole,-0.58,75,4,7,57.14
 Pancreatic Carcinoma,Tosedostat,-0.58,75,4,7,57.14
 Pancreatic Carcinoma,Venlafaxine,-0.58,75,4,7,57.14
 Pancreatic Carcinoma,Azd-6482,-0.41,60,5,7,71.43
-Pancreatic Carcinoma,Flumazenil,-0.41,60,5,7,71.43
-Pancreatic Carcinoma,Ranolazine,-0.41,60,5,7,71.43
 Parkinson's Disease,Amlodipine,-0.47,71.43,7,13,53.85
 Parkinson's Disease,Decitabine,-0.47,71.43,7,13,53.85
 Parkinson's Disease,Paroxetinehydrochloride,-0.47,71.43,7,13,53.85
