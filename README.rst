@@ -1,13 +1,11 @@
 PS4DR (Pathway Signatures for Drug Repositioning)
 =================================================
 This package comprises a modular workflow designed to identify drug repositioning candidates using multi-omics data
-sets.
-
-A schematic figure of the workflow is presented below. The R scripts necessary to run the MSDRP pipeline are located
+sets. A schematic figure of the workflow is presented below. The R scripts necessary to run the MSDRP pipeline are located
 `in the R directory <https://github.com/ps4dr/ps4dr/tree/master/R>`_.
 
 .. image:: https://github.com/ps4dr/ps4dr/blob/master/data/img/workflow.jpg
-    :width: 500px
+    :width: 400px
 
 **Figure 1**. Design of the MSDRP workflow. Differentially expressed genes/proteins (i.e., DEG/DEP) from disease and
 drug perturbed profiles are passed as input together with GWAS data. Once the data is correctly formatted, users can
@@ -69,3 +67,9 @@ Notes how to change parts of the workflow:
 
 1. Selecting different gene sets (i.e., "gene set intersection" part in the figure)
 2. Modifying the Pathway enrichment Analysis method (i.e., GSEA instead of SPIA)
+
+Citation
+--------
+If you use PS4DR in your work, please consider citing our preprint:
+
+.. [1] Emon, M. A., Domingo-Fernández, D., Hoyt, T. C., Hofmann-Apitius, M. (2020). `PS4DR: a multimodal workflow for identification and prioritization of drugs based on pathway signatures <https://www.researchsquare.com/article/b5c8e83b-9200-4fa7-b9ba-24305b8c1bc4/v1/>`_. *BMC Bioinformatics*, submitted.
