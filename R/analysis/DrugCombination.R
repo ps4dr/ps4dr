@@ -244,6 +244,17 @@ save(drugCor, file = file.path(dataFolder,"results/drugCombination_CorrelationSc
 drugCor_Shortlist = drugCor[Correlation.Score <= -.5 & affectedPathway >= 80 ]
 drugCor_breastCancer_1 = drugCor[Disease == "breast carcinoma" & Correlation.Score <= -.4 & affectedPathway >= 50 ] # 464 Drug Combinations
 drugCor_breastCancer_2 = drugCor[Disease == "breast carcinoma" & Correlation.Score <= -.5 & affectedPathway >= 80 ] # 26 Drug Combinations
-fwrite(drugCor_breastCancer_2, file = file.path(dataFolder,"results/drugCombination_shortlist_breastCancer.csv"))
+drug_comb_bc= cbind(str_split_fixed(drugCor_breastCancer_2$Drug, "_", 2),drugCor_breastCancer_2)
+drug_comb_bc = drug_comb_bc[,c(1,2,5,6,7,8,9)]
+names(drug_comb_bc) = c("Drug_1","Drug_2","Disease","Correlation.Score","Dissimilarity.Score","DrugPathway","DiseasePathway","affectedPathwa")
+drug_comb_bc$Drug_1 = tolower(drug_comb_bc$Drug_1)
+drug_comb_bc$Drug_1 = toTitleCase(drug_comb_bc$Drug_1)
+drug_comb_bc$Drug_2 = tolower(drug_comb_bc$Drug_2)
+drug_comb_bc$Drug_2 = toTitleCase(drug_comb_bc$Drug_2)
 
+
+fwrite(drug_comb_bc, file = file.path(dataFolder,"results/drugCombination_shortlist_breastCancer.csv"))
+library(stringr)
+
+# fwrite(drug_comb_bc, file = "/home/memon/projects/ps4dr/ps4dr/data/results/drugCombination_shortlist_breastCancer.csv")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

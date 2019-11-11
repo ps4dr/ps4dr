@@ -36,4 +36,4 @@ echo $"\n2.4 Checking Distributions\n"
 Rscript R/analysis/CheckDistribution.R data/
 
 echo $"\n2.5 Checking Drug Combinations\n"
-#Rscript R/analysis/DrugCombination.R data/
+Rscript R/analysis/DrugCombination.R data/
