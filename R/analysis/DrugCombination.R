@@ -246,7 +246,7 @@ drugCor_breastCancer_1 = drugCor[Disease == "breast carcinoma" & Correlation.Sco
 drugCor_breastCancer_2 = drugCor[Disease == "breast carcinoma" & Correlation.Score <= -.5 & affectedPathway >= 80 ] # 26 Drug Combinations
 drug_comb_bc= cbind(str_split_fixed(drugCor_breastCancer_2$Drug, "_", 2),drugCor_breastCancer_2)
 drug_comb_bc = drug_comb_bc[,c(1,2,5,6,7,8,9)]
-names(drug_comb_bc) = c("Drug_1","Drug_2","Disease","Correlation.Score","Dissimilarity.Score","DrugPathway","DiseasePathway","affectedPathwa")
+names(drug_comb_bc) = c("Drug_1","Drug_2","Correlation Score","Dissimilarity Score","Drug Pathway","Disease Pathway","Affected Pathway(%)")
 drug_comb_bc$Drug_1 = tolower(drug_comb_bc$Drug_1)
 drug_comb_bc$Drug_1 = toTitleCase(drug_comb_bc$Drug_1)
 drug_comb_bc$Drug_2 = tolower(drug_comb_bc$Drug_2)

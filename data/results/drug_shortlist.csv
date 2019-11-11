@@ -1,4 +1,4 @@
-Disease,Drug,Correlation.Score,Dissimilarity.Score,DrugPathway,DiseasePathway,affectedPathway
+Disease,Drug,Correlation Score,Dissimilarity Score,Drug Influenced Pathway,Disease Influenced Pathway,Affected Pathway(%)
 Alzheimer's Disease,Sirolimus,-0.69,86.36,22,33,66.67
 Alzheimer's Disease,Pevonedistat,-0.66,85,20,33,60.61
 Alzheimer's Disease,Nilotinib,-0.64,85,20,33,60.61

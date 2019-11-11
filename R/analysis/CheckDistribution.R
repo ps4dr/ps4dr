@@ -185,6 +185,7 @@ drug_shortlist_df$Drug = tolower(drug_shortlist_df$Drug)
 drug_shortlist_df$Drug = toTitleCase(drug_shortlist_df$Drug)
 drug_shortlist_df$Disease = toTitleCase(drug_shortlist_df$Disease)
 drug_shortlist_df = drug_shortlist_df[,c(2,1,3,4,5,6,7)]
+names(drug_shortlist_df) = c("Disease","Drug","Correlation Score","Dissimilarity Score","Drug Influenced Pathway","Disease Influenced Pathway","Affected Pathway(%)")
 
 save(drug_path,dis_path,drug_dis_path,drug_correlation,drug_shortlist,file=file.path(dataFolder,"results/drugCorrelation_result.RData"))
 fwrite(drug_shortlist_df, file = file.path(dataFolder,"results/drug_shortlist.csv"))
