@@ -8,6 +8,7 @@ suppressWarnings(suppressMessages(library(tidyr)))
 suppressWarnings(suppressMessages(library(RecordLinkage)))
 suppressWarnings(suppressMessages(library(ggplot2)))
 suppressWarnings(suppressMessages(library(purrr)))
+suppressWarnings(suppressMessages(library(stringr)))
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository
@@ -254,7 +255,6 @@ drug_comb_bc$Drug_2 = toTitleCase(drug_comb_bc$Drug_2)
 
 
 fwrite(drug_comb_bc, file = file.path(dataFolder,"results/drugCombination_shortlist_breastCancer.csv"))
-library(stringr)
 
 # fwrite(drug_comb_bc, file = "/home/memon/projects/ps4dr/ps4dr/data/results/drugCombination_shortlist_breastCancer.csv")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
