@@ -13,7 +13,7 @@ DEGS:
 
 Resouces
 --------
-All resources used for processing the data sets
+All resources used for processing the data sets:
 
 | * STOPGAP Pipline (Shen *et al.,* 2017)  
 | * Experimental Factor Ontology (EFO) (version 2.105)  
