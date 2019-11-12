@@ -10,10 +10,10 @@ Necessary R Packages to run the workflow:
 ---------------------------------------
 | * cowplot (v 0.9.4),  
 | * data.table (v 1.12.2),  
-| * doParallel (>= 1.0.14),  
+| * doParallel (v 1.0.14),  
 | * dplyr (v 0.8.1),  
 | * ggplot2 (v 3.2.0),  
-| * gridExtra (v2.3),  
+| * gridExtra (v 2.3),  
 | * Hmisc(v 4.2-0),  
 | * httr (v 1.4.0),  
 | * jsonlite (v 1.6),  
