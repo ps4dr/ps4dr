@@ -18,4 +18,6 @@ All resources used for processing the data sets:
 | * STOPGAP Pipline (Shen *et al.,* 2017)  
 | * Experimental Factor Ontology (EFO) (version 2.105)  
 | * Ensembl Release 97  
-
+| * KEGG  Release  
+| * Reactome via Graphite packge (time-stamped with 2019-04-17)  
+| * Biocarta via Graphite packge (time-stamped with 2019-04-17)  
