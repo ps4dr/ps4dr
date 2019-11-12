@@ -1,35 +1,35 @@
-Drug_1,Drug_2,Correlation.Score,Dissimilarity.Score,DrugPathway,DiseasePathway,affectedPathwa
-At-7519,Axitinib,-0.597296784137659,81.0810810810811,74,86,86.05
-At-7519,Azd-1775,-0.508191698358544,74.025974025974,77,86,89.53
-At-7519,Bgj-398,-0.543616170550398,77.9220779220779,77,86,89.53
-At-7519,Bms-777607,-0.533443516531271,75.6756756756757,74,86,86.05
-At-7519,Brimonidine,-0.584282940553503,78.9473684210526,76,86,88.37
-At-7519,Bromhexine,-0.547057389716911,77.6315789473684,76,86,88.37
-At-7519,Hexylcaine,-0.527046844926135,77.3333333333333,75,86,87.21
-At-7519,Iopanoicacid,-0.520831833846564,76.3157894736842,76,86,88.37
-At-7519,Isotretinoin,-0.533612706179758,77.027027027027,74,86,86.05
-At-7519,Ketorolac,-0.53680537773058,74.3243243243243,74,86,86.05
-At-7519,Levocetirizine,-0.543576826275736,77.3333333333333,75,86,87.21
-At-7519,Megestrolacetate,-0.533612706179758,77.027027027027,74,86,86.05
-At-7519,Nadolol,-0.592549034922,79.7297297297297,74,86,86.05
-At-7519,Pf-04217903,-0.519411381114874,77.3333333333333,75,86,87.21
-At-7519,r-406,-0.510151331800235,70,80,86,93.02
-At-7519,Rigosertib,-0.510227188410847,72.3684210526316,76,86,88.37
-At-7519,Selumetinib,-0.566436591998225,79.4871794871795,78,86,90.7
-At-7519,Tak-715,-0.57540953026133,79.7297297297297,74,86,86.05
-Axitinib,Omacetaxinemepesuccinate,-0.592854515439055,78.0821917808219,73,86,84.88
-Azd-1775,Omacetaxinemepesuccinate,-0.509158151701283,71.7948717948718,78,86,90.7
-Bms-777607,Omacetaxinemepesuccinate,-0.5228972830561,72.972972972973,74,86,86.05
-Brimonidine,Omacetaxinemepesuccinate,-0.580823029981476,75.6756756756757,74,86,86.05
-Bromhexine,Omacetaxinemepesuccinate,-0.523743445365033,74.3243243243243,74,86,86.05
-Erlotinibhydrochloride,Omacetaxinemepesuccinate,-0.507361593764794,71.4285714285714,77,86,89.53
-Hexylcaine,Omacetaxinemepesuccinate,-0.5280200004833,74.6666666666667,75,86,87.21
-Iopanoicacid,Omacetaxinemepesuccinate,-0.544658077744581,74.6666666666667,75,86,87.21
-Isotretinoin,Omacetaxinemepesuccinate,-0.55491950359056,75.3424657534247,73,86,84.88
-Ketorolac,Omacetaxinemepesuccinate,-0.508579731981775,69.8630136986301,73,86,84.88
-Levocetirizine,Omacetaxinemepesuccinate,-0.543875647816774,74.3243243243243,74,86,86.05
-Nadolol,Omacetaxinemepesuccinate,-0.613289998925014,78.0821917808219,73,86,84.88
-Omacetaxinemepesuccinate,Pf-04217903,-0.509524665365068,73.3333333333333,75,86,87.21
-Omacetaxinemepesuccinate,Rigosertib,-0.554319712832811,73.6842105263158,76,86,88.37
-Omacetaxinemepesuccinate,Tak-715,-0.573678628147226,76.7123287671233,73,86,84.88
-Omacetaxinemepesuccinate,Tivantinib,-0.510204081632653,67.5675675675676,74,86,86.05
+Drug_1,Drug_2,Correlation Score,Dissimilarity Score,Drug Pathway,Disease Pathway,Affected Pathway(%)
+AT-7519,Axitinib,-0.6,81.08,74,86,86.05
+AT-7519,Azd-1775,-0.51,74.03,77,86,89.53
+AT-7519,BGJ-398,-0.54,77.92,77,86,89.53
+AT-7519,BMS-777607,-0.53,75.68,74,86,86.05
+AT-7519,Brimonidine,-0.58,78.95,76,86,88.37
+AT-7519,Bromhexine,-0.55,77.63,76,86,88.37
+AT-7519,Hexylcaine,-0.53,77.33,75,86,87.21
+AT-7519,Iopanoic Acid,-0.52,76.32,76,86,88.37
+AT-7519,Isotretinoin,-0.53,77.03,74,86,86.05
+AT-7519,Ketorolac,-0.54,74.32,74,86,86.05
+AT-7519,Levocetirizine,-0.54,77.33,75,86,87.21
+AT-7519,Megestrol Acetate,-0.53,77.03,74,86,86.05
+AT-7519,Nadolol,-0.59,79.73,74,86,86.05
+AT-7519,PF-04217903,-0.52,77.33,75,86,87.21
+AT-7519,R-406,-0.51,70,80,86,93.02
+AT-7519,Rigosertib,-0.51,72.37,76,86,88.37
+AT-7519,Selumetinib,-0.57,79.49,78,86,90.7
+AT-7519,TAK-715,-0.58,79.73,74,86,86.05
+Omacetaxine Mepesuccinate,Axitinib,-0.59,78.08,73,86,84.88
+Omacetaxine Mepesuccinate,AZD-1775,-0.51,71.79,78,86,90.7
+Omacetaxine Mepesuccinate,BMS-777607,-0.52,72.97,74,86,86.05
+Omacetaxine Mepesuccinate,Brimonidine,-0.58,75.68,74,86,86.05
+Omacetaxine Mepesuccinate,Bromhexine,-0.52,74.32,74,86,86.05
+Omacetaxine Mepesuccinate,Erlotinib Hydrochloride,-0.51,71.43,77,86,89.53
+Omacetaxine Mepesuccinate,Hexylcaine,-0.53,74.67,75,86,87.21
+Omacetaxine Mepesuccinate,Iopanoic Acid,-0.54,74.67,75,86,87.21
+Omacetaxine Mepesuccinate,Isotretinoin,-0.55,75.34,73,86,84.88
+Omacetaxine Mepesuccinate,Ketorolac,-0.51,69.86,73,86,84.88
+Omacetaxine Mepesuccinate,Levocetirizine,-0.54,74.32,74,86,86.05
+Omacetaxine Mepesuccinate,Nadolol,-0.61,78.08,73,86,84.88
+Omacetaxine Mepesuccinate,PF-04217903,-0.51,73.33,75,86,87.21
+Omacetaxine Mepesuccinate,Rigosertib,-0.55,73.68,76,86,88.37
+Omacetaxine Mepesuccinate,TAK-715,-0.57,76.71,73,86,84.88
+Omacetaxine Mepesuccinate,Tivantinib,-0.51,67.57,74,86,86.05

@@ -8,6 +8,7 @@ suppressWarnings(suppressMessages(library(tidyr)))
 suppressWarnings(suppressMessages(library(RecordLinkage)))
 suppressWarnings(suppressMessages(library(ggplot2)))
 suppressWarnings(suppressMessages(library(purrr)))
+suppressWarnings(suppressMessages(library(tools)))
 suppressWarnings(suppressMessages(library(stringr)))
 
 #####################################################################
