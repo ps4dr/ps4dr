@@ -6,7 +6,7 @@ The R package is divided into two directories.
 1. **Analysis.** Contains the main PS4DR workflow.
 2. **Preprocessing.** Contains the scripts to process the data used in the case scenario to run the PS4DR workflow.
 
-Necessary R Packages to run the workflow:
+Required R Packages to run the workflow
 ---------------------------------------
 - cowplot (v 0.9.4),  
 - data.table (v 1.12.2),  
