@@ -8,7 +8,7 @@ The R package is divided into two directories.
 
 Necessary R Packages to run the workflow:
 ---------------------------------------
-| * cowplot (v 0.9.4),  
+- cowplot (v 0.9.4),  
 | * data.table (v 1.12.2),  
 | * doParallel (v 1.0.14),  
 | * dplyr (v 0.8.1),  
