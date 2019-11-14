@@ -6,7 +6,6 @@
 #' 02: Drug Perturbed Genes & DEGs & GWAS data :> drugPdisease_genes,
 #' 03: Drug Perturbed Genes & GWAS data :> drugGWAS_genes.
 
-suppressWarnings(suppressMessages(library(doSNOW)))
 suppressWarnings(suppressMessages(library(foreach)))
 suppressWarnings(suppressMessages(library(doParallel)))
 registerDoParallel(parallel::detectCores() - 1)

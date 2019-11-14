@@ -33,7 +33,7 @@ echo $"\n2.3 Calculating Drug SPIAs\n"
 #Rscript R/analysis/DrugSPIA.R data/
 
 echo $"\n2.4 Checking Distributions\n"
-Rscript R/analysis/CheckDistribution.R data/
+#Rscript R/analysis/CheckDistribution.R data/
 
 echo $"\n2.5 Checking Drug Combinations\n"
 #Rscript R/analysis/DrugCombination.R data/

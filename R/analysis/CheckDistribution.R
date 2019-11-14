@@ -229,7 +229,7 @@ splot <- ggplot(drugCor, aes(x = affectedPathway, y = Correlation.Score, col = D
   ylab("Correlation Scores") +
   xlab("Affected Pathways (%)")
 splot_int = ggplotly(splot,tooltip =c("Disease","Drug","Correlation.Score"))
-# htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder, "results/figures/ScatterPlots_CorrelationScore.html"))
+htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder, "results/figures/ScatterPlots_CorrelationScore.html"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
