@@ -109,7 +109,7 @@ disease_genes = disease_genes[order(p.value),]
 disease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
 # add dummy variable
 disease_genes[, same.disease := ifelse(efo.id.DEGs == efo.id.GWASs, TRUE, FALSE)]
-save(disease_genes, file = file.path(dataFolder,"results/disease_genes.RData"))
+# save(disease_genes, file = file.path(dataFolder,"results/disease_genes.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##___________Drugs to DISEASE Genes___________#####
@@ -128,7 +128,7 @@ gene_id = gene_id[which(! is.na(gene_id$ENTREZ)),]
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 # get LINCS dataset
-load(file.path(dataFolder,"L1000_v97.RData"))
+load(file.path(dataFolder,"L1000.RData"))
 # harmonizome = unique(fread(file.path(dataFolder,"harmonizome.tsv")))
 L1000 = L1000[, c(5, 1, 6)]
 L1000 = L1000[order(ensembl.id, decreasing = TRUE),]
@@ -204,17 +204,17 @@ drugPdisease_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandlin
 close(pb)
 cat(sprintf("\n"))
 
-save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes.RData"))
-
-#load(file.path(dataFolder,"results/drugPdisease_genes50.RData"))
-# correct p-values
-drugPdisease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
-drugPdisease_genes = drugPdisease_genes[p.adjusted < 0.05]
-save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes.padj.RData"))
-drugPdisease_genes = drugPdisease_genes[p.adjusted < 1e-05]
-save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes.padj1e-5.RData"))
-#md2 = unique(min.drugs[,c(1,3,12)]) #filtering columns for merging indication area to our super drugs
-#drugPdisease_genes = merge(drugPdisease_genes,md2,by=c("chembl.id","efo.id"))
+# save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes.RData"))
+# 
+# #load(file.path(dataFolder,"results/drugPdisease_genes50.RData"))
+# # correct p-values
+# drugPdisease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
+# drugPdisease_genes = drugPdisease_genes[p.adjusted < 0.05]
+# save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes.padj.RData"))
+# drugPdisease_genes = drugPdisease_genes[p.adjusted < 1e-05]
+# save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes.padj1e-5.RData"))
+# #md2 = unique(min.drugs[,c(1,3,12)]) #filtering columns for merging indication area to our super drugs
+# #drugPdisease_genes = merge(drugPdisease_genes,md2,by=c("chembl.id","efo.id"))
 
 
 #______Following Part is optional filtering_______#
@@ -227,83 +227,83 @@ save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes
 #' and also recorded from GWAS.
 #' 
 
-# load(file.path(dataFolder,"drug2disease.RData"))
-# load(file.path(dataFolder,"GWASs_v97.RData"))
-# GWASs = data.table(GWASs[, c(4, 5, 2, 3)])
-# tmp = dplyr::count(GWASs, efo.id)
-# 
-# # disgen_plot1 = ggplot(tmp, aes(x=n)) + geom_freqpoly(color="darkred",bins = 30)+ ggtitle("Genes per Disease frequency plot")
-# # 
-# tmp2 = subset(tmp, n >= 50)
-# # disgen_plot2 = ggplot(tmp2, aes(x=n)) + geom_freqpoly(color="darkred", bins = 30)+ ggtitle("Genes (>= 50) per Disease frequency plot")
-# # 
-# tmp3 = subset(tmp, n >= 100)
-# # disgen_plot3 = ggplot(tmp3, aes(x=n)) + geom_freqpoly(color="darkred", bins = 30)+ ggtitle("Genes (>= 100) per Disease frequency plot")
-# # 
-# tmp4 = subset(tmp, n >= 500)
-# # disgen_plot4 = ggplot(tmp4, aes(x=n)) + geom_freqpoly(color="darkred", bins = 30)+ ggtitle("Genes (>= 500) per Disease frequency plot")
-# # 
-# # jpeg(file=file.path(dataFolder,"results/figures/frequency_plots_GWASs_diseaseGenes.jpeg", width=1800, height=1980, res=200))
-# # plot_grid(disgen_plot1,disgen_plot2, disgen_plot3,disgen_plot4,align = "h", ncol = 2,nrow =2, rel_heights = c(1/4, 1/4))
-# # dev.off()
-# 
-# 
-# GWASs = merge(tmp2, GWASs, by = "efo.id")
-# GWASs = data.table(GWASs[, c(1, 3, 4, 5)])
-# 
-# tmp = dplyr::count(L1000, chembl.id)
-# tmp2 = subset(tmp, n >= 10) #we are selecting drugs that alter expresiion of at least 10 genes
-# L1000 = merge(L1000, tmp2, by = "chembl.id")
-# L1000 = L1000[, c(1, 2, 3, 4, 5)]
-# #update chembl & efo_ids again
-# chembl_ids = unique(L1000[, chembl.id])
-# efo_ids = unique(GWASs$efo.id)
-# GWASs_list = split(GWASs, GWASs$efo.id)
-# # create gene universes for Fisher's test
-# load("./data/geneID_v97.RData")
-# ensembl_ids = unique(gene_id$ensembl.id)
-# 
-# ## Signifcant overlap calculation
-# cat(sprintf("GWAS to Drug perturbed Gene Set Overlap Signifcance Calculation\n"))
-# pb <- txtProgressBar(min=0, max=length(efo_ids), style=3)
-# drugGWAS_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandling = "remove",.verbose = T) %dopar% {
-#     Sys.sleep(1)
-#     setTxtProgressBar(pb, i)
-#     current_efo = efo_ids[i]
-#     # loop through drugs
-#     foreach (j = seq(chembl_ids), .combine = rbind, .errorhandling = "remove",.verbose = T) %do% {
-#         current_chembl = chembl_ids[j]
-#         degs = unique(L1000[chembl.id == current_chembl, ensembl.id])
-#         gags = GWASs_list[[current_efo]]$ensembl.id
-#         if (length(degs) > 0 && length(gags) > 0) {
-#             # test significance
-#             tmp = SignificantOverlap(degs, gags, ensembl_ids)
-#             # annotate
-#             tmp = cbind(chembl.id = current_chembl, efo.id = current_efo, tmp)
-#             tmp = merge(unique(GWASs[, .(efo.id, efo.term)]), tmp, by = "efo.id")
-#             tmp = merge(unique(L1000[, .(chembl.id, chembl.name)]), tmp, by = "chembl.id")
-#             # add dummy variable
-#             tmp[, existing.indication := ifelse(nrow(drug2disease[efo.id == current_efo & chembl.id == current_chembl]) > 0, TRUE, FALSE)]
-#             setcolorder(tmp, c("chembl.id", "chembl.name", "efo.id", "efo.term", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value", "existing.indication"))
-#         }
-#     }
-# }
-# close(pb)
-# 
-# # correct p-values
-# drugGWAS_genes[p.value == 0, p.value := 3e-324]
-# drugGWAS_genes = drugGWAS_genes[overlap > 0]
-# drugGWAS_genes = drugGWAS_genes[order(p.value),]
-# drugGWAS_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
-# save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.RData"))
-# 
-# drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-05]
-# save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.padj1e-5.RData"))
-# 
-# drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-10]
-# save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.padj1e-10.RData"))
-# 
-# 
+load(file.path(dataFolder,"drug2disease.RData"))
+load(file.path(dataFolder,"GWASs.RData"))
+GWASs = data.table(GWASs[, c(4, 5, 2, 3)])
+tmp = dplyr::count(GWASs, efo.id)
+
+# disgen_plot1 = ggplot(tmp, aes(x=n)) + geom_freqpoly(color="darkred",bins = 30)+ ggtitle("Genes per Disease frequency plot")
+#
+tmp2 = subset(tmp, n >= 50)
+# disgen_plot2 = ggplot(tmp2, aes(x=n)) + geom_freqpoly(color="darkred", bins = 30)+ ggtitle("Genes (>= 50) per Disease frequency plot")
+#
+tmp3 = subset(tmp, n >= 100)
+# disgen_plot3 = ggplot(tmp3, aes(x=n)) + geom_freqpoly(color="darkred", bins = 30)+ ggtitle("Genes (>= 100) per Disease frequency plot")
+#
+tmp4 = subset(tmp, n >= 500)
+# disgen_plot4 = ggplot(tmp4, aes(x=n)) + geom_freqpoly(color="darkred", bins = 30)+ ggtitle("Genes (>= 500) per Disease frequency plot")
+#
+# jpeg(file=file.path(dataFolder,"results/figures/frequency_plots_GWASs_diseaseGenes.jpeg", width=1800, height=1980, res=200))
+# plot_grid(disgen_plot1,disgen_plot2, disgen_plot3,disgen_plot4,align = "h", ncol = 2,nrow =2, rel_heights = c(1/4, 1/4))
+# dev.off()
+
+
+GWASs = merge(tmp2, GWASs, by = "efo.id")
+GWASs = data.table(GWASs[, c(1, 3, 4, 5)])
+
+tmp = dplyr::count(L1000, chembl.id)
+tmp2 = subset(tmp, n >= 10) #we are selecting drugs that alter expresiion of at least 10 genes
+L1000 = merge(L1000, tmp2, by = "chembl.id")
+L1000 = L1000[, c(1, 2, 3, 4, 5)]
+#update chembl & efo_ids again
+chembl_ids = unique(L1000[, chembl.id])
+efo_ids = unique(GWASs$efo.id)
+GWASs_list = split(GWASs, GWASs$efo.id)
+# create gene universes for Fisher's test
+load("./data/geneID_v97.RData")
+ensembl_ids = unique(gene_id$ensembl.id)
+
+## Signifcant overlap calculation
+cat(sprintf("GWAS to Drug perturbed Gene Set Overlap Signifcance Calculation\n"))
+pb <- txtProgressBar(min=0, max=length(efo_ids), style=3)
+drugGWAS_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandling = "remove",.verbose = T) %dopar% {
+    Sys.sleep(1)
+    setTxtProgressBar(pb, i)
+    current_efo = efo_ids[i]
+    # loop through drugs
+    foreach (j = seq(chembl_ids), .combine = rbind, .errorhandling = "remove",.verbose = T) %do% {
+        current_chembl = chembl_ids[j]
+        degs = unique(L1000[chembl.id == current_chembl, ensembl.id])
+        gags = GWASs_list[[current_efo]]$ensembl.id
+        if (length(degs) > 0 && length(gags) > 0) {
+            # test significance
+            tmp = SignificantOverlap(degs, gags, ensembl_ids)
+            # annotate
+            tmp = cbind(chembl.id = current_chembl, efo.id = current_efo, tmp)
+            tmp = merge(unique(GWASs[, .(efo.id, efo.term)]), tmp, by = "efo.id")
+            tmp = merge(unique(L1000[, .(chembl.id, chembl.name)]), tmp, by = "chembl.id")
+            # add dummy variable
+            tmp[, existing.indication := ifelse(nrow(drug2disease[efo.id == current_efo & chembl.id == current_chembl]) > 0, TRUE, FALSE)]
+            setcolorder(tmp, c("chembl.id", "chembl.name", "efo.id", "efo.term", "DEGs", "GWASs", "overlap", "universe", "commonGenes", "odds.ratio", "p.value", "existing.indication"))
+        }
+    }
+}
+close(pb)
+
+# correct p-values
+drugGWAS_genes[p.value == 0, p.value := 3e-324]
+drugGWAS_genes = drugGWAS_genes[overlap > 0]
+drugGWAS_genes = drugGWAS_genes[order(p.value),]
+drugGWAS_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
+save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.RData"))
+
+drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-05]
+save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.padj1e-5.RData"))
+
+drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-10]
+save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.padj1e-10.RData"))
+
+
 # load(file.path(dataFolder,"results/drugGWAS_genes50.padj1e-5.RData"))
 # load(file.path(dataFolder,"results/drugGWAS_genes50.padj1e-10.RData"))
 # length(unique(drugGWAS_genes$chembl.id))

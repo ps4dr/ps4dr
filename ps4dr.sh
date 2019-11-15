@@ -24,10 +24,10 @@ echo $"\n1.3 Retreiving drug response data\n"
 ###############
 
 echo $"\n2.1 Calculating significant overlaps\n"
-#Rscript R/analysis/SignificantOverlap.R data/
+Rscript R/analysis/SignificantOverlap.R data/
 
 echo $"\n2.2 Calculating Disease SPIAs\n"
-Rscript R/analysis/DiseaseSPIA.R data/
+#Rscript R/analysis/DiseaseSPIA.R data/
 
 echo $"\n2.3 Calculating Drug SPIAs\n"
 #Rscript R/analysis/DrugSPIA.R data/
