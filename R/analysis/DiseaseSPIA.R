@@ -101,6 +101,11 @@ names(DisGen) = c("efo.id", "efo.term", "ensembl.id")
 DisGen = merge(DisGen, lfc_comb, by = c('ensembl.id', 'efo.id')) # merge with harmonizome
 
 lfc_efo = split(DisGen, DisGen$efo.term)
+
+#' We like to discard diseases with less than 10 genes in the gene sets 
+#' since after running SPIA or any other gene set enrichment method with 
+#' such a small number of genes will not return almost any significant pathway.
+#' However, users can comment out following line to not use the propsed filer
 lfc_efo = Filter(function(x) dim(x)[1] > 10, lfc_efo) # remove diseases with very few (less than 10) genes to test
 
 save(lfc_efo, file = file.path(dataFolder,"spia_input/lfc_disease_genes.RData"))

@@ -288,21 +288,8 @@ drugGWAS_genes = drugGWAS_genes[order(p.value),]
 drugGWAS_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
 # save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.RData"))
 
-# drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-05]
-# save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.padj1e-5.RData"))
-
 drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-10]
 save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.padj1e-10.RData"))
-
-
-# load(file.path(dataFolder,"results/drugGWAS_genes50.padj1e-5.RData"))
-# load(file.path(dataFolder,"results/drugGWAS_genes50.padj1e-10.RData"))
-# length(unique(drugGWAS_genes$chembl.id))
-# length(unique(drugGWAS_genes$efo.id))
-# 
-# load(file.path(dataFolder,"results/drugPdisease_genes.48D.padj1e-5.RData"))
-# length(unique(drugPdisease_genes$efo.id))
-# cat(sprintf("\n"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
