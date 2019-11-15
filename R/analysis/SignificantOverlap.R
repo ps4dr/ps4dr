@@ -109,7 +109,7 @@ disease_genes = disease_genes[order(p.value),]
 disease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
 # add dummy variable
 disease_genes[, same.disease := ifelse(efo.id.DEGs == efo.id.GWASs, TRUE, FALSE)]
-# save(disease_genes, file = file.path(dataFolder,"results/disease_genes.RData"))
+save(disease_genes, file = file.path(dataFolder,"results/disease_genes.RData"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##___________Drugs to DISEASE Genes___________#####
@@ -204,18 +204,12 @@ drugPdisease_genes <- foreach (i = seq(efo_ids), .combine = rbind, .errorhandlin
 close(pb)
 cat(sprintf("\n"))
 
-# save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes.RData"))
-# 
-# #load(file.path(dataFolder,"results/drugPdisease_genes50.RData"))
-# # correct p-values
-# drugPdisease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
-# drugPdisease_genes = drugPdisease_genes[p.adjusted < 0.05]
-# save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes.padj.RData"))
-# drugPdisease_genes = drugPdisease_genes[p.adjusted < 1e-05]
-# save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes.padj1e-5.RData"))
-# #md2 = unique(min.drugs[,c(1,3,12)]) #filtering columns for merging indication area to our super drugs
-# #drugPdisease_genes = merge(drugPdisease_genes,md2,by=c("chembl.id","efo.id"))
+save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes.RData"))
 
+# correct p-values
+drugPdisease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
+drugPdisease_genes = drugPdisease_genes[p.adjusted < 0.05]
+save(drugPdisease_genes, file = file.path(dataFolder,"results/drugPdisease_genes.padj.RData"))
 
 #______Following Part is optional filtering_______#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -259,9 +253,6 @@ L1000 = L1000[, c(1, 2, 3, 4, 5)]
 chembl_ids = unique(L1000[, chembl.id])
 efo_ids = unique(GWASs$efo.id)
 GWASs_list = split(GWASs, GWASs$efo.id)
-# create gene universes for Fisher's test
-load("./data/geneID_v97.RData")
-ensembl_ids = unique(gene_id$ensembl.id)
 
 ## Signifcant overlap calculation
 cat(sprintf("GWAS to Drug perturbed Gene Set Overlap Signifcance Calculation\n"))
@@ -295,10 +286,10 @@ drugGWAS_genes[p.value == 0, p.value := 3e-324]
 drugGWAS_genes = drugGWAS_genes[overlap > 0]
 drugGWAS_genes = drugGWAS_genes[order(p.value),]
 drugGWAS_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
-save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.RData"))
+# save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.RData"))
 
-drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-05]
-save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.padj1e-5.RData"))
+# drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-05]
+# save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.padj1e-5.RData"))
 
 drugGWAS_genes = drugGWAS_genes[p.adjusted < 1e-10]
 save(drugGWAS_genes, file = file.path(dataFolder,"results/drugGWAS_genes.padj1e-10.RData"))
