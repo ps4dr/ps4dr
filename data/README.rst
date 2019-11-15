@@ -3,10 +3,10 @@ Datasets
 Datasets used for the application of the manuscript:
 
 GWAS: 
- - GWASdb (Li *et al.,* 11)  
- - GWAS Catalog (Welter *et al.,* 2013)  
- - GRASP (Leslie *et al.,* 2014) 
- - PHEWAS (Denny  *et al.,* 2010)  
+ - GWASdb version 2.0
+ - GWAS Catalog version-1.0_associations_e93_release_2018-09-15
+ - GRASP version 2.0
+ - PHEWAS (Denny *et al.,* 2013)  
 DEGS:
  - Open Targets (Koscielny *et al.,* 2016)  
  - LINCS (Duan *et al.,* 2014)  
