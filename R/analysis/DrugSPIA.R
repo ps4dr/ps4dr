@@ -67,7 +67,7 @@ gene_id = gene_id[, c(1, 2)]
 
 # get LINCS dataset
 load(file.path(dataFolder,"L1000.RData"))
-L1000 = L1000[, c(5, 1, 7)]
+L1000 = L1000[, c(5, 1, 6)]
 L1000 = L1000[order(ensembl.id, decreasing = TRUE),]
 L1000 = L1000[! duplicated(L1000[, c('ensembl.id', 'chembl.id')]),]
 L1000 = merge(L1000, gene_id, by = "ensembl.id")

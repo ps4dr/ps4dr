@@ -15,6 +15,7 @@ suppressWarnings(suppressMessages(library(purrr)))
 suppressWarnings(suppressMessages(library(tools)))
 suppressWarnings(suppressMessages(library(plotly)))
 suppressWarnings(suppressMessages(library(cowplot)))
+suppressWarnings(suppressMessages(library(qqplotr)))
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository
@@ -191,6 +192,52 @@ save(drug_path,dis_path,drug_dis_path,drug_correlation,drug_shortlist,file=file.
 fwrite(drug_shortlist_df, file = file.path(dataFolder,"results/drug_shortlist.csv"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~: Cancer Drugs Ratio :~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#' load drug details (phase=I,II,III,IV) from ChEMBL (28/01/2020)
+tmp = read.csv(file.path(dataFolder,"chembl_1234.tsv", sep = "\t"))
+tmp = tmp[,c(1,2,3)]
+
+#' load all 673 use case drugs
+load(file.path(dataFolder,"usecase_drugs.RData"))
+dmap = dmap[,c(1,2)]
+
+tmp2 = merge(dmap,tmp,by.x="chembl.id", by.y="ChEMBL.ID")
+tmp2 = tmp2[,c(3,4)]
+chembl673 = unique(tmp2 %>% # split multiple genes in same column to multiple rows
+                     mutate(Synonyms = strsplit(as.character(Synonyms), "\\|")) %>%
+                     unnest(Synonyms))
+chembl673$Synonyms = trimws(chembl673$Synonyms)
+chembl673$Synonyms = toupper(chembl673$Synonyms)
+chembl673 = unique(chembl673)
+chembl673X=chembl673[,c(2,1)]
+names(chembl673X) = c("Name","Synonyms")
+tmp = rbind(chembl673,chembl673X)
+dmap673 = unique(as.data.table(tmp[,c(1)]))
+
+#' load all Cancer Drugs from National Cancer Institute (28/01/2020)
+cancerDrugs = read.csv(file.path(dataFolder, "cancerdrugs_NCI_28012020.txt"))
+cancerDrugs = unique(cancerDrugs)
+
+cancerDrugs = unique(cancerDrugs %>% # split multiple genes in same column to multiple rows
+                       mutate(cancerdrug = strsplit(as.character(cancerdrug), "\\(")) %>%
+                       unnest(cancerdrug))
+cancerDrugs$cancerdrug = gsub("\\)", "", cancerDrugs$cancerdrug)
+cancerDrugs$cancerdrug = trimws(cancerDrugs$cancerdrug)
+cancerDrugs$cancerdrug = toupper(cancerDrugs$cancerdrug)
+cancerDrugs = unique(cancerDrugs)
+
+
+#' merge cancer drugs with all 673 use case drugs (and their synonyms)
+alldrugs_diseaseMap = merge(dmap673,cancerDrugs,by.x = "V1",by.y="cancerdrug")
+sprintf("Cancer Drug Ratio in the all Use case Drugs: %.2f", length(unique(alldrugs_diseaseMap$V1))/673*100)
+
+#' merge canser drugs with all 115 shortlisted drugs
+topdrugs = unique(drug_shortlist_df[,c(1)])
+topdrugs_diseaseMap = merge(topdrugs,alldrugs_diseaseMap, by.x="Drug",by.y = "V1")
+sprintf("Cancer Drug Ratio in the Top Drug list: %.2f", length(unique(topdrugs_diseaseMap$Drug))/115*100)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~: Scatter Plot :~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -315,6 +362,20 @@ ggplot(drug_cor_scaled, aes(x = Correlation.Score, fill = Disease)) +
     theme(legend.title=element_blank()) +
     ylab("Density") +
     xlab("Normalized Correlation Scores")
+dev.off()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~: Q-Q Plot With Standization :~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+jpeg(file=file.path(dataFolder, "results/figures/Q-Q_Plots_CorrelationScore_scaled.jpeg"), width=3000, height=1980, res=190)
+ggplot(data = drug_cor_scaled, mapping = aes(sample = Correlation.Score, color = Disease, fill = Disease)) +
+  stat_qq_band(alpha=0.5) + 
+  stat_qq_line() +
+  stat_qq_point() +
+  facet_wrap(~ Disease) + facet_grid(rows = 5) +
+  theme(legend.position = "none", legend.title = element_text(size = 10)) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles")
 dev.off()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

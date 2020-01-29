@@ -1,0 +1,560 @@
+cancerdrug
+Abemaciclib
+Abiraterone Acetate
+Abraxane (Paclitaxel Albumin-stabilized Nanoparticle Formulation)
+ABVD
+ABVE
+ABVE-PC
+AC
+Acalabrutinib
+AC-T
+Actemra (Tocilizumab)
+Adcetris (Brentuximab Vedotin)
+ADE
+Ado-Trastuzumab Emtansine
+Adriamycin (Doxorubicin Hydrochloride)
+Afatinib Dimaleate
+Afinitor (Everolimus)
+Akynzeo (Netupitant and Palonosetron Hydrochloride)
+Aldara (Imiquimod)
+Aldesleukin
+Alecensa (Alectinib)
+Alectinib
+Alemtuzumab
+Alimta (Pemetrexed Disodium)
+Aliqopa (Copanlisib Hydrochloride)
+Alkeran for Injection (Melphalan Hydrochloride)
+Alkeran Tablets (Melphalan)
+Aloxi (Palonosetron Hydrochloride)
+Alpelisib
+Alunbrig (Brigatinib)
+Ameluz (Aminolevulinic Acid Hydrochloride)
+Amifostine
+Aminolevulinic Acid Hydrochloride
+Anastrozole
+Apalutamide
+Aprepitant
+Aranesp (Darbepoetin Alfa)
+Aredia (Pamidronate Disodium)
+Arimidex (Anastrozole)
+Aromasin (Exemestane)
+Arranon (Nelarabine)
+Arsenic Trioxide
+Arzerra (Ofatumumab)
+Asparaginase Erwinia chrysanthemi
+Asparlas (Calaspargase Pegol-mknl)
+Atezolizumab
+Avastin (Bevacizumab)
+Avelumab
+Axicabtagene Ciloleucel
+Axitinib
+Azacitidine
+Azedra (Iobenguane I 131)
+Balversa (Erdafitinib)
+Bavencio (Avelumab)
+BEACOPP
+Beleodaq (Belinostat)
+Belinostat
+Bendamustine Hydrochloride
+Bendeka (Bendamustine Hydrochloride)
+BEP
+Besponsa (Inotuzumab Ozogamicin)
+Bevacizumab
+Bexarotene
+Bicalutamide
+BiCNU (Carmustine)
+Binimetinib
+Bleomycin Sulfate
+Blinatumomab
+Blincyto (Blinatumomab)
+Bortezomib
+Bosulif (Bosutinib)
+Bosutinib
+Braftovi (Encorafenib)
+Brentuximab Vedotin
+Brigatinib
+Brukinsa (Zanubrutinib)
+BuMel
+Busulfan
+Busulfex (Busulfan)
+Cabazitaxel
+Cablivi (Caplacizumab-yhdp)
+Cabometyx (Cabozantinib-S-Malate)
+Cabozantinib-S-Malate
+CAF
+Calaspargase Pegol-mknl
+Calquence (Acalabrutinib)
+Campath (Alemtuzumab)
+Camptosar (Irinotecan Hydrochloride)
+Capecitabine
+Caplacizumab-yhdp
+CAPOX
+Carac (Fluorouracil--Topical)
+Carboplatin
+CARBOPLATIN-TAXOL
+Carfilzomib
+Carmustine
+Carmustine Implant
+Casodex (Bicalutamide)
+CEM
+Cemiplimab-rwlc
+Ceritinib
+Cerubidine (Daunorubicin Hydrochloride)
+Cervarix (Recombinant HPV Bivalent Vaccine)
+Cetuximab
+CEV
+Chlorambucil
+CHLORAMBUCIL-PREDNISONE
+CHOP
+Cisplatin
+Cladribine
+Clofarabine
+Clolar (Clofarabine)
+CMF
+Cobimetinib
+Cometriq (Cabozantinib-S-Malate)
+Copanlisib Hydrochloride
+COPDAC
+Copiktra (Duvelisib)
+COPP
+COPP-ABV
+Cosmegen (Dactinomycin)
+Cotellic (Cobimetinib)
+Crizotinib
+CVP
+Cyclophosphamide
+Cyramza (Ramucirumab)
+Cytarabine
+Dabrafenib Mesylate
+Dacarbazine
+Dacogen (Decitabine)
+Dacomitinib
+Dactinomycin
+Daratumumab
+Darbepoetin Alfa
+Darolutamide
+Darzalex (Daratumumab)
+Dasatinib
+Daunorubicin Hydrochloride
+Daunorubicin Hydrochloride and Cytarabine Liposome
+Daurismo (Glasdegib Maleate)
+Decitabine
+Defibrotide Sodium
+Defitelio (Defibrotide Sodium)
+Degarelix
+Denileukin Diftitox
+Denosumab
+Dexamethasone
+Dexrazoxane Hydrochloride
+Dinutuximab
+Docetaxel
+Doxil (Doxorubicin Hydrochloride Liposome)
+Doxorubicin Hydrochloride
+Doxorubicin Hydrochloride Liposome
+Durvalumab
+Duvelisib
+Efudex (Fluorouracil--Topical)
+Eligard (Leuprolide Acetate)
+Elitek (Rasburicase)
+Ellence (Epirubicin Hydrochloride)
+Elotuzumab
+Eloxatin (Oxaliplatin)
+Eltrombopag Olamine
+Elzonris (Tagraxofusp-erzs)
+Emapalumab-lzsg
+Emend (Aprepitant)
+Empliciti (Elotuzumab)
+Enasidenib Mesylate
+Encorafenib
+Enhertu (Fam-Trastuzumab Deruxtecan-nxki)
+Entrectinib
+Enzalutamide
+Epirubicin Hydrochloride
+EPOCH
+Epoetin Alfa
+Epogen (Epoetin Alfa)
+Erbitux (Cetuximab)
+Erdafitinib
+Eribulin Mesylate
+Erivedge (Vismodegib)
+Erleada (Apalutamide)
+Erlotinib Hydrochloride
+Erwinaze (Asparaginase Erwinia chrysanthemi)
+Ethyol (Amifostine)
+Etopophos (Etoposide Phosphate)
+Etoposide
+Etoposide Phosphate
+Everolimus
+Evista (Raloxifene Hydrochloride)
+Evomela (Melphalan Hydrochloride)
+Exemestane
+5-FU (Fluorouracil Injection)
+5-FU (Fluorouracil--Topical)
+Fam-Trastuzumab Deruxtecan-nxki
+Fareston (Toremifene)
+Farydak (Panobinostat)
+Faslodex (Fulvestrant)
+FEC
+Fedratinib Hydrochloride
+Femara (Letrozole)
+Filgrastim
+Firmagon (Degarelix)
+Fludarabine Phosphate
+Fluoroplex (Fluorouracil--Topical)
+Fluorouracil Injection
+Fluorouracil--Topical
+Flutamide
+FOLFIRI
+FOLFIRI-BEVACIZUMAB
+FOLFIRI-CETUXIMAB
+FOLFIRINOX
+FOLFOX
+Folotyn (Pralatrexate)
+Fostamatinib Disodium
+FU-LV
+Fulvestrant
+Gamifant (Emapalumab-lzsg)
+Gardasil (Recombinant HPV Quadrivalent Vaccine)
+Gardasil 9 (Recombinant HPV Nonavalent Vaccine)
+Gazyva (Obinutuzumab)
+Gefitinib
+Gemcitabine Hydrochloride
+GEMCITABINE-CISPLATIN
+GEMCITABINE-OXALIPLATIN
+Gemtuzumab Ozogamicin
+Gemzar (Gemcitabine Hydrochloride)
+Gilotrif (Afatinib Dimaleate)
+Gilteritinib Fumarate
+Glasdegib Maleate
+Gleevec (Imatinib Mesylate)
+Gliadel Wafer (Carmustine Implant)
+Glucarpidase
+Goserelin Acetate
+Granisetron
+Granisetron Hydrochloride
+Granix (Filgrastim)
+Halaven (Eribulin Mesylate)
+Hemangeol (Propranolol Hydrochloride)
+Herceptin Hylecta (Trastuzumab and Hyaluronidase-oysk)
+Herceptin (Trastuzumab)
+HPV Bivalent Vaccine, Recombinant
+HPV Nonavalent Vaccine, Recombinant
+HPV Quadrivalent Vaccine, Recombinant
+Hycamtin (Topotecan Hydrochloride)
+Hydrea (Hydroxyurea)
+Hydroxyurea
+Hyper-CVAD
+Ibrance (Palbociclib)
+Ibritumomab Tiuxetan
+Ibrutinib
+ICE
+Iclusig (Ponatinib Hydrochloride)
+Idamycin PFS (Idarubicin Hydrochloride)
+Idarubicin Hydrochloride
+Idelalisib
+Idhifa (Enasidenib Mesylate)
+Ifex (Ifosfamide)
+Ifosfamide
+IL-2 (Aldesleukin)
+Imatinib Mesylate
+Imbruvica (Ibrutinib)
+Imfinzi (Durvalumab)
+Imiquimod
+Imlygic (Talimogene Laherparepvec)
+Inlyta (Axitinib)
+Inotuzumab Ozogamicin
+Inrebic (Fedratinib Hydrochloride)
+Interferon Alfa-2b, Recombinant
+Interleukin-2 (Aldesleukin)
+Intron A (Recombinant Interferon Alfa-2b)
+Iobenguane I 131
+Ipilimumab
+Iressa (Gefitinib)
+Irinotecan Hydrochloride
+Irinotecan Hydrochloride Liposome
+Istodax (Romidepsin)
+Ivosidenib
+Ixabepilone
+Ixazomib Citrate
+Ixempra (Ixabepilone)
+Jakafi (Ruxolitinib Phosphate)
+JEB
+Jevtana (Cabazitaxel)
+Kadcyla (Ado-Trastuzumab Emtansine)
+Kepivance (Palifermin)
+Keytruda (Pembrolizumab)
+Kisqali (Ribociclib)
+Kymriah (Tisagenlecleucel)
+Kyprolis (Carfilzomib)
+Lanreotide Acetate
+Lapatinib Ditosylate
+Larotrectinib Sulfate
+Lenalidomide
+Lenvatinib Mesylate
+Lenvima (Lenvatinib Mesylate)
+Letrozole
+Leucovorin Calcium
+Leukeran (Chlorambucil)
+Leuprolide Acetate
+Levulan Kerastik (Aminolevulinic Acid Hydrochloride)
+Libtayo (Cemiplimab-rwlc)
+Lomustine
+Lonsurf (Trifluridine and Tipiracil Hydrochloride)
+Lorbrena (Lorlatinib)
+Lorlatinib
+Lumoxiti (Moxetumomab Pasudotox-tdfk)
+Lupron (Leuprolide Acetate)
+Lupron Depot (Leuprolide Acetate)
+Lutathera (Lutetium Lu 177-Dotatate)
+Lutetium (Lu 177-Dotatate)
+Lynparza (Olaparib)
+Marqibo (Vincristine Sulfate Liposome)
+Matulane (Procarbazine Hydrochloride)
+Mechlorethamine Hydrochloride
+Megestrol Acetate
+Mekinist (Trametinib)
+Mektovi (Binimetinib)
+Melphalan
+Melphalan Hydrochloride
+Mercaptopurine
+Mesna
+Mesnex (Mesna)
+Methotrexate
+Methylnaltrexone Bromide
+Midostaurin
+Mitomycin C
+Mitoxantrone Hydrochloride
+Mogamulizumab-kpkc
+Moxetumomab Pasudotox-tdfk
+Mozobil (Plerixafor)
+Mustargen (Mechlorethamine Hydrochloride)
+MVAC
+Mvasi (Bevacizumab)
+Myleran (Busulfan)
+Mylotarg (Gemtuzumab Ozogamicin)
+Nanoparticle Paclitaxel (Paclitaxel Albumin-stabilized Nanoparticle Formulation)
+Navelbine (Vinorelbine Tartrate)
+Necitumumab
+Nelarabine
+Neratinib Maleate
+Nerlynx (Neratinib Maleate)
+Netupitant and Palonosetron Hydrochloride
+Neulasta (Pegfilgrastim)
+Neupogen (Filgrastim)
+Nexavar (Sorafenib Tosylate)
+Nilandron (Nilutamide)
+Nilotinib
+Nilutamide
+Ninlaro (Ixazomib Citrate)
+Niraparib Tosylate Monohydrate
+Nivolumab
+Nplate (Romiplostim)
+Nubeqa (Darolutamide)
+Obinutuzumab
+Odomzo (Sonidegib)
+OEPA
+Ofatumumab
+OFF
+Olaparib
+Omacetaxine Mepesuccinate
+Oncaspar (Pegaspargase)
+Ondansetron Hydrochloride
+Onivyde (Irinotecan Hydrochloride Liposome)
+Ontak (Denileukin Diftitox)
+Opdivo (Nivolumab)
+OPPA
+Osimertinib Mesylate
+Oxaliplatin
+Paclitaxel
+Paclitaxel Albumin-stabilized Nanoparticle Formulation
+PAD
+Palbociclib
+Palifermin
+Palonosetron Hydrochloride
+Palonosetron Hydrochloride and Netupitant
+Pamidronate Disodium
+Panitumumab
+Panobinostat
+Pazopanib Hydrochloride
+PCV
+PEB
+Pegaspargase
+Pegfilgrastim
+Peginterferon Alfa-2b
+PEG-Intron (Peginterferon Alfa-2b)
+Pembrolizumab
+Pemetrexed Disodium
+Perjeta (Pertuzumab)
+Pertuzumab
+Piqray (Alpelisib)
+Plerixafor
+Polatuzumab Vedotin-piiq
+Polivy (Polatuzumab Vedotin-piiq)
+Pomalidomide
+Pomalyst (Pomalidomide)
+Ponatinib Hydrochloride
+Portrazza (Necitumumab)
+Poteligeo (Mogamulizumab-kpkc)
+Pralatrexate
+Prednisone
+Procarbazine Hydrochloride
+Procrit (Epoetin Alfa)
+Proleukin (Aldesleukin)
+Prolia (Denosumab)
+Promacta (Eltrombopag Olamine)
+Propranolol Hydrochloride
+Provenge (Sipuleucel-T)
+Purinethol (Mercaptopurine)
+Purixan (Mercaptopurine)
+Radium 223 Dichloride
+Raloxifene Hydrochloride
+Ramucirumab
+Rasburicase
+Ravulizumab-cwvz
+R-CHOP
+R-CVP
+Recombinant Human Papillomavirus (HPV) Bivalent Vaccine
+Recombinant Human Papillomavirus (HPV) Nonavalent Vaccine
+Recombinant Human Papillomavirus (HPV) Quadrivalent Vaccine
+Recombinant Interferon Alfa-2b
+Regorafenib
+Relistor (Methylnaltrexone Bromide)
+R-EPOCH
+Retacrit (Epoetin Alfa)
+Revlimid (Lenalidomide)
+Rheumatrex (Methotrexate)
+Ribociclib
+R-ICE
+Rituxan (Rituximab)
+Rituxan Hycela (Rituximab and Hyaluronidase Human)
+Rituximab
+Rituximab and Hyaluronidase Human
+Rolapitant Hydrochloride
+Romidepsin
+Romiplostim
+Rozlytrek (Entrectinib)
+Rubidomycin (Daunorubicin Hydrochloride)
+Rubraca (Rucaparib Camsylate)
+Rucaparib Camsylate
+Ruxolitinib Phosphate
+Rydapt (Midostaurin)
+Sancuso (Granisetron)
+Sclerosol Intrapleural Aerosol (Talc)
+Selinexor
+Siltuximab
+Sipuleucel-T
+Somatuline Depot (Lanreotide Acetate)
+Sonidegib
+Sorafenib Tosylate
+Sprycel (Dasatinib)
+STANFORD V
+Sterile Talc Powder (Talc)
+Steritalc (Talc)
+Stivarga (Regorafenib)
+Sunitinib Malate
+Sustol (Granisetron)
+Sutent (Sunitinib Malate)
+Sylatron (Peginterferon Alfa-2b)
+Sylvant (Siltuximab)
+Synribo (Omacetaxine Mepesuccinate)
+Tabloid (Thioguanine)
+TAC
+Tafinlar (Dabrafenib Mesylate)
+Tagraxofusp-erzs
+Tagrisso (Osimertinib Mesylate)
+Talazoparib Tosylate
+Talc
+Talimogene Laherparepvec
+Talzenna (Talazoparib Tosylate)
+Tamoxifen Citrate
+Tarceva (Erlotinib Hydrochloride)
+Targretin (Bexarotene)
+Tasigna (Nilotinib)
+Tavalisse (Fostamatinib Disodium)
+Taxol (Paclitaxel)
+Taxotere (Docetaxel)
+Tecentriq (Atezolizumab)
+Temodar (Temozolomide)
+Temozolomide
+Temsirolimus
+Thalidomide
+Thalomid (Thalidomide)
+Thioguanine
+Thiotepa
+Tibsovo (Ivosidenib)
+Tisagenlecleucel
+Tocilizumab
+Tolak (Fluorouracil--Topical)
+Topotecan Hydrochloride
+Toremifene
+Torisel (Temsirolimus)
+Totect (Dexrazoxane Hydrochloride)
+TPF
+Trabectedin
+Trametinib
+Trastuzumab
+Trastuzumab and Hyaluronidase-oysk
+Treanda (Bendamustine Hydrochloride)
+Trexall (Methotrexate)
+Trifluridine and Tipiracil Hydrochloride
+Trisenox (Arsenic Trioxide)
+Truxima (Rituximab)
+Tykerb (Lapatinib Ditosylate)
+Ultomiris (Ravulizumab-cwvz)
+Unituxin (Dinutuximab)
+Uridine Triacetate
+VAC
+Valrubicin
+Valstar (Valrubicin)
+Vandetanib
+VAMP
+Varubi (Rolapitant Hydrochloride)
+Vectibix (Panitumumab)
+VeIP
+Velcade (Bortezomib)
+Vemurafenib
+Venclexta (Venetoclax)
+Venetoclax
+Verzenio (Abemaciclib)
+Vidaza (Azacitidine)
+Vinblastine Sulfate
+Vincristine Sulfate
+Vincristine Sulfate Liposome
+Vinorelbine Tartrate
+VIP
+Vismodegib
+Vistogard (Uridine Triacetate)
+Vitrakvi (Larotrectinib Sulfate)
+Vizimpro (Dacomitinib)
+Voraxaze (Glucarpidase)
+Vorinostat
+Votrient (Pazopanib Hydrochloride)
+Vyxeos (Daunorubicin Hydrochloride and Cytarabine Liposome)
+Xalkori (Crizotinib)
+Xeloda (Capecitabine)
+XELIRI
+XELOX
+Xgeva (Denosumab)
+Xofigo (Radium 223 Dichloride)
+Xospata (Gilteritinib Fumarate)
+Xpovio (Selinexor)
+Xtandi (Enzalutamide)
+Yervoy (Ipilimumab)
+Yescarta (Axicabtagene Ciloleucel)
+Yondelis (Trabectedin)
+Zaltrap (Ziv-Aflibercept)
+Zanubrutinib 
+Zarxio (Filgrastim)
+Zejula (Niraparib Tosylate Monohydrate)
+Zelboraf (Vemurafenib)
+Zevalin (Ibritumomab Tiuxetan)
+Zinecard (Dexrazoxane Hydrochloride)
+Ziv-Aflibercept
+Zofran (Ondansetron Hydrochloride)
+Zoladex (Goserelin Acetate)
+Zoledronic Acid
+Zolinza (Vorinostat)
+Zometa (Zoledronic Acid)
+Zydelig (Idelalisib)
+Zykadia (Ceritinib)
+Zytiga (Abiraterone Acetate)

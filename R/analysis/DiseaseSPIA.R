@@ -433,18 +433,17 @@ print(man_wtny$p.value)
 jpeg(file = file.path(dataFolder, "results/figures/spia_real_simulated_pvalues_boxplots_kegg.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
 # jpeg(file = file.path(dataFolder, "results/figures/spia_real_simulated_pvalues_boxplots_reactome.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
 # jpeg(file = file.path(dataFolder, "results/figures/spia_real_simulated_pvalues_boxplots_biocarta.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
-print(ggplot(spia_full, aes(x = spia, y = pvalue,fill=spia)) +
-        geom_boxplot() +
-        coord_cartesian(ylim = quantile(spia_full[, pvalue], c(0.03, 0.97))) +
+ggplot(spia_full, aes(x = spia, y = pvalue,fill=spia)) +
+        geom_violin(trim=FALSE) + geom_boxplot(width=0.1)+
         xlab("Distributions of the p-values from SPIA calculations") +
         ylab("p-value") +
         theme_bw(16) + theme(legend.position = "none")+
         scale_x_discrete(breaks = c("Simulated", "Real"), labels = c("Simulated KEGG Pathways", "KEGG Pathways")) +
         # scale_x_discrete(breaks = c("Simulated", "Real"), labels = c("Simulated Reactome Pathways", "Reactome Pathways")) +
         # scale_x_discrete(breaks = c("Simulated", "Real"), labels = c("Simulated Biocarta Pathways", "Biocarta Pathways")) +
-        ggtitle(paste("p-value =", sprintf("%.2e", man_wtny$p.value))))
-dev.off()
+        ggtitle(paste("p-value =", sprintf("%.2e", man_wtny$p.value)))
 
+dev.off()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -466,7 +465,7 @@ for (i in 1:(length(lfc_efo)-1)) {
 }
 
 save(pairwise_genesets, file = file.path(dataFolder, "results/spia_output/pairwise_genesets_intersection.RData"))
-#save(pairwise_genesets, file = "/home/memon/projects/ps4dr/ps4dr/data/results/spia_output/pairwise_genesets_intersection.RData")
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
