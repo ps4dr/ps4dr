@@ -195,7 +195,7 @@ fwrite(drug_shortlist_df, file = file.path(dataFolder,"results/drug_shortlist.cs
 #~~~~~~~~~~~~~~~~: Cancer Drugs Ratio :~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #' load drug details (phase=I,II,III,IV) from ChEMBL (28/01/2020)
-tmp = read.csv(file.path(dataFolder,"chembl_1234.tsv", sep = "\t"))
+tmp = read.csv(file.path(dataFolder,"chembl_1234.csv", sep = "\t"))
 tmp = tmp[,c(1,2,3)]
 
 #' load all 673 use case drugs
