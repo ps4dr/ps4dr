@@ -430,9 +430,9 @@ rm(spia,spia_simulated,spia1,spia2)
 spia_full$spia = as.factor(spia_full$spia)
 man_wtny <- wilcox.test(x = spia_full[spia == "Simulated", pvalue], y = spia_full[spia == "Real", pvalue])
 print(man_wtny$p.value)
-jpeg(file = file.path(dataFolder, "results/figures/spia_real_simulated_pvalues_boxplots_kegg.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
-# jpeg(file = file.path(dataFolder, "results/figures/spia_real_simulated_pvalues_boxplots_reactome.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
-# jpeg(file = file.path(dataFolder, "results/figures/spia_real_simulated_pvalues_boxplots_biocarta.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
+jpeg(file = file.path(dataFolder, "results/figures/spia_real_simulated_pvalues_violinplots_kegg.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
+# jpeg(file = file.path(dataFolder, "results/figures/spia_real_simulated_pvalues_violinplots_reactome.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
+# jpeg(file = file.path(dataFolder, "results/figures/spia_real_simulated_pvalues_violinplots_biocarta.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
 ggplot(spia_full, aes(x = spia, y = pvalue,fill=spia)) +
         geom_violin(trim=FALSE) + geom_boxplot(width=0.1)+
         xlab("Distributions of the p-values from SPIA calculations") +
