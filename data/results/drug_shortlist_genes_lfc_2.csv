@@ -1,0 +1,3 @@
+Disease,Drug,Correlation Score,Dissimilarity Score,Drug Influenced Genes,Disease Influenced Genes,Affected Genes(%)
+Renal Cell Carcinoma,Pha-793887,-0.47,71.43,7,11,63.64
+Renal Cell Carcinoma,Dactolisib,-0.45,66.67,6,11,54.55

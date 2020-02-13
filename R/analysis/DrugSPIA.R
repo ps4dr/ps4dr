@@ -119,7 +119,7 @@ sprintf("Number of unique Genes: %d", length(unique(drug_genes$ensembl.id)))
 #' we will filter out all the entries from drug_genes which 
 #' do not match the EFO.ID from Disease SPIA
 #' 
-load(file.path(dataFolder,"results/lfc_disease_genes.RData"))
+load(file.path(dataFolder,"spia_input/lfc_disease_genes.RData"))
 Diseases = as.data.frame(names(lfc_efo))
 names(Diseases) = "efo.term"
 drug_genes = merge(Diseases, drug_genes, by.x = "efo.term", by.y = "efo.term.DEGs")
@@ -149,8 +149,7 @@ for (element in 1 : length(topDiseases_drug)) {
     }
 }
 
-# save(topDiseases_drug, file = file.path(dataFolder,"spia_input/drug_genes.list.drugPdiseaseGenes50.padj.RData"))
-
+save(topDiseases_drug, file = file.path(dataFolder,"spia_input/lfc_drug_genes.RData"))
 
 ####____Create named entity list for each drug_disease pairs___####
 
