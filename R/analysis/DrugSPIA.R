@@ -39,7 +39,7 @@ spia_fun = function(x){
   spia_kegg_drug <- foreach(i = seq(lfc_test)) %dopar% {
     foreach(j = seq(lfc_test[[i]])) %dopar% {
       drug = lfc_test[[i]][[j]]
-      tmp=spia(de = drug, all = entrezID_all, data.dir = "./data/spia_input/real_kegg/", organism = "hsa")
+      tmp=spia(de = drug, all = entrez_all, data.dir = file.path(dataFolder,"spia_input/real_kegg/"), organism = "hsa")
     }
   }
 }
@@ -68,6 +68,12 @@ gene_id = gene_id[, c(1, 2)]
 # get LINCS dataset
 load(file.path(dataFolder,"L1000.RData"))
 L1000 = L1000[, c(5, 1, 6)]
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#' User can use any Drug response dataset here with 3 columns: 
+#' "chembl.id", "ensembl.id", "fold change" 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 L1000 = L1000[order(ensembl.id, decreasing = TRUE),]
 L1000 = L1000[! duplicated(L1000[, c('ensembl.id', 'chembl.id')]),]
 L1000 = merge(L1000, gene_id, by = "ensembl.id")
@@ -135,7 +141,8 @@ drug_genes = drug_genes[! duplicated(drug_genes[, c('chembl.id', 'ensembl.id', '
 
 topDiseases = split(drug_genes, drug_genes$efo.term) # split on diseases first
 topDiseases_drug = lapply(topDiseases, function(x) split(x, x$chembl.name)) # split on drug inside each disease
-topDiseases_drug = topDiseases_drug[lapply(topDiseases_drug, length) > 10] # remove diseases with very few drugs to test
+topDiseases_drug = topDiseases_drug[lapply(topDiseases_drug, length) >= 10] # remove diseases with very few drugs to test
+# topDiseases_drug = topDiseases_drug[lapply(topDiseases_drug, length) > 0]
 
 
 ### remove chemble.name, chemble.id and efo.term columns sicne they are not required any more

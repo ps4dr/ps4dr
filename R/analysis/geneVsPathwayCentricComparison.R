@@ -39,7 +39,7 @@ dataFolder = file.path(resultsFolder)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 load("/home/memon/projects/ps4dr/ps4dr/data/spia_input/lfc_disease_genes.RData") # without a filter for log-fold changes
-load("/home/memon/projects/ps4dr/ps4dr/data/spia_input/lfc_2_disease_genes.RData") # log-fold changes >= |2|
+# load("/home/memon/projects/ps4dr/ps4dr/data/spia_input/lfc_2_disease_genes.RData") # log-fold changes >= |2|
 
 # remove unnecessary columns
 for (i in seq_along(lfc_efo)) {
@@ -70,46 +70,43 @@ for (element in 1 : length(lfc_drug)) {
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#: remove diseases from lfc_rugs which are not in lfc_efo :#
+#:  remove diseases from lfc_drug which are not in lfc_efo :#
+#~~~~~~~~~: when lfc_drug smaller than lfc_disease :~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-#' Now, remove those diseases from lfc_efo which are not in drug_path
-#' when lfc_drug smaller than lfc_disease
+lfc_disease = vector('list', length(lfc_drug)) # create list of lists
+names(lfc_disease) = names(lfc_drug)
 
-# lfc_disease = vector('list', length(lfc_drug)) # create list of lists
-# names(lfc_disease) = names(lfc_drug)
-# 
-# for (i in 1 : length(lfc_efo)) {
-#   if (names(lfc_efo)[[i]] %in% names(lfc_drug)) {
-#     lfc_disease[[i]] = lfc_efo[[i]]
-#     names(lfc_disease)[[i]] = names(lfc_efo)[[i]]
-#   }
-# }
-# 
-# lfc_disease = discard(lfc_disease, ~ all(is.na(.x)))
-# rm(lfc_efo)
+for (i in 1 : length(lfc_efo)) {
+  if (names(lfc_efo)[[i]] %in% names(lfc_drug)) {
+    lfc_disease[[i]] = lfc_efo[[i]]
+    names(lfc_disease)[[i]] = names(lfc_efo)[[i]]
+  }
+}
+
+lfc_disease = discard(lfc_disease, ~ all(is.na(.x)))
+rm(lfc_efo)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#: remove diseases from lfc_efo which are not in lfc_drug :#
+#:  remove diseases from lfc_efo which are not in lfc_drug :#
+#~~~~~~~~~: when lfc_disease smaller than lfc_drug :~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-#' when lfc_disease smaller than lfc_drug
-
-lfc_drugs = vector('list', length(lfc_disease)) # create list of lists
-names(lfc_drugs) = names(lfc_disease)
-
-for (i in 1 : length(lfc_drug)) {
-  if (names(lfc_drug)[[i]] %in% names(lfc_disease)) {
-    lfc_drugs[[i]] = lfc_drug[[i]]
-    names(lfc_drugs)[[i]] = names(lfc_drug)[[i]]
-  }
-}
-
-lfc_drugs = discard(lfc_drugs, ~ all(is.na(.x)))
-lfc_drug = lfc_drugs
-lfc_disease$azoospermia = NULL
+# lfc_drugs = vector('list', length(lfc_disease)) # create list of lists
+# names(lfc_drugs) = names(lfc_disease)
+# 
+# for (i in 1 : length(lfc_drug)) {
+#   if (names(lfc_drug)[[i]] %in% names(lfc_disease)) {
+#     lfc_drugs[[i]] = lfc_drug[[i]]
+#     names(lfc_drugs)[[i]] = names(lfc_drug)[[i]]
+#   }
+# }
+# 
+# lfc_drugs = discard(lfc_drugs, ~ all(is.na(.x)))
+# lfc_drug = lfc_drugs
+# lfc_disease$azoospermia = NULL
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~: Calculate Correlation-Score :~~~~~~~~~~~~#
@@ -211,7 +208,8 @@ drugCor$Drug = capitalize(drugCor$Drug)
 drugCor$Disease = toTitleCase(drugCor$Disease)
 
 
-jpeg(file = file.path(dataFolder, "results/figures/ScatterPlots_CorrelationScore_Genes.jpeg"), width = 3000, height = 1980, res = 200)
+jpeg(file = file.path(dataFolder, "results/figures/ScatterPlots_CorrelationScore_Genes_all.jpeg"), width = 3000, height = 1980, res = 200)
+#jpeg(file = file.path(dataFolder, "results/figures/ScatterPlots_CorrelationScore_Genes_lfc_2.jpeg"), width = 3000, height = 1980, res = 200)
 ggplot(drugCor, aes(x = affectedGenes, y = Correlation.Score, col = Disease)) +
   geom_point(size = 2, shape = 1) +
   labs(title = "Combined Scatter Plots of Drug's Correlation Scores and Affected Geness (%) in each Disease") +
@@ -230,4 +228,46 @@ dev.off()
 
 ferrero2 = read.csv("/home/memon/projects/ps4dr/ps4dr/data/13040_2018_171_MOESM2_ESM.csv")
 ferrero3 = read.csv("/home/memon/projects/ps4dr/ps4dr/data/13040_2018_171_MOESM3_ESM.csv")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+load("/home/memon/projects/ps4dr/ps4dr/data/geneID_v97.RData")
+gene_id$ENTREZ = gsub("^$", NA, gene_id$ENTREZ)
+gene_id = gene_id[which(! is.na(gene_id$ENTREZ)),]
+
+creeds_melanoma = read.csv("/home/memon/projects/ps4dr/ps4dr/data/creeds/melanoma_disease_data.tsv",sep = "\t")
+creeds_melanoma = creeds_melanoma[,c(2,4,5)]
+names(creeds_melanoma) = c("efo.id","HGNC","lfc")
+creeds_melanoma$efo.id = "EFO_0000756"
+lfc_comb = creeds_melanoma
+lfc_comb = merge(lfc_comb, gene_id, by = "HGNC")
+lfc_comb = lfc_comb[! duplicated(lfc_comb[, c('efo.id', 'ENTREZ')]),]
+lfc_comb = lfc_comb[,c(5,2,3,4,1)]
+names(lfc_comb)
+save(lfc_comb, file = "/home/memon/projects/ps4dr/results/data/CREEDS/lfc_disease_creeds.RData")
+
+#######################################################
+
+#~~~~~~~~~~~: CREEDS drug data: Bortezomib :~~~~~~~~~~~~~#
+creeds_bortezomib = fread("/home/memon/projects/ps4dr/ps4dr/data/creeds/bortezomib_drug_data.tsv",sep = "\t")
+creeds_bortezomib = creeds_bortezomib[,c(2,4,5)]
+names(creeds_bortezomib) = c("chembl.id","HGNC","lfc")
+creeds_bortezomib$chembl.id = "CHEMBL325041"
+creeds_bortezomib = merge(creeds_bortezomib,gene_id,by="HGNC")
+creeds_bortezomib = creeds_bortezomib[,c(2,5,3)]
+L1000 = creeds_bortezomib
+
+save(spia_kegg_creeds_melanoma, spia_kegg_drug_creeds, file = "/home/memon/projects/ps4dr/ps4dr/data/results/spia_output/spia_kegg_creeds.RData")
+save(drug_path,dis_path,drug_dis_path,drug_correlation,file = "/home/memon/projects/ps4dr/ps4dr/data/results/drugCorrelation_result_creeds.RData")
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+#~~~~~~~~~~~~~~~~~~~: Drug SPIA - KEGG :~~~~~~~~~~~~~~~~~#
+
+lfc_test = lfc_drug_entrez[16]
+
+spia_kegg_drug = spia_fun(lfc_test)
+spia_kegg_drug = name_fun(spia_kegg_drug)
+spia_kegg_drug_creeds = spia_kegg_drug
+spia_drug = spia_kegg_drug_creeds
+save(spia_kegg_drug_creeds, file = "/home/memon/projects/ps4dr/ps4dr/data/results/spia_output/spia_kegg_drug_creeds.RData")
+
 

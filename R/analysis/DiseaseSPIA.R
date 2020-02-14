@@ -80,6 +80,11 @@ gene_id = gene_id[which(! is.na(gene_id$ENTREZ)),]
 lfc_comb = merge(lfc_comb, gene_id, by = "ensembl.id")
 lfc_comb = lfc_comb[! duplicated(lfc_comb[, c('efo.id', 'ENTREZ')]),]
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#' User can use any Disese response Dataset here with 5 columns:
+#' "ensembl.id", "efo.id", "fold change", "ENTREZ", "HGNC"   
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 # lfc_efo = split(lfc_comb, lfc_comb$efo.id)
 load(file.path(dataFolder,"results/disease_genes.RData"))
 disease_genes = disease_genes[p.adjusted <= 0.05]
