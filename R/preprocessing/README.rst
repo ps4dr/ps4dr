@@ -45,4 +45,7 @@ Download the LINCS L1000 dataset and maps LINCS identifiers to ChEMBL ids for ha
 
    $ cd R/preprocessing/
    $ Rscript RetrieveDrugResponseData.R ../../data/
-
+   
+1.2.3: Download and Preprocess CREEDS (Disease/Drug Gene Expression Profiles)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+For use additional datasets, please check https://github.com/ps4dr/results/tree/master/data
