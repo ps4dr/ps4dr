@@ -97,22 +97,22 @@ ps4dr_shortlist = split(ps4dr_shortlist,ps4dr_shortlist$efo.id)
 nrow(comparison_shortlist_list[[1]])
 nrow(drug_shortlist[[1]])
 
-comparison_table <- data.frame(matrix(ncol = 3, nrow = 12))
-names(comparison_table) = c("EFO_ID","PS4DR_drugNumber","PS4DR_Drug_Match_Ferrero(%)")
+comparison_table <- data.frame(matrix(ncol = 4, nrow = 19))
+names(comparison_table) = c("EFO_ID","PS4DR_drugNumber","match","PS4DR_Drug_Match_Ferrero(%)")
 
 for (i in 1 : length(ps4dr_shortlist)) {
-  for (j in 1:length(comparison_shortlist_list)){
     if (names(ps4dr_shortlist)[[i]] %in% names(comparison_shortlist_list)) {
       print(names(ps4dr_shortlist)[[i]])
-      #comparison_table[[1]][[i]] = names(ps4dr_shortlist)[[i]]
-      #comparison_table[[2]][[i]] = nrow(ps4dr_shortlist[[i]])
-      #comparison_table[[3]][[i]] = round(nrow(comparison_shortlist_list[[i]])/nrow(ps4dr_shortlist[[i]])*100,2)
-    }
+      comparison_table[[1]][[i]] = names(ps4dr_shortlist)[[i]]
+      comparison_table[[2]][[i]] = nrow(ps4dr_shortlist[[i]])
+      comparison_table[[3]][[i]] = nrow(comparison_shortlist_list[[i]])
+        #comparison_table[[3]][[i]] = round(nrow(comparison_shortlist_list[[i]])/nrow(ps4dr_shortlist[[i]])*100,2)
   }
 }
 
 round(nrow(comparison_shortlist_list[[7]])/nrow(ps4dr_shortlist[[12]])*100,2)
 nrow(comparison_shortlist_list[[1]])/nrow(ps4dr_shortlist[[1]])
+nrow(ps4dr_shortlist[[3]])
 
 comparison_table[[1]][[2]] = names(ps4dr_shortlist)[[1]]
 
