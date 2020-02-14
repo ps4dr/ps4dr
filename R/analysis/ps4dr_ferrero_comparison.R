@@ -86,12 +86,35 @@ ferrero_all$efo.term = toTitleCase(ferrero_all$efo.term)
 # Comparison
 comparison_shortlist = merge(ps4dr_shortlist,ferrero_all, by.x=c("efo.id","Drug"),by.y=c("efo.id","chembl.name"))
 length(unique(comparison_shortlist$efo.id))
-comparison_shortlist = split(comparison_shortlist, comparison_shortlist$efo.term)
+comparison_shortlist_list = split(comparison_shortlist, comparison_shortlist$efo.id)
 
 # comparison_allNegative = merge(ps4dr_allNegative,ferrero_all,  by.x=c("efo.id","Drug"),by.y=c("efo.id","chembl.name"))
 # length(unique(comparison_allNegative$efo.id))
 # comparison_allNegative = split(comparison_allNegative, comparison_allNegative$efo.term)
 
+ps4dr_shortlist = split(ps4dr_shortlist,ps4dr_shortlist$efo.id)
+
+nrow(comparison_shortlist_list[[1]])
+nrow(drug_shortlist[[1]])
+
+comparison_table <- data.frame(matrix(ncol = 3, nrow = 12))
+names(comparison_table) = c("EFO_ID","PS4DR_drugNumber","PS4DR_Drug_Match_Ferrero(%)")
+
+for (i in 1 : length(ps4dr_shortlist)) {
+  for (j in 1:length(comparison_shortlist_list)){
+    if (names(ps4dr_shortlist)[[i]] %in% names(comparison_shortlist_list)) {
+      print(names(ps4dr_shortlist)[[i]])
+      #comparison_table[[1]][[i]] = names(ps4dr_shortlist)[[i]]
+      #comparison_table[[2]][[i]] = nrow(ps4dr_shortlist[[i]])
+      #comparison_table[[3]][[i]] = round(nrow(comparison_shortlist_list[[i]])/nrow(ps4dr_shortlist[[i]])*100,2)
+    }
+  }
+}
+
+round(nrow(comparison_shortlist_list[[7]])/nrow(ps4dr_shortlist[[12]])*100,2)
+nrow(comparison_shortlist_list[[1]])/nrow(ps4dr_shortlist[[1]])
+
+comparison_table[[1]][[2]] = names(ps4dr_shortlist)[[1]]
 
 save(comparison_shortlist,file = "/home/memon/projects/ps4dr/ps4dr/data/results/drug_comparison_ps4dr-ferrero.RData")
 
