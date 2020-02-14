@@ -229,45 +229,6 @@ dev.off()
 ferrero2 = read.csv("/home/memon/projects/ps4dr/ps4dr/data/13040_2018_171_MOESM2_ESM.csv")
 ferrero3 = read.csv("/home/memon/projects/ps4dr/ps4dr/data/13040_2018_171_MOESM3_ESM.csv")
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-load("/home/memon/projects/ps4dr/ps4dr/data/geneID_v97.RData")
-gene_id$ENTREZ = gsub("^$", NA, gene_id$ENTREZ)
-gene_id = gene_id[which(! is.na(gene_id$ENTREZ)),]
 
-creeds_melanoma = read.csv("/home/memon/projects/ps4dr/ps4dr/data/creeds/melanoma_disease_data.tsv",sep = "\t")
-creeds_melanoma = creeds_melanoma[,c(2,4,5)]
-names(creeds_melanoma) = c("efo.id","HGNC","lfc")
-creeds_melanoma$efo.id = "EFO_0000756"
-lfc_comb = creeds_melanoma
-lfc_comb = merge(lfc_comb, gene_id, by = "HGNC")
-lfc_comb = lfc_comb[! duplicated(lfc_comb[, c('efo.id', 'ENTREZ')]),]
-lfc_comb = lfc_comb[,c(5,2,3,4,1)]
-names(lfc_comb)
-save(lfc_comb, file = "/home/memon/projects/ps4dr/results/data/CREEDS/lfc_disease_creeds.RData")
-
-#######################################################
-
-#~~~~~~~~~~~: CREEDS drug data: Bortezomib :~~~~~~~~~~~~~#
-creeds_bortezomib = fread("/home/memon/projects/ps4dr/ps4dr/data/creeds/bortezomib_drug_data.tsv",sep = "\t")
-creeds_bortezomib = creeds_bortezomib[,c(2,4,5)]
-names(creeds_bortezomib) = c("chembl.id","HGNC","lfc")
-creeds_bortezomib$chembl.id = "CHEMBL325041"
-creeds_bortezomib = merge(creeds_bortezomib,gene_id,by="HGNC")
-creeds_bortezomib = creeds_bortezomib[,c(2,5,3)]
-L1000 = creeds_bortezomib
-
-save(spia_kegg_creeds_melanoma, spia_kegg_drug_creeds, file = "/home/memon/projects/ps4dr/ps4dr/data/results/spia_output/spia_kegg_creeds.RData")
-save(drug_path,dis_path,drug_dis_path,drug_correlation,file = "/home/memon/projects/ps4dr/ps4dr/data/results/drugCorrelation_result_creeds.RData")
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
-#~~~~~~~~~~~~~~~~~~~: Drug SPIA - KEGG :~~~~~~~~~~~~~~~~~#
-
-lfc_test = lfc_drug_entrez[16]
-
-spia_kegg_drug = spia_fun(lfc_test)
-spia_kegg_drug = name_fun(spia_kegg_drug)
-spia_kegg_drug_creeds = spia_kegg_drug
-spia_drug = spia_kegg_drug_creeds
-save(spia_kegg_drug_creeds, file = "/home/memon/projects/ps4dr/ps4dr/data/results/spia_output/spia_kegg_drug_creeds.RData")
 
 
