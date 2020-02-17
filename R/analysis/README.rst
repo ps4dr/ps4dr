@@ -42,3 +42,17 @@ Scripts
 
    $ cd R/analysis/
    $ Rscript DrugCombination.R ../../data/
+   
+6. Additional analysis: Comparison of Gene vs Pathway Correlation Score based Prediction.
+
+.. code-block:: sh
+
+   $ cd R/analysis/
+   $ Rscript geneVsPathwayCentricComparison.R ../../data/
+
+7. Additional analysis: Comparison of PS4DR and Ferreros' Drug Predictions.
+
+.. code-block:: sh
+
+   $ cd R/analysis/
+   $ Rscript ps4dr_ferrero_comparison.R ../../data/
