@@ -3,7 +3,6 @@
 #' This script calculates correation and dissimilarity scores for all drug-disease Gene pairs
 #' This demonstrates how the results will differ if we use anti-correlation scores of Genes instead of disrupted pathways
 
-
 suppressWarnings(suppressMessages(library(data.table)))
 suppressWarnings(suppressMessages(library(tidyr)))
 suppressWarnings(suppressMessages(library(dplyr)))
@@ -38,8 +37,8 @@ dataFolder = file.path(resultsFolder)
 #~~~~~~~: load Disease Gene Expression Profiles :~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load("/home/memon/projects/ps4dr/ps4dr/data/spia_input/lfc_disease_genes.RData") # without a filter for log-fold changes
-# load("/home/memon/projects/ps4dr/ps4dr/data/spia_input/lfc_2_disease_genes.RData") # log-fold changes >= |2|
+load(file.path(dataFolder,"spia_input/lfc_disease_genes.RData")) # without a filter for log-fold changes
+# load(file.path(dataFolder,"spia_input/lfc_2_disease_genes.RData")) # log-fold changes >= |2|
 
 # remove unnecessary columns
 for (i in seq_along(lfc_efo)) {
@@ -57,7 +56,7 @@ lfc_disease = lfc_efo
 #: load Drug perturbed Expression Profiles in Diseases :~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-load("/home/memon/projects/ps4dr/ps4dr/data/spia_input/lfc_drug_genes.RData")
+load(file.path(dataFolder,"spia_input/lfc_drug_genes.RData"))
 lfc_drug = topDiseases_drug
 rm(topDiseases_drug)
 
@@ -183,11 +182,9 @@ drug_shortlist_df$Disease = toTitleCase(drug_shortlist_df$Disease)
 drug_shortlist_df = drug_shortlist_df[,c(2,1,3,4,5,6,7)]
 names(drug_shortlist_df) = c("Disease","Drug","Correlation Score","Dissimilarity Score","Drug Influenced Genes","Disease Influenced Genes","Affected Genes(%)")
 
-save(lfc_drug,lfc_disease,drug_dis_path,drug_correlation,drug_shortlist,file=file.path(dataFolder,"results/drugCorrelation_result_genes_all.RData"))
-fwrite(drug_shortlist_df, file = file.path(dataFolder,"results/drug_shortlist_genes_all.csv"))
 
-save(lfc_drug,lfc_disease,drug_dis_path,drug_correlation,drug_shortlist,file="/home/memon/projects/ps4dr/ps4dr/data/results/drugCorrelation_result_genes_lfc_2.RData")
-fwrite(drug_shortlist_df, file = "/home/memon/projects/ps4dr/ps4dr/data/results/drug_shortlist_genes_lfc_2.csv")
+save(lfc_drug,lfc_disease,drug_dis_path,drug_correlation,drug_shortlist, file = file.path(dataFolder,"results/drugCorrelation_result_genes_lfc_2.RData"))
+fwrite(drug_shortlist_df, file = file.path(dataFolder,"results/drug_shortlist_genes_lfc_2.csv"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
