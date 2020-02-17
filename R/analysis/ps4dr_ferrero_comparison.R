@@ -7,6 +7,7 @@
 suppressWarnings(suppressMessages(library(data.table)))
 suppressWarnings(suppressMessages(library(tidyr)))
 suppressWarnings(suppressMessages(library(dplyr)))
+suppressWarnings(suppressMessages(library(tools)))
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository
@@ -113,4 +114,3 @@ save(comparison_shortlist,file = "/home/memon/projects/ps4dr/ps4dr/data/results/
 write.csv(comparison_table,file = "/home/memon/projects/ps4dr/ps4dr/data/results/drug_comparison_table_ps4dr-ferrero.csv")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
