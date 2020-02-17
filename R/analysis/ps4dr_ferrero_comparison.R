@@ -64,7 +64,7 @@ tmp = unique(ps4dr_shortlist[,c(2)])
 tmp = merge(tmp,efo,by="Disease")
 tmp[2,2] = "EFO_0003869"
 ps4dr_shortlist = merge(ps4dr_shortlist,tmp,by ="Disease")
-ps4dr_shortlist = ps4dr_shortlist[,c(8,2,3,4,5,6,7)]
+#ps4dr_shortlist = ps4dr_shortlist[,c(8,2,3,4,5,6,7)]
 
 # tmp = unique(ps4dr_allNegative[,c(2)])
 # tmp = merge(tmp,efo,by="Disease")
@@ -92,50 +92,25 @@ comparison_shortlist_list = split(comparison_shortlist, comparison_shortlist$efo
 # length(unique(comparison_allNegative$efo.id))
 # comparison_allNegative = split(comparison_allNegative, comparison_allNegative$efo.term)
 
-ps4dr_shortlist = split(ps4dr_shortlist,ps4dr_shortlist$efo.id)
+ps4dr_shortlist = split(ps4dr_shortlist,ps4dr_shortlist$Disease)
 
-nrow(comparison_shortlist_list[[1]])
-nrow(drug_shortlist[[1]])
+comparison_table <- data.frame(matrix(ncol = 4, nrow = 12))
+names(comparison_table) = c("Disease","# PS4DR_Drug","# match_with_Ferrero","PS4DR_Ferrero_Match(%)")
 
-comparison_table <- data.frame(matrix(ncol = 4, nrow = 19))
-names(comparison_table) = c("EFO_ID","PS4DR_drugNumber","match","PS4DR_Drug_Match_Ferrero(%)")
-
-for (i in 1 : length(ps4dr_shortlist)) {
-    if (names(ps4dr_shortlist)[[i]] %in% names(comparison_shortlist_list)) {
-      print(names(ps4dr_shortlist)[[i]])
-      comparison_table[[1]][[i]] = names(ps4dr_shortlist)[[i]]
-      comparison_table[[2]][[i]] = nrow(ps4dr_shortlist[[i]])
+for (i in 1 : length(comparison_shortlist_list)) {
+  for (j in 1 : length(ps4dr_shortlist)) {  
+    #if (names(comparison_shortlist_list)[[i]] == names(ps4dr_shortlist)[[j]]) {
+    if (names(comparison_shortlist_list)[[i]] == ps4dr_shortlist[[j]][["efo.id"]][[1]]) {
+      comparison_table[[1]][[i]] = names(ps4dr_shortlist)[[j]]
+      comparison_table[[2]][[i]] = nrow(ps4dr_shortlist[[j]])
       comparison_table[[3]][[i]] = nrow(comparison_shortlist_list[[i]])
-        #comparison_table[[3]][[i]] = round(nrow(comparison_shortlist_list[[i]])/nrow(ps4dr_shortlist[[i]])*100,2)
+      comparison_table[[4]][[i]] = round(nrow(comparison_shortlist_list[[i]])/nrow(ps4dr_shortlist[[j]])*100,2)
+    }
   }
 }
 
-round(nrow(comparison_shortlist_list[[7]])/nrow(ps4dr_shortlist[[12]])*100,2)
-nrow(comparison_shortlist_list[[1]])/nrow(ps4dr_shortlist[[1]])
-nrow(ps4dr_shortlist[[3]])
-
-comparison_table[[1]][[2]] = names(ps4dr_shortlist)[[1]]
-
 save(comparison_shortlist,file = "/home/memon/projects/ps4dr/ps4dr/data/results/drug_comparison_ps4dr-ferrero.RData")
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
-# Subset Melanoma Drug Prediction from Ferrero
-fer_melanoma_true = fer_true[efo.term == "melanoma"]
-fer_melanoma_false = fer_false[efo.term == "melanoma"]
-fer_melanoma = rbind(fer_melanoma_true,fer_melanoma_false)
-
-# Subset Melanoma Drug Prediction from PS4DR
-ps4dr_melanoma_all = drug_correlation[["melanoma"]]
-ps4dr_melanoma_all = ps4dr_melanoma_all[Correlation.Score < 0 ]
-ps4dr_melanoma = drug_shortlist[["melanoma"]]
-
-# Comparison Melanoma
-melanoma_comparison_shortlist = merge(ps4dr_melanoma,fer_melanoma, by.x="Drug",by.y="chembl.name")
-melanoma_comparison_allNegative = merge(ps4dr_melanoma_all,fer_melanoma, by.x="Drug",by.y="chembl.name")
-
-save(melanoma_comparison_shortlist,melanoma_comparison_allNegative, file = "/home/memon/projects/ps4dr/ps4dr/data/results/_melanoma_drug_comparison_ps4dr-ferrero.RData")
+write.csv(comparison_table,file = "/home/memon/projects/ps4dr/ps4dr/data/results/drug_comparison_table_ps4dr-ferrero.csv")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
