@@ -48,4 +48,9 @@ Download the LINCS L1000 dataset and maps LINCS identifiers to ChEMBL ids for ha
    
 1.2.3: Download and Preprocess CREEDS (Disease/Drug Gene Expression Profiles)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-For use additional datasets, please check https://github.com/ps4dr/results/tree/master/data
+After downloading CREEDs datasets with the `Jupyter notebook <https://github.com/ps4dr/ps4dr/blob/master/notebooks/creeds_loader.ipynb>`_ use following command to clean the data:
+
+.. code-block:: sh
+
+   $ cd R/preprocessing/
+   $ Rscript creeds_data_preprocessing.R ../../data/
