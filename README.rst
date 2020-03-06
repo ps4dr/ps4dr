@@ -73,3 +73,7 @@ Citation
 If you use PS4DR in your work, please consider citing our preprint:
 
 .. [1] Emon, M. A., Domingo-Fernández, D., Hoyt, T. C., Hofmann-Apitius, M. (2020). `PS4DR: a multimodal workflow for identification and prioritization of drugs based on pathway signatures <https://www.researchsquare.com/article/b5c8e83b-9200-4fa7-b9ba-24305b8c1bc4/v1/>`_. *BMC Bioinformatics*, submitted.
+
+Disclaimer
+----------
+PS4DR is a scientific software that has been developed in an academic capacity, and thus comes with no warranty or guarantee of maintenance, support, or back-up of data.
