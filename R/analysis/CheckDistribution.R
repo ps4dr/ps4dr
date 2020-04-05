@@ -457,9 +457,10 @@ drugPdisease_genes$efo.term = capitalize(drugPdisease_genes$efo.term)
 
 predictedDrugs = merge(predictedDrugs,drugPdisease_genes, by=c("chembl.name","efo.term"))
 
-# follwoing drug-disease pairs are manually checked in clinicaltirals.gov
-# hence we chage their existing indications to TRUE
-# Git link for manually curated clinical trial info: https://github.com/ps4dr/ps4dr/blob/master/data/Predicted-Drugs-with-clinical-Trials-Info.csv
+# Even though we have used OpenTarget for mapping with clinical trials info, we did manual curation for all
+# our predicted drug-disease pairs by checking them in the  clinicaltirals.gov
+# git link for manually curated clinical trial info: https://github.com/ps4dr/ps4dr/blob/master/data/Predicted-Drugs-with-clinical-Trials-Info.csv
+# Below, we change 6 additional drug-disease association with the updated information from the above table
 
 predictedDrugs[103,13] = TRUE; predictedDrugs[5,13] = TRUE; predictedDrugs[3,13] = TRUE; predictedDrugs[76,13] = TRUE; predictedDrugs[29,13] = TRUE; predictedDrugs[102,13] = TRUE
 
