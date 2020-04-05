@@ -1,13 +1,14 @@
 Disease,Drug,Correlation Score,Dissimilarity Score,Drug Influenced Pathway,Disease Influenced Pathway,Affected Pathway(%),clinical trial
 Alzheimer's Disease,Sirolimus,-0.69,86.36,22,33,66.67,NCT04200911
-Prostate Adenocarcinoma,Niclosamide,-1,100,2,4,50,NCT02532114
-Melanoma,Crizotinib,-0.64,80,20,27,74.07,NCT02645149
-Pancreatic Carcinoma,Tosedostat,-0.58,75,4,7,57.14,NCT02352831
-Prostate Adenocarcinoma,Alvocidib,-1,100,2,4,50,NCT00003256
-Prostate Adenocarcinoma,Alprostadil,-1,100,2,4,50,NCT00544076
 Alzheimer's Disease,Nilotinib,-0.64,85,20,33,60.61,NCT02947893
 Glioblastoma Multiforme,Hydroxychloroquine,-0.46,85,20,29,68.97,NCT01602588
 Lung Carcinoma,Dasatinib,-0.41,60,10,15,66.67,NCT00470054
+Melanoma,Crizotinib,-0.64,80,20,27,74.07,NCT02645149
+Melanoma,Sepantronium,-0.52,70,20,27,74.07,NCT00281541
 Melanoma,Bortezomib,-0.52,70.59,17,27,62.96,NCT02645149
 Multiple Sclerosis,Methylprednisolone,-0.57,78.26,23,28,82.14,NCT01986998
+Pancreatic Carcinoma,Tosedostat,-0.58,75,4,7,57.14,NCT02352831
+Prostate Adenocarcinoma,Niclosamide,-1,100,2,4,50,NCT02532114
+Prostate Adenocarcinoma,Alvocidib,-1,100,2,4,50,NCT00003256
+Prostate Adenocarcinoma,Alprostadil,-1,100,2,4,50,NCT00544076
 Prostate Adenocarcinoma,Dasatinib,-1,100,2,4,50,NCT00570700

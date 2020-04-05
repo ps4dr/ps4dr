@@ -459,14 +459,23 @@ predictedDrugs = merge(predictedDrugs,drugPdisease_genes, by=c("chembl.name","ef
 
 #follwoing drug-disease pairs are manually checked in clinicaltirals.gov
 #hence we chage their existing indications to TRUE
-predictedDrugs[103,13] = TRUE; predictedDrugs[5,13] = TRUE; predictedDrugs[3,13] = TRUE; predictedDrugs[76,13] = TRUE; predictedDrugs[29,13] = TRUE
-predictedDrugs = predictedDrugs[,c(1,2,3,13)]
+predictedDrugs[103,13] = TRUE; predictedDrugs[5,13] = TRUE; predictedDrugs[3,13] = TRUE; predictedDrugs[76,13] = TRUE; predictedDrugs[29,13] = TRUE; predictedDrugs[102,13] = TRUE
 
-preds <- predictedDrugs[, correlationScore]
+predictedDrugs = predictedDrugs[ order(correlationScore),]
+predictedDrugs$correlationScore = predictedDrugs$correlationScore*-1
+scale01 = function(x){(x-min(x)) / (max(x)-min(x))}
+
+predictedDrugs$correlationScoreSclaed = scale01(predictedDrugs$correlationScore)
+predictedDrugs = predictedDrugs[,c(1,2,3,15,13)]
+
+
+preds <- predictedDrugs[, -log10(correlationScoreSclaed)]
 labls <- as.numeric(predictedDrugs[, existing.indication])
 
 drugROC <- roc(response = labls, predictor = preds, algorithm = 2, ci = TRUE, ci.method = "bootstrap", boot.n = 1000, parallel = TRUE, progress = "none")
 print(drugROC)
+save(ROCresult, file=file.path(dataFolder,"results/ROC_result.RDATA"))
+
 ci.specificity <- ci.sp(drugROC, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
 ci.sensivity <- ci.se(drugROC, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
 
