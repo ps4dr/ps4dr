@@ -1,7 +1,7 @@
 #' 4th script
 #' summary:
 #' This script calculates correation and dissimilarity scores for all drug-disease pathway pairs
-#' plot distribution for all drug correlation scores for each disease 
+#' plot distribution for all drug correlation scores for each disease
 
 
 suppressWarnings(suppressMessages(library(data.table)))
@@ -16,6 +16,7 @@ suppressWarnings(suppressMessages(library(tools)))
 suppressWarnings(suppressMessages(library(plotly)))
 suppressWarnings(suppressMessages(library(cowplot)))
 suppressWarnings(suppressMessages(library(qqplotr)))
+suppressWarnings(suppressMessages(library(pROC)))
 
 #####################################################################
 #TODO: Change to the directory where you cloned this repository
@@ -242,7 +243,7 @@ sprintf("Cancer Drug Ratio in the Top Drug list: %.2f", length(unique(topdrugs_d
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #' remove few diseases which gives spike on the graph due to extremely less variabllity in the data
-drug_correlation$`celiac disease` = NULL 
+drug_correlation$`celiac disease` = NULL
 drug_correlation$`non-small cell lung carcinoma` = NULL
 drug_correlation$`squamous cell carcinoma` = NULL
 
@@ -285,7 +286,7 @@ htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder, "results/fig
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 # load(file.path(dataFolder,"drugCorrelation_result.RData"))
-# 
+#
 # for (i in seq_along(drug_correlation)) {
 #     for (j in seq_along(drug_correlation[[i]])) {
 #         drug_correlation[[i]]$Dissimilarity.Score = NULL
@@ -296,11 +297,11 @@ htmlwidgets::saveWidget(as_widget(splot_int), file.path(dataFolder, "results/fig
 #     }
 #     names(drug_correlation[[i]])[[2]] = names(drug_correlation)[[i]]
 # }
-# 
+#
 # density.score = lapply(drug_correlation, melt)
 # density.score = do.call(rbind, density.score)
 # names(density.score) = c("Drug", "Diseases", "Correlation_Score")
-# 
+#
 # # jpeg(file=file.path(dataFolder, "results/figures/densityPlots_allDiseases.jpeg"), width=2800, height=1980, res=200)
 # ggplot(density.score, aes(x = Correlation_Score, fill = Diseases)) +
 #     geom_density(alpha = 0.25) +
@@ -370,7 +371,7 @@ dev.off()
 
 jpeg(file=file.path(dataFolder, "results/figures/Q-Q_Plots_CorrelationScore_scaled.jpeg"), width=3000, height=1980, res=190)
 ggplot(data = drug_cor_scaled, mapping = aes(sample = Correlation.Score, color = Disease, fill = Disease)) +
-  stat_qq_band(alpha=0.5) + 
+  stat_qq_band(alpha=0.5) +
   stat_qq_line() +
   stat_qq_point() +
   facet_wrap(~ Disease) + facet_grid(rows = 5) +
@@ -408,7 +409,7 @@ xcase = merge(drug_cor_scaled,xcase, by.x="Disease", by.y="DisnoShortlst")
 # jpeg(file=file.path(dataFolder, "results/figures/densityPlots_CorrelationScore_scaled_noshortlist.jpeg"), width=3000, height=1980, res=200)
 p2 <- ggplot(xcase, aes(x = Correlation.Score, fill = Disease)) +
   labs(title = "Distribution of Z-score normalized correlation scores of drugs\nfor 4 diseases which have no shortlisted drugs") +
-  geom_density(alpha = 0.25) + 
+  geom_density(alpha = 0.25) +
   theme(plot.title = element_text(hjust = 0.5, size = 18)) +
   theme(legend.position = "bottom", legend.title = element_text(size = 10)) +
   theme(legend.title=element_blank()) + ylab("Density") +
@@ -426,12 +427,56 @@ casexcase = merge(drug_cor_scaled,casexcase, by.x="Disease", by.y="twoDiseases")
 
 jpeg(file=file.path(dataFolder, "results/figures/densityPlots_CorrelationScore_scaled_Melanoma_Psoriasis.jpeg"), width=3000, height=1980, res=200)
 ggplot(casexcase, aes(x = Correlation.Score, fill = Disease)) +
-  geom_density(alpha = 0.25) + 
+  geom_density(alpha = 0.25) +
   labs(title = "Distribution of Z-score Normalized Correlation Scores of all Drugs for Melanoma and Psoriasis") +
   theme(plot.title = element_text(hjust = 0.5, size = 18)) +
   theme(legend.position = "bottom", legend.title = element_text(size = 10)) +
   theme(legend.title=element_blank()) + ylab("Density") +
   xlab("Normalized Correlation Scores")
 dev.off()
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~ ROC Curve for predicted drugs ~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+predictedDrugs = fread(file.path(dataFolder, "results/drug_shortlist.csv"))
+predictedDrugs = predictedDrugs[,c(2,1,3)]
+names(predictedDrugs) = c("chembl.name","efo.term", "correlationScore")
+predictedDrugs$chembl.name = toupper(predictedDrugs$chembl.name)
+predictedDrugs$efo.term = tolower(predictedDrugs$efo.term)
+predictedDrugs$efo.term = capitalize(predictedDrugs$efo.term)
+
+# load drugPurturbed genesets list to map predictedDrugs with exisiting indications
+load(file.path(dataFolder,"results/drugPdisease_genes.RData"))
+
+drugPdisease_genes[, p.adjusted := p.adjust(p.value, method = "fdr")]
+drugPdisease_genes$efo.term = tolower(drugPdisease_genes$efo.term)
+drugPdisease_genes$efo.term = capitalize(drugPdisease_genes$efo.term)
+
+predictedDrugs = merge(predictedDrugs,drugPdisease_genes, by=c("chembl.name","efo.term"))
+
+#follwoing drug-disease pairs are manually checked in clinicaltirals.gov
+#hence we chage their existing indications to TRUE
+predictedDrugs[103,13] = TRUE; predictedDrugs[5,13] = TRUE; predictedDrugs[3,13] = TRUE; predictedDrugs[76,13] = TRUE; predictedDrugs[29,13] = TRUE
+predictedDrugs = predictedDrugs[,c(1,2,3,13)]
+
+preds <- predictedDrugs[, correlationScore]
+labls <- as.numeric(predictedDrugs[, existing.indication])
+
+drugROC <- roc(response = labls, predictor = preds, algorithm = 2, ci = TRUE, ci.method = "bootstrap", boot.n = 1000, parallel = TRUE, progress = "none")
+print(drugROC)
+ci.specificity <- ci.sp(drugROC, sensitivities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
+ci.sensivity <- ci.se(drugROC, specifities = seq(0, 1, 0.05), boot.n = 1000, parallel = TRUE, progress = "none")
+
+jpeg(file=file.path(dataFolder, "results/figures/predictedDrugs_ROC.jpeg"), width = 6 * 150, height = 6 * 150, res = 150)
+par(pty = "s")
+plot(smooth(drugROC), main = paste("AUC =", round(drugROC$auc, 2)), xlab = "False positive rate", ylab = "True positive rate", identity.lty = 2, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.5)
+plot(ci.sensivity, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
+plot(ci.specificity, type = "shape", col = "lightgrey", border = NA, no.roc = TRUE)
+plot(smooth(drugROC), add = TRUE, col = "#ff6600", lwd = 3)
+dev.off()
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
