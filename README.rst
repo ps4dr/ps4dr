@@ -17,6 +17,12 @@ the disease and drug perturbed profiles to evaluate the direction of dysregulati
 these contexts. Finally, the workflow prioritizes drugs by finding the drugs that are predicted to invert the pathway
 signatures observed in the pathophysiology context.
 
+Citation
+--------
+If you use PS4DR in your work, please consider citing our preprint:
+
+.. [1] Emon, M. A., Domingo-Fernández, D., Hoyt, T. C., Hofmann-Apitius, M. (2020). `PS4DR: a multimodal workflow for identification and prioritization of drugs based on pathway signatures <https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-020-03568-5>`_. *BMC Bioinformatics*, 21:231.
+
 Installation
 ------------
 If ``devtools`` is not installed, do:
@@ -67,12 +73,6 @@ Notes how to change parts of the workflow:
 
 1. Selecting different gene sets (i.e., "gene set intersection" part in the figure)
 2. Modifying the Pathway enrichment Analysis method (i.e., GSEA instead of SPIA)
-
-Citation
---------
-If you use PS4DR in your work, please consider citing our preprint:
-
-.. [1] Emon, M. A., Domingo-Fernández, D., Hoyt, T. C., Hofmann-Apitius, M. (2020). `PS4DR: a multimodal workflow for identification and prioritization of drugs based on pathway signatures <https://www.researchsquare.com/article/b5c8e83b-9200-4fa7-b9ba-24305b8c1bc4/v1/>`_. *BMC Bioinformatics*, submitted.
 
 Disclaimer
 ----------
